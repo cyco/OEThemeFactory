@@ -7,9 +7,9 @@
 //
 
 #import "OETheme.h"
-#import "OEThemeItem.h"
-#import "OEThemeColor.h"
-#import "OEThemeFont.h"
+#import "OEThemeItemStates.h"
+#import "OEThemeColorStates.h"
+#import "OEThemeFontStates.h"
 
 static NSString * const OEThemeColorKey = @"Colors";
 static NSString * const OEThemeFontKey  = @"Fonts";
@@ -19,7 +19,7 @@ static NSString * const OEThemeImageKey = @"Images";
 
 - (BOOL)OE_parseThemeFileAtPath:(NSString *)themeFile;
 - (NSDictionary *)OE_parseThemeSection:(NSDictionary *)section forThemeClass:(Class)class;
-- (OEThemeItem *)OE_itemForType:(NSString *)type forKey:(NSString *)key;
+- (OEThemeItemStates *)OE_itemForType:(NSString *)type forKey:(NSString *)key;
 
 @end
 
@@ -71,8 +71,9 @@ static NSString * const OEThemeImageKey = @"Images";
         return NO;
 
     NSDictionary *classesBySection = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      [OEThemeColor class], OEThemeColorKey,
-                                      [OEThemeFont class], OEThemeFontKey,
+                                      [OEThemeColorStates class], OEThemeColorKey,
+                                      [OEThemeFontStates class], OEThemeFontKey,
+                                      [OEThemeImageStates class], OEThemeImageKey,
                                       nil];
 
     __block NSMutableDictionary *itemsByType = [NSMutableDictionary dictionary];
@@ -92,14 +93,49 @@ static NSString * const OEThemeImageKey = @"Images";
     return [[_itemsByType valueForKey:type] valueForKey:key];
 }
 
-- (id)colorForKey:(NSString *)key
+- (OEThemeColorStates *)colorStatesForKey:(NSString *)key
 {
-    return [self OE_itemForType:OEThemeColorKey forKey:key];
+    return (OEThemeColorStates *)[self OE_itemForType:OEThemeColorKey forKey:key];
 }
 
-- (id)fontForKey:(NSString *)key
+- (NSColor *)colorForKey:(NSString *)key forState:(OEThemeState)state
 {
-    return [self OE_itemForType:OEThemeFontKey forKey:key];
+    return [[self colorStatesForKey:key] colorForState:state];
+}
+
+- (OEThemeFontStates *)fontStatesForKey:(NSString *)key
+{
+    return (OEThemeFontStates *)[self OE_itemForType:OEThemeFontKey forKey:key];
+}
+
+- (OEThemeFont *)themeFontForKey:(NSString *)key forState:(OEThemeState)state
+{
+    return [[self fontStatesForKey:key] themeFontForState:state];
+}
+
+- (NSFont *)fontForKey:(NSString *)key forState:(OEThemeState)state
+{
+    return [[self themeFontForKey:key forState:state] font];
+}
+
+- (NSColor *)fontColorForKey:(NSString *)key forState:(OEThemeState)state
+{
+    return [[self themeFontForKey:key forState:state] color];
+}
+
+- (NSShadow *)fontShadowForKey:(NSString *)key forState:(OEThemeState)state;
+{
+    return [[self themeFontForKey:key forState:state] shadow];
+}
+
+- (OEThemeImageStates *)imageStatesForKey:(NSString *)key
+{
+    return (OEThemeImageStates *)[self OE_itemForType:OEThemeImageKey forKey:key];
+}
+
+- (NSImage *)imageForKey:(NSString *)key forState:(OEThemeState)state
+{
+    return [[self imageStatesForKey:key] imageForState:state];
 }
 
 @end

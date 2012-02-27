@@ -7,11 +7,11 @@
 		<key>color1</key>
 		<dict>
 			<key>Value</key>
-			<string>#FFFF0000</string>
+			<string>red</string>
 			<key>States</key>
 			<dict>
-				<key>Off</key>
-				<string>#FF000000</string>
+				<key>Off,On</key>
+				<string>black</string>
 			</dict>
 		</dict>
 	</dict>

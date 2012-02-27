@@ -8,6 +8,7 @@
 
 #import "OEAppDelegate.h"
 #import "OETheme.h"
+#import "OEThemeItemStates.h"
 
 @implementation OEAppDelegate
 
@@ -15,7 +16,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    NSLog(@"%@", [[OETheme sharedTheme] colorForKey:@"color1"]);
+    NSLog(@"%@", [[OETheme sharedTheme] colorStatesForKey:@"color1"]);
 }
 
 @end
