@@ -58,7 +58,6 @@ static NSString * const OEThemeImageKey = @"Images";
     {
         id themeItem = [[class alloc] initWithDefinition:obj];
         if(themeItem) [results setValue:themeItem forKey:key];
-
     }];
 
     return [results copy];
