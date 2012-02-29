@@ -9,8 +9,6 @@
 #import "OEThemeColorStates.h"
 #import "NSColor+OEAdditions.h"
 
-static NSString *OENormalizeColorString(NSString *colorString);
-
 @implementation OEThemeColorStates
 
 + (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
@@ -68,72 +66,98 @@ static NSString *OENormalizeColorString(NSString *colorString);
 
 @end
 
-NSString *OENormalizeColorString(NSString *colorString)
+NSColor *_OENormalizedRGBAColorString(NSArray *parameters)
 {
-    NSUInteger           len = [colorString length];
-    NSRegularExpression *regex  = [NSRegularExpression regularExpressionWithPattern:@"^(?:(?:#)|(?:0x))?[0-9a-f]+$" options:NSRegularExpressionCaseInsensitive error:nil];
-    NSString            *result = nil;
+    if([parameters count] < 3) return nil;
 
-    if(colorString && [regex numberOfMatchesInString:colorString options:0 range:NSMakeRange(0, len)] == 1)
-    {
-        result = [colorString lowercaseString];
-        if([result hasPrefix:@"0x"])
-        {
-            result = [result substringFromIndex:2];
-            len   -= 2;
-        }
-        else if([result hasPrefix:@"#"])
-        {
-            result = [result substringFromIndex:1];
-            len   -= 1;
-        }
+    CGFloat red   = MAX(MIN([[parameters objectAtIndex:0] intValue], 255), 0) / 255.0;
+    CGFloat green = MAX(MIN([[parameters objectAtIndex:1] intValue], 255), 0) / 255.0;
+    CGFloat blue  = MAX(MIN([[parameters objectAtIndex:2] intValue], 255), 0) / 255.0;
+    CGFloat alpha = ([parameters count] > 3 ? MAX(MIN([[parameters objectAtIndex:3] floatValue], 1.0), 0.0) : 1.0);
 
-        unichar a, r, g, b;
-        switch (len)
-        {
-            case 4: // argb format
-            case 3: // rgb format
-                if (len == 4)
-                    a = [result characterAtIndex:len-4];
-                else
-                    a = 'F';
-                r = [result characterAtIndex:len-3];
-                g = [result characterAtIndex:len-2];
-                b = [result characterAtIndex:len-1];
-                result = [NSString stringWithFormat:@"%c%c%c%c%c%c%c%c", a, a, r, r, g, g, b, b];
-                break;
-            case 6: // rrggbb format
-                result = [@"ff" stringByAppendingFormat:result];
-            case 8: // aarrggbb format
-                break;
-            default:
-                result = [result substringToIndex:8];
-                break;
-        }
-    }
-    return result;
+    return [NSColor colorWithDeviceRed:red green:green blue:blue alpha:alpha];
+}
+
+NSColor *_OENormalizedHSLAColorString(NSArray *parameters)
+{
+    if([parameters count] < 3) return nil;
+
+    CGFloat hue        = MAX(MIN([[parameters objectAtIndex:0] intValue], 360), 0) / 360.0;
+    CGFloat saturation = MAX(MIN([[parameters objectAtIndex:1] intValue], 100), 0) / 100.0;
+    CGFloat brightness  = MAX(MIN([[parameters objectAtIndex:2] intValue], 100), 0) / 100.0;
+    CGFloat alpha      = ([parameters count] > 3 ? MAX(MIN([[parameters objectAtIndex:3] floatValue], 1.0), 0.0) : 1.0);
+
+    return [NSColor colorWithDeviceHue:hue saturation:saturation brightness:brightness alpha:alpha];
 }
 
 NSColor *_NSColorFromString(NSString *colorString)
 {
-    long long unsigned int colorARGB = 0;
+    if(colorString == nil) return nil;
 
-    NSScanner *hexScanner = [NSScanner scannerWithString:OENormalizeColorString(colorString)];
-    [hexScanner scanHexLongLong:&colorARGB];
+    NSRegularExpression  *rgbRegex      = [NSRegularExpression regularExpressionWithPattern:@"\\s*(?:(?:#)|(?:0x))?([0-9a-f]+)\\s*" options:NSRegularExpressionCaseInsensitive error:nil];
+    NSRegularExpression  *functionRegex = [NSRegularExpression regularExpressionWithPattern:@"\\s*(.+)\\(((?:[^,]+,){2,3}[^,]+)\\)\\s*" options:0 error:nil];
+    const NSRange         range         = NSMakeRange(0, [colorString length]);
+    NSTextCheckingResult *match         = nil;
+    NSColor              *result        = nil;
 
-    const CGFloat components[] =
+    if((match = [[functionRegex matchesInString:colorString options:0 range:range] lastObject]))
     {
-        (CGFloat)((colorARGB & 0x00FF0000) >> 16) / 255.0f, // r
-        (CGFloat)((colorARGB & 0x0000FF00) >>  8) / 255.0f, // g
-        (CGFloat)((colorARGB & 0x000000FF) >>  0) / 255.0f, // b
-        (CGFloat)((colorARGB & 0xFF000000) >> 24) / 255.0f  // a
-    };
+        NSString *function = [[colorString substringWithRange:[match rangeAtIndex:1]] lowercaseString];
+        NSArray *parameters = [[[colorString substringWithRange:[match rangeAtIndex:2]] lowercaseString] componentsSeparatedByString:@","];
 
-#if defined(OE_USE_SRGB_COLORSPACE) && OE_USE_SRGB_COLORSPACE == 1
-    return [NSColor colorWithColorSpace:[NSColorSpace sRGBColorSpace] components:components count:4];
-#else
-    return [NSColor colorWithColorSpace:[NSColorSpace deviceRGBColorSpace] components:components count:4];
-#endif
+        if([function isEqualToString:@"rgba"] || [function isEqualToString:@"rgb"])
+            result = _OENormalizedRGBAColorString(parameters);
+        else if([function isEqualToString:@"hsla"] || [function isEqualToString:@"hsl"])
+            result = _OENormalizedHSLAColorString(parameters);
+    }
+    else if((match = [[rgbRegex matchesInString:colorString options:0 range:range] lastObject]))
+    {
+        const NSRange matchRange = [match rangeAtIndex:1];
+        NSString *matchedString  = [[colorString substringWithRange:matchRange] lowercaseString];
+
+        switch(matchRange.length)
+        {
+            case 3: // rgb format
+            case 4: // rgba format
+            {
+                CGFloat red   = [matchedString characterAtIndex:0] / 255.0;
+                CGFloat green = [matchedString characterAtIndex:1] / 255.0;
+                CGFloat blue  = [matchedString characterAtIndex:2] / 255.0;
+                CGFloat alpha = (matchRange.length == 4 ? [matchedString characterAtIndex:3] / 255.0 : 1.0);
+
+                result = [NSColor colorWithDeviceRed:red green:green blue:blue alpha:alpha];
+
+                break;
+            }
+            case 6: // rrggbb format
+                matchedString = [matchedString stringByAppendingFormat:@"ff"];
+                break;
+            case 8: // rrggbbaa format
+                break;
+            default:
+                if(matchRange.length > 8) matchedString = [matchedString substringToIndex:8];
+                break;
+        }
+
+        if(result == nil)
+        {
+            long long unsigned int colorARGB = 0;
+
+            NSScanner *hexScanner = [NSScanner scannerWithString:matchedString];
+            [hexScanner scanHexLongLong:&colorARGB];
+
+            const CGFloat components[] =
+            {
+                (CGFloat)((colorARGB & 0xFF000000) >> 24) / 255.0f, // r
+                (CGFloat)((colorARGB & 0x00FF0000) >> 16) / 255.0f, // g
+                (CGFloat)((colorARGB & 0x0000FF00) >>  8) / 255.0f, // b
+                (CGFloat)((colorARGB & 0x000000FF) >>  0) / 255.0f  // a
+            };
+
+            result = [NSColor colorWithColorSpace:[NSColorSpace deviceRGBColorSpace] components:components count:4];
+        }
+    }
+    return result;
 }
 
 // Inspired by http://www.w3.org/TR/css3-color/ and https://github.com/kballard/uicolor-utilities/blob/master/UIColor-Expanded.m
