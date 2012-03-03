@@ -27,7 +27,7 @@ static NSString * const OEThemeStateMouseOverName      = @"Mouse Over";
 static NSString * const OEThemeStateMouseOffName       = @"Mouse Off";
 
 static NSString * const OEThemeStateAnyWindowActivityName = @"Any Window State";
-static NSString * const OEThemeStateAnyStateName          = @"Any Activity State";
+static NSString * const OEThemeStateAnyStateName          = @"Any State";
 static NSString * const OEThemeStateAnySelectionName      = @"Any Selection";
 static NSString * const OEThemeStateAnyInteractionName    = @"Any Interaction";
 static NSString * const OEThemeStateAnyFocusName          = @"Any Focus";
@@ -45,6 +45,8 @@ static inline NSString *OEKeyForState(OEThemeState state)
 @end
 
 @implementation OEThemeItemStates
+
+@synthesize stateMask = _stateMask;
 
 - (id)initWithDefinition:(id)definition
 {
@@ -67,9 +69,21 @@ static inline NSString *OEKeyForState(OEThemeState state)
                  {
                      NSString     *trimmedKey = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                      OEThemeState  state      = ([trimmedKey length] == 0 ? OEThemeStateDefault : OEThemeStateFromString(trimmedKey));
-                     id            value      = ([isa parseWithDefinition:obj inheritedDefinition:rootDefinition] ?: [NSNull null]);
+                     id            value      = [isa parseWithDefinition:obj inheritedDefinition:rootDefinition];
+
+                     if(state != OEThemeStateDefault) _stateMask |= state;
                      [self OE_setValue:value forState:state];
                  }];
+            }
+
+            if(_stateMask != OEThemeStateDefault)
+            {
+                if(_stateMask & OEThemeStateAnyWindowActivityMask) _stateMask |= OEThemeStateAnyWindowActivityMask;
+                if(_stateMask & OEThemeStateAnyStateMask)          _stateMask |= OEThemeStateAnyStateMask;
+                if(_stateMask & OEThemeStateAnySelectionMask)      _stateMask |= OEThemeStateAnySelectionMask;
+                if(_stateMask & OEThemeStateAnyInteractionMask)    _stateMask |= OEThemeStateAnyInteractionMask;
+                if(_stateMask & OEThemeStateAnyFocusMask)          _stateMask |= OEThemeStateAnyFocusMask;
+                if(_stateMask & OEThemeStateAnyMouseMask)          _stateMask |= OEThemeStateAnyMouseMask;
             }
         }
         else
@@ -86,12 +100,28 @@ static inline NSString *OEKeyForState(OEThemeState state)
     return nil;
 }
 
++ (OEThemeState)themeStateWithWindowActive:(BOOL)windowActive buttonState:(NSInteger)state selected:(BOOL)selected enabled:(BOOL)enabled focused:(BOOL)focused houseHover:(BOOL)hover
+{
+    return ((windowActive ? OEThemeStateWindowActive : OEThemeStateWindowInactive) |
+            (selected     ? OEThemeStateSelected     : OEThemeStateUnselected)     |
+            (enabled      ? OEThemeStateEnabled      : OEThemeStateDisabled)       |
+            (focused      ? OEThemeStateFocused      : OEThemeStateUnfocused)      |
+            (hover        ? OEThemeStateMouseOver    : OEThemeStateMouseOff)       |
+            (state == NSOnState ? OEThemeStateOn : (state == NSMixedState ? OEThemeStateMixed : OEThemeStateOff)));
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: states = [%@]>", [self className], [[_itemByState allKeys] componentsJoinedByString:@", "]];
+}
+
 - (void)OE_setValue:(id)value forState:(OEThemeState)state
 {
-    NSNumber *stateValue = [NSNumber numberWithUnsignedInteger:state];
-    NSUInteger index = 0;
+    const NSUInteger  count      = [_states count];
+    NSNumber         *stateValue = [NSNumber numberWithUnsignedInteger:state];
+    NSUInteger        index      = 0;
 
-    if([_states count] > 0)
+    if(count)
     {
         index = [_states indexOfObject:stateValue inSortedRange:NSMakeRange(0, [_states count]) options:NSBinarySearchingFirstEqual | NSBinarySearchingInsertionIndex usingComparator:
                  ^ NSComparisonResult(id obj1, id obj2)
@@ -100,20 +130,21 @@ static inline NSString *OEKeyForState(OEThemeState state)
                  }];
     }
 
-    if(index < [_states count] && ![[_states objectAtIndex:index] isEqualTo:stateValue]) [_states insertObject:stateValue atIndex:index];
-    else                                                                                 [_states addObject:stateValue];
+    if(((index == 0) && (count == 0)) || ((index < count) && ![[_states objectAtIndex:index] isEqualToNumber:stateValue])) [_states insertObject:stateValue atIndex:index];
 
-    [_itemByState setValue:value forKey:OEKeyForState(state)];
+    [_itemByState setValue:(value ?: [NSNull null]) forKey:OEKeyForState(state)];
 }
 
 - (id)itemForState:(OEThemeState)state
 {
+    if(state == 0) return [_itemByState valueForKey:OEKeyForState(OEThemeStateDefault)];
+
     __block id results = [_itemByState valueForKey:OEKeyForState(state)];
     if(results == nil)
     {
         [_states enumerateObjectsUsingBlock:
          ^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
-            if([obj unsignedIntegerValue] & state)
+            if(([obj unsignedIntegerValue] & state) == state)
             {
                 results = [_itemByState valueForKey:OEKeyForState([obj unsignedIntegerValue])];
                 if(state != OEThemeStateDefault) [self OE_setValue:results forState:state];
@@ -139,18 +170,13 @@ static inline NSString *OEKeyForState(OEThemeState state)
 {
 }
 
-- (NSString *)description
-{
-    return [NSString stringWithFormat:@"<%@: states = [%@]>", [self className], [[_itemByState allKeys] componentsJoinedByString:@", "]];
-}
-
 @end
 
 NSString *NSStringFromThemeState(OEThemeState state)
 {
     NSMutableArray *results = [NSMutableArray array];
 
-    if(state == OEThemeStateDefault) [results addObject:OEThemeStateDefaultName];
+    if(state == 0 || state == OEThemeStateDefault) [results addObject:OEThemeStateDefaultName];
     else
     {
         if((state & OEThemeStateAnyWindowActivityMask) == OEThemeStateAnyWindowActivityMask) [results addObject:OEThemeStateAnyWindowActivityName];

@@ -231,8 +231,8 @@ static NSMutableArray* interfaceImages;
 {
     NSImage *newImage = [[NSImage alloc] initWithSize:rect.size];
 
-    [newImage lockFocus];
-    [self drawInRect:NSMakeRect(0, 0, newImage.size.width, newImage.size.height) fromRect:rect operation:NSCompositeCopy fraction:1.0];
+    [newImage lockFocusFlipped:YES];
+    [self drawInRect:NSMakeRect(0, 0, rect.size.width, rect.size.height) fromRect:rect operation:NSCompositeCopy fraction:1.0];
     [newImage unlockFocus];
 
     return newImage;
@@ -249,24 +249,43 @@ static NSMutableArray* interfaceImages;
     [interfaceImages addObject:resultImage];
 }
 
-- (NSImage *)imageFromParts:(NSArray *)parts
+- (NSImage *)imageFromParts:(NSArray *)parts vertical:(BOOL)vertical;
 {
-    NSImage *result = nil;
-    if(parts == nil || [parts count] == 1)
-    {
-        NSRect sourceRect = ([parts count] == 1 ? [[parts objectAtIndex:0] rectValue] : NSZeroRect);
+    if(parts == nil || [parts count] == 0) return self;
 
-        result = [NSImage imageNamed:resource];
-        if(!NSIsEmptyRect(sourceRect)) result = [result subImageFromRect:sourceRect];
-    }
-    else if([parts count] == 3)
+    NSImage        *result    = self;
+    NSMutableArray *rectParts = [NSMutableArray arrayWithCapacity:[parts count]];
+    const NSSize    size      = [self size];
+    NSRect          rect;
+
+    for(id part in parts)
     {
-        // TODO: return three part image
+        rect = NSZeroRect;
+
+        if([part isKindOfClass:[NSString class]])     rect = NSRectFromString(part);
+        else if([part isKindOfClass:[NSValue class]]) rect = [part rectValue];
+        else                                          NSLog(@"Unable to parse NSRect from part: %@", part);
+
+        // Flip coordinate system
+        if(!NSIsEmptyRect(rect)) rect.origin.y = size.height - rect.origin.y - rect.size.height;
+        [rectParts addObject:[NSValue valueWithRect:rect]];
     }
-    else if([parts count] == 9)
+
+    if([rectParts count] == 1)
+    {
+        NSRect sourceRect = [[rectParts objectAtIndex:0] rectValue];
+        if(!NSIsEmptyRect(sourceRect)) result = [self subImageFromRect:sourceRect];
+    }
+    else if([parts count] >= 9)
     {
         // TODO: return nine part image
     }
+    else if([parts count] >= 3)
+    {
+        // TODO: return three part image
+    }
+
+    return result;
 }
 
 @end

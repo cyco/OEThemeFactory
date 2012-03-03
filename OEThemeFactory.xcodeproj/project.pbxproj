@@ -10,6 +10,9 @@
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
 		EF37DA4114FC3F110098A077 /* OEThemeImageStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImageStates.m */; };
 		EF910A27150240580071A0A8 /* OEThemeGradientStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradientStates.m */; };
+		EF910A6215025CA00071A0A8 /* OEThemeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A6115025CA00071A0A8 /* OEThemeButton.m */; };
+		EF910A68150266C90071A0A8 /* toolbar_view_buttons.png in Resources */ = {isa = PBXBuildFile; fileRef = EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */; };
+		EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */; };
 		EFD9BE2014FA3DB500397397 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EFD9BE1F14FA3DB500397397 /* Cocoa.framework */; };
 		EFD9BE2A14FA3DB500397397 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = EFD9BE2814FA3DB500397397 /* InfoPlist.strings */; };
 		EFD9BE2C14FA3DB500397397 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE2B14FA3DB500397397 /* main.m */; };
@@ -34,6 +37,9 @@
 		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSImage+OEDrawingAdditions.m"; path = "../NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
 		EF910A25150240580071A0A8 /* OEThemeGradientStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeGradientStates.h; sourceTree = "<group>"; };
 		EF910A26150240580071A0A8 /* OEThemeGradientStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeGradientStates.m; sourceTree = "<group>"; };
+		EF910A6015025CA00071A0A8 /* OEThemeButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeButton.h; sourceTree = "<group>"; };
+		EF910A6115025CA00071A0A8 /* OEThemeButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeButton.m; sourceTree = "<group>"; };
+		EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toolbar_view_buttons.png; sourceTree = "<group>"; };
 		EFD9BE1B14FA3DB500397397 /* OEThemeFactory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OEThemeFactory.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFD9BE1F14FA3DB500397397 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		EFD9BE2214FA3DB500397397 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -121,6 +127,7 @@
 				EFD9BE3114FA3DB500397397 /* OEAppDelegate.h */,
 				EFD9BE3214FA3DB500397397 /* OEAppDelegate.m */,
 				EFD9BE3414FA3DB500397397 /* MainMenu.xib */,
+				EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */,
 				EFD9BE2614FA3DB500397397 /* Supporting Files */,
 			);
 			path = OEThemeFactory;
@@ -156,6 +163,8 @@
 				EF910A26150240580071A0A8 /* OEThemeGradientStates.m */,
 				EFD9BE5314FA83A700397397 /* OEThemeFont.h */,
 				EFD9BE5414FA83A700397397 /* OEThemeFont.m */,
+				EF910A6015025CA00071A0A8 /* OEThemeButton.h */,
+				EF910A6115025CA00071A0A8 /* OEThemeButton.m */,
 			);
 			name = Theme;
 			sourceTree = "<group>";
@@ -215,6 +224,7 @@
 				EFD9BE3014FA3DB500397397 /* Credits.rtf in Resources */,
 				EFD9BE3614FA3DB500397397 /* MainMenu.xib in Resources */,
 				EFD9BE3E14FA3DCB00397397 /* Theme.plist in Resources */,
+				EF910A68150266C90071A0A8 /* toolbar_view_buttons.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,6 +244,8 @@
 				EFD9BE5514FA83A700397397 /* OEThemeFont.m in Sources */,
 				EF37DA4114FC3F110098A077 /* OEThemeImageStates.m in Sources */,
 				EF910A27150240580071A0A8 /* OEThemeGradientStates.m in Sources */,
+				EF910A6215025CA00071A0A8 /* OEThemeButton.m in Sources */,
+				EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

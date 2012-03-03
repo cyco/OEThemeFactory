@@ -31,12 +31,11 @@ static NSString * const OEThemeImageVerticalAttributeName = @"Vertical";
             newDefinition = [definition mutableCopy];
         }
 
-        NSImage *result = nil;
-        NSString *resource = [definition valueForKey:OEThemeImageResourceAttributeName];
+        NSString *resource = [newDefinition valueForKey:OEThemeImageResourceAttributeName];
         if(resource)
         {
-            NSArray *parts = [definition valueForKey:OEThemeImagePartsAttributeName];
-            BOOL vertical  = [[definition objectForKey:OEThemeImageVerticalAttributeName] boolValue];
+            NSArray *parts = [newDefinition valueForKey:OEThemeImagePartsAttributeName];
+            BOOL vertical  = [[newDefinition objectForKey:OEThemeImageVerticalAttributeName] boolValue];
 
             if(![parts isKindOfClass:[NSArray class]]) parts = [NSArray array];
             result = [[NSImage imageNamed:resource] imageFromParts:parts vertical:vertical];

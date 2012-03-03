@@ -15,8 +15,8 @@ enum
     OEThemeStateWindowActive     = 1 <<  1,
     OEThemeStateOff              = 1 <<  2,
     OEThemeStateOn               = 1 <<  3,
-    OEThemeStateMixed            = 2 <<  4,
-    OEThemeStateUnselected       = 2 <<  5,
+    OEThemeStateMixed            = 1 <<  4,
+    OEThemeStateUnselected       = 1 <<  5,
     OEThemeStateSelected         = 1 <<  6,
     OEThemeStateDisabled         = 1 <<  7,
     OEThemeStateEnabled          = 1 <<  8,
@@ -30,7 +30,7 @@ typedef NSUInteger OEThemeState;
 
 enum
 {
-    OEThemeStateAnyWindowActivityMask = OEThemeStateWindowInactive | OEThemeStateWindowInactive,
+    OEThemeStateAnyWindowActivityMask = OEThemeStateWindowInactive | OEThemeStateWindowActive,
     OEThemeStateAnyStateMask          = OEThemeStateOff            | OEThemeStateOn             | OEThemeStateMixed,
     OEThemeStateAnySelectionMask      = OEThemeStateUnselected     | OEThemeStateSelected,
     OEThemeStateAnyInteractionMask    = OEThemeStateDisabled       | OEThemeStateEnabled,
@@ -42,8 +42,8 @@ enum
 extern NSString * const OEThemeItemStatesAttributeName;
 extern NSString * const OEThemeItemValueAttributeName;
 
-extern NSString *NSStringFromThemeState(OEThemeState state);
-extern OEThemeState OEThemeStateFromString(NSString *state);
+extern NSString     *NSStringFromThemeState(OEThemeState state);
+extern OEThemeState  OEThemeStateFromString(NSString *state);
 
 @interface OEThemeItemStates : NSObject
 {
@@ -55,10 +55,14 @@ extern OEThemeState OEThemeStateFromString(NSString *state);
 - (id)initWithDefinition:(id)definition;
 + (id)parseWithDefinition:(id)definition inheritedDefinition:(id)inherited;
 
++ (OEThemeState)themeStateWithWindowActive:(BOOL)windowActive buttonState:(NSInteger)state selected:(BOOL)selected enabled:(BOOL)enabled focused:(BOOL)focused houseHover:(BOOL)hover;
+
 - (id)itemForState:(OEThemeState)state;
 
 - (void)setInContext:(CGContextRef)ctx withState:(OEThemeState)state;
 - (void)setWithState:(OEThemeState)state;
 - (void)setInLayer:(CALayer *)layer withState:(OEThemeState)state;
+
+@property (nonatomic, readonly) NSUInteger stateMask;
 
 @end

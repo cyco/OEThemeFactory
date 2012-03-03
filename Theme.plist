@@ -26,7 +26,137 @@
 		</dict>
 	</dict>
 	<key>Images</key>
-	<dict/>
+	<dict>
+		<key>image1</key>
+		<dict>
+			<key>Resource</key>
+			<string>toolbar_view_buttons</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,46},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,Any State,Selected</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,92},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,On,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,69},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,Off,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,0},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,On,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,23},[27,23}}</string>
+					</array>
+				</dict>
+			</dict>
+		</dict>
+		<key>image2</key>
+		<dict>
+			<key>Resource</key>
+			<string>toolbar_view_buttons</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{27,46},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,Any State,Selected</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{27,92},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,On,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{27,69},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,Off,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{27,0},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,On,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{27,23},[27,23}}</string>
+					</array>
+				</dict>
+			</dict>
+		</dict>
+		<key>image3</key>
+		<dict>
+			<key>Resource</key>
+			<string>toolbar_view_buttons</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{54,46},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,Any State,Selected</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{54,92},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,On,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{54,69},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,Off,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{54,0},[27,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,On,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{54,23},[27,23}}</string>
+					</array>
+				</dict>
+			</dict>
+		</dict>
+	</dict>
 	<key>Gradients</key>
 	<dict>
 		<key>gradient1</key>
