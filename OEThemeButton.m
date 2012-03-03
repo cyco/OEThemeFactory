@@ -138,25 +138,30 @@
 {
     if(_imageStates == nil) return;
 
-    OEThemeButton *button = (OEThemeButton *)controlView;
-    if(![button isKindOfClass:[OEThemeButton class]]) return;
+    const OEThemeState state      = [self currentState];
+    const NSRect       sourceRect = [self imageRectForButtonState:state];
+    const NSRect       targetRect = cellFrame;
 
-    const BOOL focused      = [[controlView window] firstResponder] == controlView;
-    const BOOL windowActive = (button->_stateMask & OEThemeStateAnyWindowActivityMask) && ([[controlView window] isMainWindow] || ([[controlView window] parentWindow] && [[[controlView window] parentWindow] isMainWindow]));
-    BOOL hover              = NO;
+    [[_imageStates imageForState:state] drawInRect:targetRect fromRect:sourceRect operation:NSCompositeSourceOver fraction:1.0];
+}
+
+- (OEThemeState)currentState
+{
+    OEThemeButton *button = (OEThemeButton *)[self controlView];
+    if(![button isKindOfClass:[OEThemeButton class]]) return OEThemeStateDefault;
+
+    NSWindow   *window       = [[self controlView] window];
+    const BOOL  focused      = [window firstResponder] == [self controlView];
+    const BOOL  windowActive = (button->_stateMask & OEThemeStateAnyWindowActivityMask) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
+    BOOL        hover        = NO;
 
     if(button->_stateMask & OEThemeStateAnyMouseMask)
     {
-        const NSPoint p = [controlView convertPointFromBase:[[controlView window] convertScreenToBase:[NSEvent mouseLocation]]];
-        hover           = NSPointInRect(p, [controlView bounds]);
+        const NSPoint p = [[self controlView] convertPointFromBase:[window convertScreenToBase:[NSEvent mouseLocation]]];
+        hover           = NSPointInRect(p, [[self controlView] bounds]);
     }
 
-    OEThemeState state = [OEThemeItemStates themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:hover] & [_imageStates stateMask];;
-
-    NSRect sourceRect = [self imageRectForButtonState:state];
-    NSRect targetRect = cellFrame;
-
-    [[_imageStates imageForState:state] drawInRect:targetRect fromRect:sourceRect operation:NSCompositeSourceOver fraction:1.0];
+    return [OEThemeItemStates themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:hover] & [_imageStates stateMask];;
 }
 
 - (NSRect)imageRectForButtonState:(OEThemeState)state

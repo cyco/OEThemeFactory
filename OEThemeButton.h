@@ -28,9 +28,9 @@
 
 @interface OEImageButtonCell : NSButtonCell
 
+- (OEThemeState)currentState;
 - (NSRect)imageRectForButtonState:(OEThemeState)state;
 - (BOOL)respondsToStateChangesForMask:(OEThemeState)mask;
-
 
 @property (nonatomic, retain) OEThemeImageStates *imageStates;
 
