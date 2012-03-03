@@ -10,6 +10,7 @@
 #import "OEThemeColorStates.h"
 #import "OEThemeFontStates.h"
 #import "OEThemeImageStates.h"
+#import "OEThemeGradientStates.h"
 
 @class OEThemeItemStates;
 
@@ -32,5 +33,8 @@
 
 - (OEThemeImageStates *)imageStatesForKey:(NSString *)key;
 - (NSImage *)imageForKey:(NSString *)key forState:(OEThemeState)state;
+
+- (OEThemeGradientStates *)gradientStatesForKey:(NSString *)key;
+- (NSGradient *)gradientForKey:(NSString *)key forState:(OEThemeState)state;
 
 @end

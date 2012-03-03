@@ -27,6 +27,24 @@
 	</dict>
 	<key>Images</key>
 	<dict/>
+	<key>Gradients</key>
+	<dict>
+		<key>gradient1</key>
+		<dict>
+			<key>Locations</key>
+			<array>
+				<integer>0</integer>
+				<real>0.5</real>
+				<real>1</real>
+			</array>
+			<key>Colors</key>
+			<array>
+				<string>black</string>
+				<string>red</string>
+				<string>clear</string>
+			</array>
+		</dict>
+	</dict>
 	<key>Name</key>
 	<string>Default</string>
 	<key>Version</key>

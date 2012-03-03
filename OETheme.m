@@ -7,13 +7,11 @@
 //
 
 #import "OETheme.h"
-#import "OEThemeItemStates.h"
-#import "OEThemeColorStates.h"
-#import "OEThemeFontStates.h"
 
-static NSString * const OEThemeColorKey = @"Colors";
-static NSString * const OEThemeFontKey  = @"Fonts";
-static NSString * const OEThemeImageKey = @"Images";
+static NSString * const OEThemeColorKey    = @"Colors";
+static NSString * const OEThemeFontKey     = @"Fonts";
+static NSString * const OEThemeImageKey    = @"Images";
+static NSString * const OEThemeGradientKey = @"Gradients";
 
 @interface OETheme ()
 
@@ -66,22 +64,22 @@ static NSString * const OEThemeImageKey = @"Images";
 - (BOOL)OE_parseThemeFileAtPath:(NSString *)themeFile
 {
     NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:themeFile];
-    if(!dictionary)
-        return NO;
+    if(!dictionary) return NO;
 
     NSDictionary *classesBySection = [NSDictionary dictionaryWithObjectsAndKeys:
                                       [OEThemeColorStates class], OEThemeColorKey,
                                       [OEThemeFontStates class], OEThemeFontKey,
                                       [OEThemeImageStates class], OEThemeImageKey,
+                                      [OEThemeGradientStates class], OEThemeGradientKey,
                                       nil];
 
     __block NSMutableDictionary *itemsByType = [NSMutableDictionary dictionary];
     [classesBySection enumerateKeysAndObjectsUsingBlock:
      ^(id key, id obj, BOOL *stop)
-    {
-        NSDictionary *items = [self OE_parseThemeSection:[dictionary valueForKey:key] forThemeClass:obj];
-        [itemsByType setValue:(items ?: [NSDictionary dictionary]) forKey:key];
-    }];
+     {
+         NSDictionary *items = [self OE_parseThemeSection:[dictionary valueForKey:key] forThemeClass:obj];
+         [itemsByType setValue:(items ?: [NSDictionary dictionary]) forKey:key];
+     }];
 
     _itemsByType = [itemsByType copy];
     return YES;
@@ -135,6 +133,16 @@ static NSString * const OEThemeImageKey = @"Images";
 - (NSImage *)imageForKey:(NSString *)key forState:(OEThemeState)state
 {
     return [[self imageStatesForKey:key] imageForState:state];
+}
+
+- (OEThemeGradientStates *)gradientStatesForKey:(NSString *)key
+{
+    return (OEThemeGradientStates *)[self OE_itemForType:OEThemeGradientKey forKey:key];
+}
+
+- (NSGradient *)gradientForKey:(NSString *)key forState:(OEThemeState)state
+{
+    return [[self gradientStatesForKey:key] gradientForState:state];
 }
 
 @end

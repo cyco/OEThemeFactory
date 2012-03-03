@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
 		EF37DA4114FC3F110098A077 /* OEThemeImageStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImageStates.m */; };
+		EF910A27150240580071A0A8 /* OEThemeGradientStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradientStates.m */; };
 		EFD9BE2014FA3DB500397397 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EFD9BE1F14FA3DB500397397 /* Cocoa.framework */; };
 		EFD9BE2A14FA3DB500397397 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = EFD9BE2814FA3DB500397397 /* InfoPlist.strings */; };
 		EFD9BE2C14FA3DB500397397 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE2B14FA3DB500397397 /* main.m */; };
@@ -24,13 +25,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSColor+OEAdditions.h"; sourceTree = "<group>"; };
-		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSColor+OEAdditions.m"; sourceTree = "<group>"; };
+		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSColor+OEAdditions.h"; path = "../NSColor+OEAdditions.h"; sourceTree = "<group>"; };
+		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSColor+OEAdditions.m"; path = "../NSColor+OEAdditions.m"; sourceTree = "<group>"; };
 		EF37DA3D14FC3E850098A077 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		EF37DA3F14FC3F110098A077 /* OEThemeImageStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeImageStates.h; sourceTree = "<group>"; };
 		EF37DA4014FC3F110098A077 /* OEThemeImageStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeImageStates.m; sourceTree = "<group>"; };
-		EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSImage+OEDrawingAdditions.h"; sourceTree = "<group>"; };
-		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
+		EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSImage+OEDrawingAdditions.h"; path = "../NSImage+OEDrawingAdditions.h"; sourceTree = "<group>"; };
+		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSImage+OEDrawingAdditions.m"; path = "../NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
+		EF910A25150240580071A0A8 /* OEThemeGradientStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeGradientStates.h; sourceTree = "<group>"; };
+		EF910A26150240580071A0A8 /* OEThemeGradientStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeGradientStates.m; sourceTree = "<group>"; };
 		EFD9BE1B14FA3DB500397397 /* OEThemeFactory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OEThemeFactory.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFD9BE1F14FA3DB500397397 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		EFD9BE2214FA3DB500397397 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -111,6 +114,10 @@
 		EFD9BE2514FA3DB500397397 /* OEThemeFactory */ = {
 			isa = PBXGroup;
 			children = (
+				EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */,
+				EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */,
+				EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */,
+				EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */,
 				EFD9BE3114FA3DB500397397 /* OEAppDelegate.h */,
 				EFD9BE3214FA3DB500397397 /* OEAppDelegate.m */,
 				EFD9BE3414FA3DB500397397 /* MainMenu.xib */,
@@ -135,10 +142,6 @@
 			isa = PBXGroup;
 			children = (
 				EFD9BE3D14FA3DCB00397397 /* Theme.plist */,
-				EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */,
-				EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */,
-				EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */,
-				EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */,
 				EFD9BE3F14FA442900397397 /* OETheme.h */,
 				EFD9BE4014FA442900397397 /* OETheme.m */,
 				EFD9BE4214FA49E700397397 /* OEThemeItemStates.h */,
@@ -150,6 +153,8 @@
 				EF37DA3F14FC3F110098A077 /* OEThemeImageStates.h */,
 				EF37DA4014FC3F110098A077 /* OEThemeImageStates.m */,
 				EFD9BE5414FA83A700397397 /* OEThemeFont.m */,
+				EF910A25150240580071A0A8 /* OEThemeGradientStates.h */,
+				EF910A26150240580071A0A8 /* OEThemeGradientStates.m */,
 				EFD9BE5314FA83A700397397 /* OEThemeFont.h */,
 			);
 			name = Theme;
@@ -228,6 +233,7 @@
 				EFD9BE5214FA823800397397 /* OEThemeFontStates.m in Sources */,
 				EFD9BE5514FA83A700397397 /* OEThemeFont.m in Sources */,
 				EF37DA4114FC3F110098A077 /* OEThemeImageStates.m in Sources */,
+				EF910A27150240580071A0A8 /* OEThemeGradientStates.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

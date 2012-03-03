@@ -66,7 +66,7 @@
 
 @end
 
-NSColor *_OENormalizedRGBAColorString(NSArray *parameters)
+NSColor *_NSColorFromRGBA(NSArray *parameters)
 {
     if([parameters count] < 3) return nil;
 
@@ -75,10 +75,10 @@ NSColor *_OENormalizedRGBAColorString(NSArray *parameters)
     CGFloat blue  = MAX(MIN([[parameters objectAtIndex:2] intValue], 255), 0) / 255.0;
     CGFloat alpha = ([parameters count] > 3 ? MAX(MIN([[parameters objectAtIndex:3] floatValue], 1.0), 0.0) : 1.0);
 
-    return [NSColor colorWithDeviceRed:red green:green blue:blue alpha:alpha];
+    return [NSColor colorWithCalibratedRed:red green:green blue:blue alpha:alpha];
 }
 
-NSColor *_OENormalizedHSLAColorString(NSArray *parameters)
+NSColor *_NSColorFromHSLA(NSArray *parameters)
 {
     if([parameters count] < 3) return nil;
 
@@ -87,14 +87,14 @@ NSColor *_OENormalizedHSLAColorString(NSArray *parameters)
     CGFloat brightness  = MAX(MIN([[parameters objectAtIndex:2] intValue], 100), 0) / 100.0;
     CGFloat alpha      = ([parameters count] > 3 ? MAX(MIN([[parameters objectAtIndex:3] floatValue], 1.0), 0.0) : 1.0);
 
-    return [NSColor colorWithDeviceHue:hue saturation:saturation brightness:brightness alpha:alpha];
+    return [NSColor colorWithCalibratedHue:hue saturation:saturation brightness:brightness alpha:alpha];
 }
 
 NSColor *_NSColorFromString(NSString *colorString)
 {
     if(colorString == nil) return nil;
 
-    NSRegularExpression  *rgbRegex      = [NSRegularExpression regularExpressionWithPattern:@"\\s*(?:(?:#)|(?:0x))?([0-9a-f]+)\\s*" options:NSRegularExpressionCaseInsensitive error:nil];
+    NSRegularExpression  *rgbRegex      = [NSRegularExpression regularExpressionWithPattern:@"\\s*(?:(?:#)|(?:0x))?([0-9a-f]+)\\s*" options:0 error:nil];
     NSRegularExpression  *functionRegex = [NSRegularExpression regularExpressionWithPattern:@"\\s*(.+)\\(((?:[^,]+,){2,3}[^,]+)\\)\\s*" options:0 error:nil];
     const NSRange         range         = NSMakeRange(0, [colorString length]);
     NSTextCheckingResult *match         = nil;
@@ -105,10 +105,8 @@ NSColor *_NSColorFromString(NSString *colorString)
         NSString *function = [[colorString substringWithRange:[match rangeAtIndex:1]] lowercaseString];
         NSArray *parameters = [[[colorString substringWithRange:[match rangeAtIndex:2]] lowercaseString] componentsSeparatedByString:@","];
 
-        if([function isEqualToString:@"rgba"] || [function isEqualToString:@"rgb"])
-            result = _OENormalizedRGBAColorString(parameters);
-        else if([function isEqualToString:@"hsla"] || [function isEqualToString:@"hsl"])
-            result = _OENormalizedHSLAColorString(parameters);
+        if([function isEqualToString:@"rgba"] || [function isEqualToString:@"rgb"])      result = _NSColorFromRGBA(parameters);
+        else if([function isEqualToString:@"hsla"] || [function isEqualToString:@"hsl"]) result = _NSColorFromHSLA(parameters);
     }
     else if((match = [[rgbRegex matchesInString:colorString options:0 range:range] lastObject]))
     {
@@ -125,7 +123,7 @@ NSColor *_NSColorFromString(NSString *colorString)
                 CGFloat blue  = [matchedString characterAtIndex:2] / 255.0;
                 CGFloat alpha = (matchRange.length == 4 ? [matchedString characterAtIndex:3] / 255.0 : 1.0);
 
-                result = [NSColor colorWithDeviceRed:red green:green blue:blue alpha:alpha];
+                result = [NSColor colorWithCalibratedRed:red green:green blue:blue alpha:alpha];
 
                 break;
             }
@@ -154,7 +152,7 @@ NSColor *_NSColorFromString(NSString *colorString)
                 (CGFloat)((colorARGB & 0x000000FF) >>  0) / 255.0f  // a
             };
 
-            result = [NSColor colorWithColorSpace:[NSColorSpace deviceRGBColorSpace] components:components count:4];
+            result = [NSColor colorWithColorSpace:[NSColorSpace genericRGBColorSpace] components:components count:4];
         }
     }
     return result;
@@ -163,42 +161,42 @@ NSColor *_NSColorFromString(NSString *colorString)
 // Inspired by http://www.w3.org/TR/css3-color/ and https://github.com/kballard/uicolor-utilities/blob/master/UIColor-Expanded.m
 NSColor *NSColorFromString(NSString *colorString)
 {
-    static NSDictionary *namedColors = nil;
-    static dispatch_once_t onceToken;
+    static NSDictionary    *namedColors = nil;
+    static dispatch_once_t  onceToken;
     dispatch_once(&onceToken, ^{
         namedColors = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                       @"clear",                        [NSColor clearColor],
-                       @"alternateselectedcontrol",     [NSColor alternateSelectedControlColor],
-                       @"alternateselectedcontroltext", [NSColor alternateSelectedControlTextColor],
-                       @"controlbackground",            [NSColor controlBackgroundColor],
-                       @"control",                      [NSColor controlColor],
-                       @"controlhighlight",             [NSColor controlHighlightColor],
-                       @"controllighthighlight",        [NSColor controlLightHighlightColor],
-                       @"controlshadow",                [NSColor controlShadowColor],
-                       @"controldarkshadow",            [NSColor controlDarkShadowColor],
-                       @"controltext",                  [NSColor controlTextColor],
-                       @"disabledcontroltext",          [NSColor disabledControlTextColor],
-                       @"grid",                         [NSColor gridColor],
-                       @"header",                       [NSColor headerColor],
-                       @"headertext",                   [NSColor headerTextColor],
-                       @"highlight",                    [NSColor highlightColor],
-                       @"keyboardfocusindicator",       [NSColor keyboardFocusIndicatorColor],
-                       @"knob",                         [NSColor knobColor],
-                       @"scrollbar",                    [NSColor scrollBarColor],
-                       @"secondaryselectedcontrol",     [NSColor secondarySelectedControlColor],
-                       @"selectedcontrol",              [NSColor selectedControlColor],
-                       @"selectedcontroltext",          [NSColor selectedControlTextColor],
-                       @"selectedmenuitem",             [NSColor selectedMenuItemColor],
-                       @"selectedmenuitemtext",         [NSColor selectedMenuItemTextColor],
-                       @"selectedtextbackground",       [NSColor selectedTextBackgroundColor],
-                       @"selectedtext",                 [NSColor selectedTextColor],
-                       @"selectedknob",                 [NSColor selectedKnobColor],
-                       @"shadow",                       [NSColor shadowColor],
-                       @"textbackground",               [NSColor textBackgroundColor],
-                       @"text",                         [NSColor textColor],
-                       @"windowbackground",             [NSColor windowBackgroundColor],
-                       @"windowframe",                  [NSColor windowFrameColor],
-                       @"windowframetext",              [NSColor windowFrameTextColor],
+                       [NSColor clearColor],                        @"clear",
+                       [NSColor alternateSelectedControlColor],     @"alternateselectedcontrol",
+                       [NSColor alternateSelectedControlTextColor], @"alternateselectedcontroltext",
+                       [NSColor controlBackgroundColor],            @"controlbackground",
+                       [NSColor controlColor],                      @"control",
+                       [NSColor controlHighlightColor],             @"controlhighlight",
+                       [NSColor controlLightHighlightColor],        @"controllighthighlight",
+                       [NSColor controlShadowColor],                @"controlshadow",
+                       [NSColor controlDarkShadowColor],            @"controldarkshadow",
+                       [NSColor controlTextColor],                  @"controltext",
+                       [NSColor disabledControlTextColor],          @"disabledcontroltext",
+                       [NSColor gridColor],                         @"grid",
+                       [NSColor headerColor],                       @"header",
+                       [NSColor headerTextColor],                   @"headertext",
+                       [NSColor highlightColor],                    @"highlight",
+                       [NSColor keyboardFocusIndicatorColor],       @"keyboardfocusindicator",
+                       [NSColor knobColor],                         @"knob",
+                       [NSColor scrollBarColor],                    @"scrollbar",
+                       [NSColor secondarySelectedControlColor],     @"secondaryselectedcontrol",
+                       [NSColor selectedControlColor],              @"selectedcontrol",
+                       [NSColor selectedControlTextColor],          @"selectedcontroltext",
+                       [NSColor selectedMenuItemColor],             @"selectedmenuitem",
+                       [NSColor selectedMenuItemTextColor],         @"selectedmenuitemtext",
+                       [NSColor selectedTextBackgroundColor],       @"selectedtextbackground",
+                       [NSColor selectedTextColor],                 @"selectedtext",
+                       [NSColor selectedKnobColor],                 @"selectedknob",
+                       [NSColor shadowColor],                       @"shadow",
+                       [NSColor textBackgroundColor],               @"textbackground",
+                       [NSColor textColor],                         @"text",
+                       [NSColor windowBackgroundColor],             @"windowbackground",
+                       [NSColor windowFrameColor],                  @"windowframe",
+                       [NSColor windowFrameTextColor],              @"windowframetext",
                        nil];
 
         static const char *colorNameDB =
@@ -244,8 +242,7 @@ NSColor *NSColorFromString(NSString *colorString)
 
         @try
         {
-            names = malloc(strlen(colorNameDB));
-            if(names != NULL)
+            if((names = malloc(strlen(colorNameDB))) != NULL)
             {
                 memcpy(names, colorNameDB, strlen(colorNameDB));
 
@@ -274,7 +271,5 @@ NSColor *NSColorFromString(NSString *colorString)
     if(!colorString) return nil;
 
     NSColor *result = [namedColors valueForKey:[[colorString lowercaseString] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-    if(result == nil) result = _NSColorFromString(colorString);
-
-    return result;
+    return (result ?: _NSColorFromString(colorString));
 }
