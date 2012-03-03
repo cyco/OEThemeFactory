@@ -15,13 +15,42 @@ static NSString * const OEThemeGradientKey = @"Gradients";
 
 @interface OETheme ()
 
-- (BOOL)OE_parseThemeFileAtPath:(NSString *)themeFile;
 - (NSDictionary *)OE_parseThemeSection:(NSDictionary *)section forThemeClass:(Class)class;
 - (OEThemeItemStates *)OE_itemForType:(NSString *)type forKey:(NSString *)key;
 
 @end
 
 @implementation OETheme
+
+- (id)init
+{
+    NSString *themeFile = [[NSBundle mainBundle] pathForResource:@"Theme" ofType:@"plist"];
+    if(!themeFile) return nil;
+
+    if((self = [super init]))
+    {
+        NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:themeFile];
+        if(!dictionary) return nil;
+
+        NSDictionary *classesBySection = [NSDictionary dictionaryWithObjectsAndKeys:
+                                          [OEThemeColorStates class], OEThemeColorKey,
+                                          [OEThemeFontStates class], OEThemeFontKey,
+                                          [OEThemeImageStates class], OEThemeImageKey,
+                                          [OEThemeGradientStates class], OEThemeGradientKey,
+                                          nil];
+
+        __block NSMutableDictionary *itemsByType = [NSMutableDictionary dictionary];
+        [classesBySection enumerateKeysAndObjectsUsingBlock:
+         ^(id key, id obj, BOOL *stop)
+         {
+             NSDictionary *items = [self OE_parseThemeSection:[dictionary valueForKey:key] forThemeClass:obj];
+             [itemsByType setValue:(items ?: [NSDictionary dictionary]) forKey:key];
+         }];
+
+        _itemsByType = [itemsByType copy];
+    }
+    return self;
+}
 
 + (id)sharedTheme
 {
@@ -32,20 +61,6 @@ static NSString * const OEThemeGradientKey = @"Gradients";
     });
 
     return sharedTheme;
-}
-
-- (id)init
-{
-    NSString *themeFile = [[NSBundle mainBundle] pathForResource:@"Theme" ofType:@"plist"];
-    if(!themeFile)
-        return nil;
-
-    if((self = [super init]))
-    {
-        if(![self OE_parseThemeFileAtPath:themeFile])
-            return nil;
-    }
-    return self;
 }
 
 - (NSDictionary *)OE_parseThemeSection:(NSDictionary *)section forThemeClass:(Class)class
@@ -59,30 +74,6 @@ static NSString * const OEThemeGradientKey = @"Gradients";
     }];
 
     return [results copy];
-}
-
-- (BOOL)OE_parseThemeFileAtPath:(NSString *)themeFile
-{
-    NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:themeFile];
-    if(!dictionary) return NO;
-
-    NSDictionary *classesBySection = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      [OEThemeColorStates class], OEThemeColorKey,
-                                      [OEThemeFontStates class], OEThemeFontKey,
-                                      [OEThemeImageStates class], OEThemeImageKey,
-                                      [OEThemeGradientStates class], OEThemeGradientKey,
-                                      nil];
-
-    __block NSMutableDictionary *itemsByType = [NSMutableDictionary dictionary];
-    [classesBySection enumerateKeysAndObjectsUsingBlock:
-     ^(id key, id obj, BOOL *stop)
-     {
-         NSDictionary *items = [self OE_parseThemeSection:[dictionary valueForKey:key] forThemeClass:obj];
-         [itemsByType setValue:(items ?: [NSDictionary dictionary]) forKey:key];
-     }];
-
-    _itemsByType = [itemsByType copy];
-    return YES;
 }
 
 - (id)OE_itemForType:(NSString *)type forKey:(NSString *)key

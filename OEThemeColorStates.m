@@ -14,12 +14,10 @@
 + (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
 {
     id result = nil;
-    if([definition isKindOfClass:[NSDictionary class]])
-        result = NSColorFromString([definition valueForKey:OEThemeItemValueAttributeName]);
-    else if([definition isKindOfClass:[NSString class]])
-        result = NSColorFromString(definition);
-    else
-        result = nil;
+
+    if([definition isKindOfClass:[NSDictionary class]])  result = NSColorFromString([definition valueForKey:OEThemeItemValueAttributeName]);
+    else if([definition isKindOfClass:[NSString class]]) result = NSColorFromString(definition);
+
     return result;
 }
 

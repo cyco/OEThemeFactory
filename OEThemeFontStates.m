@@ -30,8 +30,7 @@
 
         result = [[OEThemeFont alloc] initWithDictionary:newDefinition];
     }
-    else
-        result = nil;
+
     return result;
 }
 

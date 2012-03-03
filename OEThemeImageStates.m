@@ -46,8 +46,7 @@ static NSString * const OEThemeImageVerticalAttributeName = @"Vertical";
     {
         result = [self parseWithDefinition:[NSDictionary dictionaryWithObject:definition forKey:OEThemeImageResourceAttributeName] inheritedDefinition:inherited];
     }
-    else
-        result = nil;
+
     return result;
 }
 

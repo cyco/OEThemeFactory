@@ -76,7 +76,6 @@
 		EFD9BE1014FA3DB500397397 = {
 			isa = PBXGroup;
 			children = (
-				EF37DA3D14FC3E850098A077 /* QuartzCore.framework */,
 				EFD9BE3C14FA3DBD00397397 /* Theme */,
 				EFD9BE2514FA3DB500397397 /* OEThemeFactory */,
 				EFD9BE1E14FA3DB500397397 /* Frameworks */,
@@ -96,6 +95,7 @@
 			isa = PBXGroup;
 			children = (
 				EFD9BE1F14FA3DB500397397 /* Cocoa.framework */,
+				EF37DA3D14FC3E850098A077 /* QuartzCore.framework */,
 				EFD9BE2114FA3DB500397397 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -152,10 +152,10 @@
 				EFD9BE5114FA823800397397 /* OEThemeFontStates.m */,
 				EF37DA3F14FC3F110098A077 /* OEThemeImageStates.h */,
 				EF37DA4014FC3F110098A077 /* OEThemeImageStates.m */,
-				EFD9BE5414FA83A700397397 /* OEThemeFont.m */,
 				EF910A25150240580071A0A8 /* OEThemeGradientStates.h */,
 				EF910A26150240580071A0A8 /* OEThemeGradientStates.m */,
 				EFD9BE5314FA83A700397397 /* OEThemeFont.h */,
+				EFD9BE5414FA83A700397397 /* OEThemeFont.m */,
 			);
 			name = Theme;
 			sourceTree = "<group>";

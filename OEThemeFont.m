@@ -29,19 +29,16 @@ NSString * const OEThemeFontTraitsAttributeName = @"Traits";
 
 NSFontTraitMask NSFontTraitMaskFromString(NSString *string)
 {
-    NSFontTraitMask mask = 0;
-    NSArray *components = [string componentsSeparatedByString:@","];
+    NSFontTraitMask  mask = 0;
+    NSArray         *components = [string componentsSeparatedByString:@","];
+
     for(NSString *component in components)
     {
         NSString *trimmedComponent = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        if([trimmedComponent caseInsensitiveCompare:@"Bold"])
-            mask = mask | NSBoldFontMask;
-        else if([trimmedComponent caseInsensitiveCompare:@"Unbold"])
-            mask = mask | NSUnboldFontMask;
-        else if([trimmedComponent caseInsensitiveCompare:@"Italic"])
-            mask = mask | NSItalicFontMask;
-        else if([trimmedComponent caseInsensitiveCompare:@"Unitalic"])
-            mask = mask | NSUnitalicFontMask;
+        if([trimmedComponent caseInsensitiveCompare:@"Bold"])          mask |= NSBoldFontMask;
+        else if([trimmedComponent caseInsensitiveCompare:@"Unbold"])   mask |= NSUnboldFontMask;
+        else if([trimmedComponent caseInsensitiveCompare:@"Italic"])   mask |= NSItalicFontMask;
+        else if([trimmedComponent caseInsensitiveCompare:@"Unitalic"]) mask |= NSUnitalicFontMask;
     }
 
     return mask;
@@ -52,12 +49,9 @@ NSFontTraitMask NSFontTraitMaskFromString(NSString *string)
     if((self = [super init]))
     {
         id color = [dictionary objectForKey:OEThemeFontColorAttributeName];
-        if([color isKindOfClass:[NSColor class]])
-            _color = color;
-        else if([color isKindOfClass:[NSString class]])
-            _color = (NSColorFromString(color) ?: [NSColor blackColor]);
-        else
-            _color = [NSColor blackColor];
+        if([color isKindOfClass:[NSColor class]])       _color = color;
+        else if([color isKindOfClass:[NSString class]]) _color = (NSColorFromString(color) ?: [NSColor blackColor]);
+        else                                            _color = [NSColor blackColor];
 
         id shadow = [dictionary objectForKey:OEThemeFontShadowAttributeName];
         if([shadow isKindOfClass:[NSShadow class]])
@@ -96,10 +90,8 @@ NSFontTraitMask NSFontTraitMaskFromString(NSString *string)
     NSMutableArray *components = [NSMutableArray array];
     [components addObject:[NSString stringWithFormat:@"font = %@", _font]];
 
-    if(![_color isEqualTo:[NSColor blackColor]])
-        [components addObject:[NSString stringWithFormat:@"color = %@", _color]];
-    if(_shadow)
-        [components addObject:[NSString stringWithFormat:@"shadow = %@", _shadow]];
+    if(![_color isEqualTo:[NSColor blackColor]]) [components addObject:[NSString stringWithFormat:@"color = %@", _color]];
+    if(_shadow)                                  [components addObject:[NSString stringWithFormat:@"shadow = %@", _shadow]];
 
     return [components componentsJoinedByString:@"; "];
 }
