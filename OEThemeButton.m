@@ -7,6 +7,7 @@
 //
 
 #import "OEThemeButton.h"
+#import "OEThemeImage.h"
 
 @interface OEThemeButton ()
 

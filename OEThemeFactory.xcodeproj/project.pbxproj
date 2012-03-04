@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
 		EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImage.m */; };
 		EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradient.m */; };
@@ -246,6 +247,7 @@
 				EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */,
 				EF910A6215025CA00071A0A8 /* OEThemeButton.m in Sources */,
 				EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */,
+				EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

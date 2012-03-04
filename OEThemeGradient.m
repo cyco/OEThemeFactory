@@ -7,7 +7,7 @@
 //
 
 #import "OEThemeGradient.h"
-#import "OEThemeColor.h"
+#import "NSColor+OEAdditions.h"
 
 static NSString * const OEThemeGradientLocationsAttributeName = @"Locations";
 static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";

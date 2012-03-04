@@ -7,7 +7,7 @@
 //
 
 #import "OETextAttributes.h"
-#import "OEThemeColor.h"
+#import "NSColor+OEAdditions.h"
 
 @implementation OETextAttributes
 

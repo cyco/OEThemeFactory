@@ -253,7 +253,7 @@ static NSMutableArray* interfaceImages;
 {
     if(parts == nil || [parts count] == 0) return self;
 
-    NSImage        *result    = self;
+    NSImage        *result    = nil;
     NSMutableArray *rectParts = [NSMutableArray arrayWithCapacity:[parts count]];
     const NSSize    size      = [self size];
     NSRect          rect;
@@ -266,8 +266,9 @@ static NSMutableArray* interfaceImages;
         else if([part isKindOfClass:[NSValue class]]) rect = [part rectValue];
         else                                          NSLog(@"Unable to parse NSRect from part: %@", part);
 
-        // Flip coordinate system
-        if(!NSIsEmptyRect(rect)) rect.origin.y = size.height - rect.origin.y - rect.size.height;
+        // Flip coordinate system (if it is not already flipped)
+        if(![self isFlipped] && !NSIsEmptyRect(rect)) rect.origin.y = size.height - rect.origin.y - rect.size.height;
+
         [rectParts addObject:[NSValue valueWithRect:rect]];
     }
 

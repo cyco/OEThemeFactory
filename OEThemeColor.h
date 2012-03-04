@@ -8,8 +8,6 @@
 
 #import "OEThemeObject.h"
 
-extern NSColor *NSColorFromString(NSString *colorString);
-
 @interface OEThemeColor : OEThemeObject
 
 - (NSColor *)colorForState:(OEThemeState)state;

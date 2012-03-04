@@ -36,7 +36,7 @@
 
 - (OETextAttributes *)textAttributesForState:(OEThemeState)state
 {
-    return (OETextAttributes *)[self itemForState:state];
+    return (OETextAttributes *)[self objectForState:state];
 }
 
 - (void)setInContext:(CGContextRef)ctx withState:(OEThemeState)state

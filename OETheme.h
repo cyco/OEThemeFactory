@@ -7,13 +7,45 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "OEThemeObject.h"
-#import "OEThemeColor.h"
-#import "OEThemeTextAttributes.h"
-#import "OEThemeImage.h"
-#import "OEThemeGradient.h"
 
-@class OEThemeObject;
+enum
+{
+    OEThemeStateWindowInactive   = 1 <<  0,
+    OEThemeStateWindowActive     = 1 <<  1,
+    OEThemeStateOff              = 1 <<  2,
+    OEThemeStateOn               = 1 <<  3,
+    OEThemeStateMixed            = 1 <<  4,
+    OEThemeStateUnselected       = 1 <<  5,
+    OEThemeStateSelected         = 1 <<  6,
+    OEThemeStateDisabled         = 1 <<  7,
+    OEThemeStateEnabled          = 1 <<  8,
+    OEThemeStateUnfocused        = 1 <<  9,
+    OEThemeStateFocused          = 1 << 10,
+    OEThemeStateMouseOff         = 1 << 11,
+    OEThemeStateMouseOver        = 1 << 12,
+    OEThemeStateDefault          = 0xFFFF,
+};
+typedef NSUInteger OEThemeState;
+
+enum
+{
+    OEThemeStateAnyWindowActivityMask = OEThemeStateWindowInactive | OEThemeStateWindowActive,
+    OEThemeStateAnyStateMask          = OEThemeStateOff            | OEThemeStateOn             | OEThemeStateMixed,
+    OEThemeStateAnySelectionMask      = OEThemeStateUnselected     | OEThemeStateSelected,
+    OEThemeStateAnyInteractionMask    = OEThemeStateDisabled       | OEThemeStateEnabled,
+    OEThemeStateAnyFocusMask          = OEThemeStateUnfocused      | OEThemeStateFocused,
+    OEThemeStateAnyMouseMask          = OEThemeStateMouseOff       | OEThemeStateMouseOver,
+    OEThemeStateDefaultMask           = 0xFFFF,
+};
+
+extern NSString     *NSStringFromThemeState(OEThemeState state);
+extern OEThemeState  OEThemeStateFromString(NSString *state);
+
+@class OEThemeColor;
+@class OEThemeTextAttributes;
+@class OETextAttributes;
+@class OEThemeImage;
+@class OEThemeGradient;
 
 @interface OETheme : NSObject
 {
