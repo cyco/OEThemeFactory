@@ -275,18 +275,39 @@
 	<dict>
 		<key>gradient1</key>
 		<dict>
-			<key>Locations</key>
-			<array>
-				<integer>0</integer>
-				<real>0.5</real>
-				<real>1</real>
-			</array>
-			<key>Colors</key>
-			<array>
-				<string>black</string>
-				<string>red</string>
-				<string>clear</string>
-			</array>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Locations</key>
+					<array>
+						<integer>0</integer>
+						<real>0.5</real>
+						<real>1</real>
+					</array>
+					<key>Colors</key>
+					<array>
+						<string>black</string>
+						<string>red</string>
+						<string>green</string>
+					</array>
+				</dict>
+				<key>Window Inactive,Any Selection</key>
+				<dict>
+					<key>Locations</key>
+					<array>
+						<integer>0</integer>
+						<real>0.5</real>
+						<real>1</real>
+					</array>
+					<key>Colors</key>
+					<array>
+						<string>gray</string>
+						<string>pink</string>
+						<string>yellow</string>
+					</array>
+				</dict>
+			</dict>
 		</dict>
 	</dict>
 	<key>Name</key>

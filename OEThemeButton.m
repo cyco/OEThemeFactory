@@ -28,7 +28,7 @@
     }
 
     OEThemeButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEThemeButtonCell class]] && newWindow && [[cell backgroundThemeImage] stateMask] & OEThemeStateAnyWindowActivityMask)
+    if([cell isKindOfClass:[OEThemeButtonCell class]] && newWindow && (_cachedStateMask & OEThemeStateAnyWindowActivityMask))
     {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidBecomeMainNotification object:newWindow];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidResignMainNotification object:newWindow];
@@ -45,7 +45,7 @@
 {
     if(_mouseTrackingArea) [self removeTrackingArea:_mouseTrackingArea];
     OEThemeButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEThemeButtonCell class]] && [[cell backgroundThemeImage] stateMask] & OEThemeStateAnyMouseMask)
+    if([cell isKindOfClass:[OEThemeButtonCell class]] && (_cachedStateMask & OEThemeStateAnyMouseMask))
     {
         _mouseTrackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
         [self addTrackingArea:_mouseTrackingArea];

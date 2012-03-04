@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		EF1027E21503B708003BC6C0 /* gloss_button.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E11503B708003BC6C0 /* gloss_button.png */; };
+		EF1027E51503FC78003BC6C0 /* OEGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF1027E41503FC78003BC6C0 /* OEGradientView.m */; };
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
 		EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImage.m */; };
 		EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradient.m */; };
@@ -30,6 +31,8 @@
 
 /* Begin PBXFileReference section */
 		EF1027E11503B708003BC6C0 /* gloss_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_button.png; sourceTree = "<group>"; };
+		EF1027E31503FC78003BC6C0 /* OEGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEGradientView.h; sourceTree = "<group>"; };
+		EF1027E41503FC78003BC6C0 /* OEGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEGradientView.m; sourceTree = "<group>"; };
 		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSColor+OEAdditions.h"; path = "../NSColor+OEAdditions.h"; sourceTree = "<group>"; };
 		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSColor+OEAdditions.m"; path = "../NSColor+OEAdditions.m"; sourceTree = "<group>"; };
 		EF37DA3D14FC3E850098A077 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -130,6 +133,8 @@
 				EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */,
 				EF1027E11503B708003BC6C0 /* gloss_button.png */,
 				EFD9BE2614FA3DB500397397 /* Supporting Files */,
+				EF1027E31503FC78003BC6C0 /* OEGradientView.h */,
+				EF1027E41503FC78003BC6C0 /* OEGradientView.m */,
 			);
 			path = OEThemeFactory;
 			sourceTree = "<group>";
@@ -246,6 +251,7 @@
 				EF910A6215025CA00071A0A8 /* OEThemeButton.m in Sources */,
 				EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */,
 				EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */,
+				EF1027E51503FC78003BC6C0 /* OEGradientView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
