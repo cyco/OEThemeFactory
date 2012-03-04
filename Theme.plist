@@ -17,12 +17,21 @@
 	</dict>
 	<key>Fonts</key>
 	<dict>
-		<key>font1</key>
+		<key>gloss_blue</key>
 		<dict>
-			<key>Family</key>
-			<string>Lucida Grande</string>
-			<key>Size</key>
-			<integer>12</integer>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Foreground Color</key>
+					<string>White</string>
+				</dict>
+				<key>Window Inactive,Any Selection</key>
+				<dict>
+					<key>Foreground Color</key>
+					<string>Gray</string>
+				</dict>
+			</dict>
 		</dict>
 	</dict>
 	<key>Images</key>
@@ -152,6 +161,111 @@
 					<key>Parts</key>
 					<array>
 						<string>{{54,23},[27,23}}</string>
+					</array>
+				</dict>
+			</dict>
+		</dict>
+		<key>gloss_default</key>
+		<dict>
+			<key>Resource</key>
+			<string>gloss_button</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,46},{5,23}}</string>
+						<string>{{5,46},{41,23}}</string>
+						<string>{{46,46},{5,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,0},{5,23}}</string>
+						<string>{{5,0},{41,23}}</string>
+						<string>{{46,0},{5,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,Selected</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,23},{5,23}}</string>
+						<string>{{5,23},{41,23}}</string>
+						<string>{{46,23},{5,23}}</string>
+					</array>
+				</dict>
+			</dict>
+		</dict>
+		<key>gloss_blue</key>
+		<dict>
+			<key>Resource</key>
+			<string>gloss_button</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,92},{5,23}}</string>
+						<string>{{5,92},{41,23}}</string>
+						<string>{{46,92},{5,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,69},{5,23}}</string>
+						<string>{{5,69},{41,23}}</string>
+						<string>{{46,69},{5,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,Selected</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,23},{5,23}}</string>
+						<string>{{5,23},{41,23}}</string>
+						<string>{{46,23},{5,23}}</string>
+					</array>
+				</dict>
+			</dict>
+		</dict>
+		<key>gloss_green</key>
+		<dict>
+			<key>Resource</key>
+			<string>gloss_button</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,46},{5,23}}</string>
+						<string>{{5,46},{41,23}}</string>
+						<string>{{46,46},{5,23}}</string>
+					</array>
+				</dict>
+				<key>Window Inactive,Any Selection</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,0},{5,23}}</string>
+						<string>{{5,0},{41,23}}</string>
+						<string>{{46,0},{5,23}}</string>
+					</array>
+				</dict>
+				<key>Window Active,Selected</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,23},{5,23}}</string>
+						<string>{{5,23},{41,23}}</string>
+						<string>{{46,23},{5,23}}</string>
 					</array>
 				</dict>
 			</dict>

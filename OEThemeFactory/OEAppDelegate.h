@@ -15,5 +15,6 @@
 @property (assign) IBOutlet OEThemeButton *button1;
 @property (assign) IBOutlet OEThemeButton *button2;
 @property (assign) IBOutlet OEThemeButton *button3;
+@property (assign) IBOutlet OEThemeButton *button4;
 
 @end
