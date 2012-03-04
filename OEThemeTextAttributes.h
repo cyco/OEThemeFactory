@@ -7,10 +7,9 @@
 //
 
 #import "OEThemeObject.h"
-#import "OETextAttributes.h"
 
 @interface OEThemeTextAttributes : OEThemeObject
 
-- (OETextAttributes *)textAttributesForState:(OEThemeState)state;
+- (NSDictionary *)textAttributesForState:(OEThemeState)state;
 
 @end

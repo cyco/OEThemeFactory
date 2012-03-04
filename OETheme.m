@@ -73,7 +73,7 @@ static NSString * const OEThemeGradientKey                = @"Gradients";
              [itemsByType setValue:(items ?: [NSDictionary dictionary]) forKey:key];
          }];
 
-        _itemsByType = [itemsByType copy];
+        _objectsByType = [itemsByType copy];
     }
     return self;
 }
@@ -104,7 +104,7 @@ static NSString * const OEThemeGradientKey                = @"Gradients";
 
 - (id)OE_itemForType:(NSString *)type forKey:(NSString *)key
 {
-    return [[_itemsByType valueForKey:type] valueForKey:key];
+    return [[_objectsByType valueForKey:type] valueForKey:key];
 }
 
 - (OEThemeColor *)themeColorForKey:(NSString *)key
@@ -122,24 +122,9 @@ static NSString * const OEThemeGradientKey                = @"Gradients";
     return (OEThemeTextAttributes *)[self OE_itemForType:OEThemeFontKey forKey:key];
 }
 
-- (OETextAttributes *)textAttributesForKey:(NSString *)key forState:(OEThemeState)state
+- (NSDictionary *)textAttributesForKey:(NSString *)key forState:(OEThemeState)state
 {
     return [[self themeTextAttributesForKey:key] textAttributesForState:state];
-}
-
-- (NSFont *)fontForKey:(NSString *)key forState:(OEThemeState)state
-{
-    return [[self textAttributesForKey:key forState:state] font];
-}
-
-- (NSColor *)fontColorForKey:(NSString *)key forState:(OEThemeState)state
-{
-    return [[self textAttributesForKey:key forState:state] color];
-}
-
-- (NSShadow *)fontShadowForKey:(NSString *)key forState:(OEThemeState)state;
-{
-    return [[self textAttributesForKey:key forState:state] shadow];
 }
 
 - (OEThemeImage *)themeImageForKey:(NSString *)key

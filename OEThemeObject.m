@@ -30,7 +30,7 @@ static inline NSString *OEKeyForState(OEThemeState state)
 {
     if((self = [super init]))
     {
-        _states       = [[NSMutableArray alloc] init];
+        _states        = [[NSMutableArray alloc] init];
         _objectByState = [[NSMutableDictionary alloc] init];
 
         if([definition isKindOfClass:[NSDictionary class]])
@@ -115,22 +115,23 @@ static inline NSString *OEKeyForState(OEThemeState state)
 
 - (id)objectForState:(OEThemeState)state
 {
-    if(state == 0) return [_objectByState valueForKey:OEKeyForState(OEThemeStateDefault)];
+    OEThemeState maskedState = state & _stateMask;
+    if(maskedState == 0) return [_objectByState valueForKey:OEKeyForState(OEThemeStateDefault)];
 
-    __block id results = [_objectByState valueForKey:OEKeyForState(state)];
+    __block id results = [_objectByState valueForKey:OEKeyForState(maskedState)];
     if(results == nil)
     {
         [_states enumerateObjectsUsingBlock:
          ^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
-            if(([obj unsignedIntegerValue] & state) == state)
+            if(([obj unsignedIntegerValue] & maskedState) == maskedState)
             {
                 results = [_objectByState valueForKey:OEKeyForState([obj unsignedIntegerValue])];
-                if(state != OEThemeStateDefault) [self OE_setValue:results forState:state];
+                if(state != OEThemeStateDefault) [self OE_setValue:results forState:maskedState];
                 *stop = YES;
             }
          }];
 
-        if(results == nil) [self OE_setValue:[NSNull null] forState:state];
+        if(results == nil) [self OE_setValue:[NSNull null] forState:maskedState];
     }
 
     return (results == [NSNull null] ? nil : results);

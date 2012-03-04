@@ -7,7 +7,6 @@
 //
 
 #import "OEThemeButton.h"
-#import "OEThemeImage.h"
 
 @interface OEThemeButton ()
 
@@ -17,11 +16,6 @@
 @end
 
 @implementation OEThemeButton
-
-- (BOOL)isFlipped
-{
-    return YES;
-}
 
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow
 {
@@ -33,8 +27,8 @@
         [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:[self window]];
     }
 
-    OEImageButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEImageButtonCell class]] && newWindow && [[cell backgroundThemeImage] stateMask] & OEThemeStateAnyWindowActivityMask)
+    OEThemeButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEThemeButtonCell class]] && newWindow && [[cell backgroundThemeImage] stateMask] & OEThemeStateAnyWindowActivityMask)
     {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidBecomeMainNotification object:newWindow];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidResignMainNotification object:newWindow];
@@ -50,10 +44,10 @@
 - (void)updateTrackingAreas
 {
     if(_mouseTrackingArea) [self removeTrackingArea:_mouseTrackingArea];
-    OEImageButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEImageButtonCell class]] && [[cell backgroundThemeImage] stateMask] & OEThemeStateAnyMouseMask)
+    OEThemeButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEThemeButtonCell class]] && [[cell backgroundThemeImage] stateMask] & OEThemeStateAnyMouseMask)
     {
-        _mouseTrackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp|NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
+        _mouseTrackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
         [self addTrackingArea:_mouseTrackingArea];
     }
 }
@@ -75,16 +69,18 @@
 
 - (void)OE_updateNotifications
 {
-    OEImageButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEImageButtonCell class]])
+    OEThemeButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEThemeButtonCell class]])
     {
-        OEThemeImage *backgroundThemeImage = [cell backgroundThemeImage];
-        NSUInteger stateMask = [backgroundThemeImage stateMask];
+        OEThemeImage          *backgroundThemeImage = [cell backgroundThemeImage];
+        OEThemeTextAttributes *themeTextAttributes  = [cell themeTextAttributes];
 
-        BOOL updateWindowActivity = (_stateMask & OEThemeStateAnyWindowActivityMask) != (stateMask & OEThemeStateAnyWindowActivityMask);
-        BOOL updateMouseActivity  = (_stateMask & OEThemeStateAnyMouseMask)          != (stateMask & OEThemeStateAnyMouseMask);
+        NSUInteger stateMask = [backgroundThemeImage stateMask] | [themeTextAttributes stateMask];
 
-        _stateMask = stateMask;
+        BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivityMask) != (stateMask & OEThemeStateAnyWindowActivityMask);
+        BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouseMask)          != (stateMask & OEThemeStateAnyMouseMask);
+
+        _cachedStateMask = stateMask;
         if(updateWindowActivity)
         {
             [self viewWillMoveToWindow:[self window]];
@@ -104,10 +100,15 @@
     [self setBackgroundThemeImage:[[OETheme sharedTheme] themeImageForKey:key]];
 }
 
+- (void)setThemeTextAttributesKey:(NSString *)key
+{
+    [self setThemeTextAttributes:[[OETheme sharedTheme] themeTextAttributesForKey:key]];
+}
+
 - (void)setBackgroundThemeImage:(OEThemeImage *)backgroundThemeImage
 {
-    OEImageButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEImageButtonCell class]])
+    OEThemeButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEThemeButtonCell class]])
     {
         [cell setBackgroundThemeImage:backgroundThemeImage];
         [self OE_updateNotifications];
@@ -117,8 +118,25 @@
 
 - (OEThemeImage *)backgroundThemeImage
 {
-    OEImageButtonCell *cell = [self cell];
-    return ([cell isKindOfClass:[OEImageButtonCell class]] ? [cell backgroundThemeImage] : nil);
+    OEThemeButtonCell *cell = [self cell];
+    return ([cell isKindOfClass:[OEThemeButtonCell class]] ? [cell backgroundThemeImage] : nil);
+}
+
+- (void)setThemeTextAttributes:(OEThemeTextAttributes *)themeTextAttributes
+{
+    OEThemeButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEThemeButtonCell class]])
+    {
+        [cell setThemeTextAttributes:themeTextAttributes];
+        [self OE_updateNotifications];
+        [self setNeedsDisplay];
+    }
+}
+
+- (OEThemeTextAttributes *)themeTextAttributes
+{
+    OEThemeButtonCell *cell = [self cell];
+    return ([cell isKindOfClass:[OEThemeButtonCell class]] ? [cell themeTextAttributes] : nil);
 }
 
 - (void)setCell:(NSCell *)aCell
@@ -131,48 +149,76 @@
 
 #pragma mark -
 
-@implementation OEImageButtonCell
+@implementation OEThemeButtonCell
 
 @synthesize backgroundThemeImage = _backgroundThemeImage;
+@synthesize themeTextAttributes = _themeTextAttributes;
 
-- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
-{
-    if(_backgroundThemeImage == nil) return;
-
-    const OEThemeState state      = [self currentState];
-    const NSRect       sourceRect = [self imageRectForButtonState:state];
-    const NSRect       targetRect = cellFrame;
-
-    [[_backgroundThemeImage imageForState:state] drawInRect:targetRect fromRect:sourceRect operation:NSCompositeSourceOver fraction:1.0];
-}
-
-- (OEThemeState)currentState
+- (OEThemeState)OE_currentState
 {
     OEThemeButton *button = (OEThemeButton *)[self controlView];
     if(![button isKindOfClass:[OEThemeButton class]]) return OEThemeStateDefault;
 
     NSWindow   *window       = [[self controlView] window];
     const BOOL  focused      = [window firstResponder] == [self controlView];
-    const BOOL  windowActive = (button->_stateMask & OEThemeStateAnyWindowActivityMask) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
+    const BOOL  windowActive = (button->_cachedStateMask & OEThemeStateAnyWindowActivityMask) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
     BOOL        hover        = NO;
 
-    if(button->_stateMask & OEThemeStateAnyMouseMask)
+    if(button->_cachedStateMask & OEThemeStateAnyMouseMask)
     {
         const NSPoint p = [[self controlView] convertPointFromBase:[window convertScreenToBase:[NSEvent mouseLocation]]];
         hover           = NSPointInRect(p, [[self controlView] bounds]);
     }
 
-    return [OEThemeObject themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:hover] & [_backgroundThemeImage stateMask];;
+    return [OEThemeObject themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:hover];
 }
 
-- (NSRect)imageRectForButtonState:(OEThemeState)state
+- (NSDictionary *)OE_attributesForState:(OEThemeState)state
 {
-    return NSZeroRect;
+    if(!_themeTextAttributes) return nil;
+    if(!_style) _style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+
+    NSDictionary *attributes = [_themeTextAttributes textAttributesForState:state];
+    if(![attributes objectForKey:NSParagraphStyleAttributeName])
+    {
+        [_style setLineBreakMode:([self wraps] ? NSLineBreakByWordWrapping : NSLineBreakByClipping)];
+        [_style setAlignment:[self alignment]];
+
+        NSMutableDictionary *newAttributes = [attributes mutableCopy];
+        [newAttributes setValue:_style forKey:NSParagraphStyleAttributeName];
+        attributes = [newAttributes copy];
+    }
+
+    return attributes;
 }
 
-- (BOOL)respondsToStateChangesForMask:(OEThemeState)mask
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    return YES;
+    if(_backgroundThemeImage == nil)
+    {
+        [super drawWithFrame:cellFrame inView:controlView];
+    }
+    else
+    {
+        const OEThemeState state      = [self OE_currentState];
+        const NSRect       targetRect = cellFrame;
+
+        [[_backgroundThemeImage imageForState:state] drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [self drawInteriorWithFrame:[self drawingRectForBounds:cellFrame] inView:controlView];
+    }
+}
+
+- (NSAttributedString *)attributedTitle
+{
+    if(_themeTextAttributes == nil)
+    {
+        return [super attributedTitle];
+    }
+    else
+    {
+        NSDictionary *attributes = [self OE_attributesForState:[self OE_currentState]];
+        return (!attributes ? [super attributedTitle] : [[NSAttributedString alloc] initWithString:[self title] attributes:attributes]);
+    }
 }
 
 @end
