@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeItemStates.h"
+#import "OEThemeObject.h"
 
-@interface OEThemeGradientStates : OEThemeItemStates
+@interface OEThemeGradient : OEThemeObject
 
 - (NSGradient *)gradientForState:(OEThemeState)state;
 

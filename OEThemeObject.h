@@ -39,16 +39,16 @@ enum
     OEThemeStateDefaultMask           = 0xFFFF,
 };
 
-extern NSString * const OEThemeItemStatesAttributeName;
-extern NSString * const OEThemeItemValueAttributeName;
+extern NSString * const OEThemeObjectStatesAttributeName;
+extern NSString * const OEThemeObjectValueAttributeName;
 
 extern NSString     *NSStringFromThemeState(OEThemeState state);
 extern OEThemeState  OEThemeStateFromString(NSString *state);
 
-@interface OEThemeItemStates : NSObject
+@interface OEThemeObject : NSObject
 {
 @private
-    NSMutableDictionary *_itemByState;
+    NSMutableDictionary *_objectByState;
     NSMutableArray *_states;
 }
 
@@ -57,7 +57,7 @@ extern OEThemeState  OEThemeStateFromString(NSString *state);
 
 + (OEThemeState)themeStateWithWindowActive:(BOOL)windowActive buttonState:(NSInteger)state selected:(BOOL)selected enabled:(BOOL)enabled focused:(BOOL)focused houseHover:(BOOL)hover;
 
-- (id)itemForState:(OEThemeState)state;
+- (id)objectForState:(OEThemeState)state;
 
 - (void)setInContext:(CGContextRef)ctx withState:(OEThemeState)state;
 - (void)setWithState:(OEThemeState)state;

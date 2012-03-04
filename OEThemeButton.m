@@ -33,7 +33,7 @@
     }
 
     OEImageButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEImageButtonCell class]] && newWindow && [[cell imageStates] stateMask] & OEThemeStateAnyWindowActivityMask)
+    if([cell isKindOfClass:[OEImageButtonCell class]] && newWindow && [[cell backgroundThemeImage] stateMask] & OEThemeStateAnyWindowActivityMask)
     {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidBecomeMainNotification object:newWindow];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidResignMainNotification object:newWindow];
@@ -50,7 +50,7 @@
 {
     if(_mouseTrackingArea) [self removeTrackingArea:_mouseTrackingArea];
     OEImageButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEImageButtonCell class]] && [[cell imageStates] stateMask] & OEThemeStateAnyMouseMask)
+    if([cell isKindOfClass:[OEImageButtonCell class]] && [[cell backgroundThemeImage] stateMask] & OEThemeStateAnyMouseMask)
     {
         _mouseTrackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp|NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
         [self addTrackingArea:_mouseTrackingArea];
@@ -77,8 +77,8 @@
     OEImageButtonCell *cell = [self cell];
     if([cell isKindOfClass:[OEImageButtonCell class]])
     {
-        OEThemeImageStates *imageStates = [cell imageStates];
-        NSUInteger stateMask = [imageStates stateMask];
+        OEThemeImage *backgroundThemeImage = [cell backgroundThemeImage];
+        NSUInteger stateMask = [backgroundThemeImage stateMask];
 
         BOOL updateWindowActivity = (_stateMask & OEThemeStateAnyWindowActivityMask) != (stateMask & OEThemeStateAnyWindowActivityMask);
         BOOL updateMouseActivity  = (_stateMask & OEThemeStateAnyMouseMask)          != (stateMask & OEThemeStateAnyMouseMask);
@@ -98,26 +98,26 @@
     }
 }
 
-- (void)setImageStates:(OEThemeImageStates *)imageStates
+- (void)setBackgroundThemeImageKey:(NSString *)key
+{
+    [self setBackgroundThemeImage:[[OETheme sharedTheme] themeImageForKey:key]];
+}
+
+- (void)setBackgroundThemeImage:(OEThemeImage *)backgroundThemeImage
 {
     OEImageButtonCell *cell = [self cell];
     if([cell isKindOfClass:[OEImageButtonCell class]])
     {
-        [cell setImageStates:imageStates];
+        [cell setBackgroundThemeImage:backgroundThemeImage];
         [self OE_updateNotifications];
         [self setNeedsDisplay];
     }
 }
 
-- (void)setImageStatesThemeKey:(NSString *)key
-{
-    [self setImageStates:[[OETheme sharedTheme] imageStatesForKey:key]];
-}
-
-- (OEThemeImageStates *)imageStates
+- (OEThemeImage *)backgroundThemeImage
 {
     OEImageButtonCell *cell = [self cell];
-    return ([cell isKindOfClass:[OEImageButtonCell class]] ? [cell imageStates] : nil);
+    return ([cell isKindOfClass:[OEImageButtonCell class]] ? [cell backgroundThemeImage] : nil);
 }
 
 - (void)setCell:(NSCell *)aCell
@@ -132,17 +132,17 @@
 
 @implementation OEImageButtonCell
 
-@synthesize imageStates = _imageStates;
+@synthesize backgroundThemeImage = _backgroundThemeImage;
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    if(_imageStates == nil) return;
+    if(_backgroundThemeImage == nil) return;
 
     const OEThemeState state      = [self currentState];
     const NSRect       sourceRect = [self imageRectForButtonState:state];
     const NSRect       targetRect = cellFrame;
 
-    [[_imageStates imageForState:state] drawInRect:targetRect fromRect:sourceRect operation:NSCompositeSourceOver fraction:1.0];
+    [[_backgroundThemeImage imageForState:state] drawInRect:targetRect fromRect:sourceRect operation:NSCompositeSourceOver fraction:1.0];
 }
 
 - (OEThemeState)currentState
@@ -161,7 +161,7 @@
         hover           = NSPointInRect(p, [[self controlView] bounds]);
     }
 
-    return [OEThemeItemStates themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:hover] & [_imageStates stateMask];;
+    return [OEThemeObject themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:hover] & [_backgroundThemeImage stateMask];;
 }
 
 - (NSRect)imageRectForButtonState:(OEThemeState)state

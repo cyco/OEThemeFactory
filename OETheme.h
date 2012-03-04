@@ -7,13 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "OEThemeItemStates.h"
-#import "OEThemeColorStates.h"
-#import "OEThemeFontStates.h"
-#import "OEThemeImageStates.h"
-#import "OEThemeGradientStates.h"
+#import "OEThemeObject.h"
+#import "OEThemeColor.h"
+#import "OEThemeTextAttributes.h"
+#import "OEThemeImage.h"
+#import "OEThemeGradient.h"
 
-@class OEThemeItemStates;
+@class OEThemeObject;
 
 @interface OETheme : NSObject
 {
@@ -23,19 +23,19 @@
 
 + (id)sharedTheme;
 
-- (OEThemeColorStates *)colorStatesForKey:(NSString *)key;
+- (OEThemeColor *)themeColorForKey:(NSString *)key;
 - (NSColor *)colorForKey:(NSString *)key forState:(OEThemeState)state;
 
-- (OEThemeFontStates *)fontStatesForKey:(NSString *)key;
-- (OEThemeFont *)themeFontForKey:(NSString *)key forState:(OEThemeState)state;
+- (OEThemeTextAttributes *)themeTextAttributesForKey:(NSString *)key;
+- (OETextAttributes *)textAttributesForKey:(NSString *)key forState:(OEThemeState)state;
 - (NSFont *)fontForKey:(NSString *)key forState:(OEThemeState)state;
 - (NSColor *)fontColorForKey:(NSString *)key forState:(OEThemeState)state;
 - (NSShadow *)fontShadowForKey:(NSString *)key forState:(OEThemeState)state;
 
-- (OEThemeImageStates *)imageStatesForKey:(NSString *)key;
+- (OEThemeImage *)themeImageForKey:(NSString *)key;
 - (NSImage *)imageForKey:(NSString *)key forState:(OEThemeState)state;
 
-- (OEThemeGradientStates *)gradientStatesForKey:(NSString *)key;
+- (OEThemeGradient *)themeGradientForKey:(NSString *)key;
 - (NSGradient *)gradientForKey:(NSString *)key forState:(OEThemeState)state;
 
 @end

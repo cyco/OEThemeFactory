@@ -8,7 +8,7 @@
 
 #import "OEAppDelegate.h"
 #import "OETheme.h"
-#import "OEThemeItemStates.h"
+#import "OEThemeObject.h"
 
 @implementation OEAppDelegate
 
@@ -19,10 +19,10 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    NSLog(@"%@", [[OETheme sharedTheme] colorStatesForKey:@"color1"]);
-    [_button1 setImageStatesThemeKey:@"image1"];
-    [_button2 setImageStatesThemeKey:@"image2"];
-    [_button3 setImageStatesThemeKey:@"image3"];
+    NSLog(@"%@", [[OETheme sharedTheme] themeColorForKey:@"color1"]);
+    [_button1 setBackgroundThemeImageKey:@"image1"];
+    [_button2 setBackgroundThemeImageKey:@"image2"];
+    [_button3 setBackgroundThemeImageKey:@"image3"];
 }
 
 @end

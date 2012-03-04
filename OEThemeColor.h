@@ -6,11 +6,11 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeItemStates.h"
+#import "OEThemeObject.h"
 
 extern NSColor *NSColorFromString(NSString *colorString);
 
-@interface OEThemeColorStates : OEThemeItemStates
+@interface OEThemeColor : OEThemeObject
 
 - (NSColor *)colorForState:(OEThemeState)state;
 

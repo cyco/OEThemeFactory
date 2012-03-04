@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "OETheme.h"
-#import "OEThemeItemStates.h"
+#import "OEThemeObject.h"
 
 @interface OEThemeButton : NSButton
 {
@@ -19,8 +19,8 @@
     NSTrackingArea *_mouseTrackingArea;
 }
 
-- (void)setImageStatesThemeKey:(NSString *)key;
-@property (nonatomic, retain) OEThemeImageStates *imageStates;
+- (void)setBackgroundThemeImageKey:(NSString *)key;
+@property (nonatomic, retain) OEThemeImage *backgroundThemeImage;
 
 @end
 
@@ -32,6 +32,6 @@
 - (NSRect)imageRectForButtonState:(OEThemeState)state;
 - (BOOL)respondsToStateChangesForMask:(OEThemeState)mask;
 
-@property (nonatomic, retain) OEThemeImageStates *imageStates;
+@property (nonatomic, retain) OEThemeImage *backgroundThemeImage;
 
 @end

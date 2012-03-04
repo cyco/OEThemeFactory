@@ -6,13 +6,13 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeGradientStates.h"
-#import "OEThemeColorStates.h"
+#import "OEThemeGradient.h"
+#import "OEThemeColor.h"
 
 static NSString * const OEThemeGradientLocationsAttributeName = @"Locations";
 static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
 
-@implementation OEThemeGradientStates
+@implementation OEThemeGradient
 
 + (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
 {
@@ -72,7 +72,7 @@ static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
 
 - (NSGradient *)gradientForState:(OEThemeState)state
 {
-    return (NSGradient *)[self itemForState:state];
+    return (NSGradient *)[self objectForState:state];
 }
 
 @end

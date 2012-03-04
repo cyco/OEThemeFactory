@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeItemStates.h"
+#import "OEThemeObject.h"
 
-NSString * const OEThemeItemStatesAttributeName = @"States";
-NSString * const OEThemeItemValueAttributeName  = @"Value";
+NSString * const OEThemeObjectStatesAttributeName = @"States";
+NSString * const OEThemeObjectValueAttributeName  = @"Value";
 
 static NSString * const OEThemeStateDefaultName        = @"Default";
 static NSString * const OEThemeStateWindowInactiveName = @"Window Inactive";
@@ -38,13 +38,13 @@ static inline NSString *OEKeyForState(OEThemeState state)
     return [NSString stringWithFormat:@"0x%04x", state];
 }
 
-@interface OEThemeItemStates ()
+@interface OEThemeObject ()
 
 - (void)OE_setValue:(id)value forState:(OEThemeState)state;
 
 @end
 
-@implementation OEThemeItemStates
+@implementation OEThemeObject
 
 @synthesize stateMask = _stateMask;
 
@@ -52,16 +52,16 @@ static inline NSString *OEKeyForState(OEThemeState state)
 {
     if((self = [super init]))
     {
-        _states      = [[NSMutableArray alloc] init];
-        _itemByState = [[NSMutableDictionary alloc] init];
+        _states       = [[NSMutableArray alloc] init];
+        _objectByState = [[NSMutableDictionary alloc] init];
 
         if([definition isKindOfClass:[NSDictionary class]])
         {
             NSMutableDictionary *rootDefinition = [definition mutableCopy];
-            [rootDefinition removeObjectForKey:OEThemeItemStatesAttributeName];
+            [rootDefinition removeObjectForKey:OEThemeObjectStatesAttributeName];
             [self OE_setValue:[isa parseWithDefinition:rootDefinition inheritedDefinition:nil] forState:OEThemeStateDefault];
 
-            NSDictionary *states = [definition valueForKey:OEThemeItemStatesAttributeName];
+            NSDictionary *states = [definition valueForKey:OEThemeObjectStatesAttributeName];
             if([states isKindOfClass:[NSDictionary class]])
             {
                 [states enumerateKeysAndObjectsUsingBlock:
@@ -112,7 +112,7 @@ static inline NSString *OEKeyForState(OEThemeState state)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: states = [%@]>", [self className], [[_itemByState allKeys] componentsJoinedByString:@", "]];
+    return [NSString stringWithFormat:@"<%@: states = [%@]>", [self className], [[_objectByState allKeys] componentsJoinedByString:@", "]];
 }
 
 - (void)OE_setValue:(id)value forState:(OEThemeState)state
@@ -132,21 +132,21 @@ static inline NSString *OEKeyForState(OEThemeState state)
 
     if(((index == 0) && (count == 0)) || ((index < count) && ![[_states objectAtIndex:index] isEqualToNumber:stateValue])) [_states insertObject:stateValue atIndex:index];
 
-    [_itemByState setValue:(value ?: [NSNull null]) forKey:OEKeyForState(state)];
+    [_objectByState setValue:(value ?: [NSNull null]) forKey:OEKeyForState(state)];
 }
 
-- (id)itemForState:(OEThemeState)state
+- (id)objectForState:(OEThemeState)state
 {
-    if(state == 0) return [_itemByState valueForKey:OEKeyForState(OEThemeStateDefault)];
+    if(state == 0) return [_objectByState valueForKey:OEKeyForState(OEThemeStateDefault)];
 
-    __block id results = [_itemByState valueForKey:OEKeyForState(state)];
+    __block id results = [_objectByState valueForKey:OEKeyForState(state)];
     if(results == nil)
     {
         [_states enumerateObjectsUsingBlock:
          ^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
             if(([obj unsignedIntegerValue] & state) == state)
             {
-                results = [_itemByState valueForKey:OEKeyForState([obj unsignedIntegerValue])];
+                results = [_objectByState valueForKey:OEKeyForState([obj unsignedIntegerValue])];
                 if(state != OEThemeStateDefault) [self OE_setValue:results forState:state];
                 *stop = YES;
             }

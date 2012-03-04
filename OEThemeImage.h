@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeItemStates.h"
+#import "OEThemeObject.h"
 
-@interface OEThemeImageStates : OEThemeItemStates
+@interface OEThemeImage : OEThemeObject
 
 - (NSImage *)imageForState:(OEThemeState)state;
 

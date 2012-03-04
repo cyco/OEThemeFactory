@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeFont.h"
-#import "OEThemeColorStates.h"
+#import "OETextAttributes.h"
+#import "OEThemeColor.h"
 
-@implementation OEThemeFont
+@implementation OETextAttributes
 
 @synthesize font = _font;
 @synthesize color = _color;

@@ -16,7 +16,7 @@ static NSString * const OEThemeGradientKey = @"Gradients";
 @interface OETheme ()
 
 - (NSDictionary *)OE_parseThemeSection:(NSDictionary *)section forThemeClass:(Class)class;
-- (OEThemeItemStates *)OE_itemForType:(NSString *)type forKey:(NSString *)key;
+- (OEThemeObject *)OE_itemForType:(NSString *)type forKey:(NSString *)key;
 
 @end
 
@@ -33,10 +33,10 @@ static NSString * const OEThemeGradientKey = @"Gradients";
         if(!dictionary) return nil;
 
         NSDictionary *classesBySection = [NSDictionary dictionaryWithObjectsAndKeys:
-                                          [OEThemeColorStates class], OEThemeColorKey,
-                                          [OEThemeFontStates class], OEThemeFontKey,
-                                          [OEThemeImageStates class], OEThemeImageKey,
-                                          [OEThemeGradientStates class], OEThemeGradientKey,
+                                          [OEThemeColor class], OEThemeColorKey,
+                                          [OEThemeTextAttributes class], OEThemeFontKey,
+                                          [OEThemeImage class], OEThemeImageKey,
+                                          [OEThemeGradient class], OEThemeGradientKey,
                                           nil];
 
         __block NSMutableDictionary *itemsByType = [NSMutableDictionary dictionary];
@@ -81,59 +81,59 @@ static NSString * const OEThemeGradientKey = @"Gradients";
     return [[_itemsByType valueForKey:type] valueForKey:key];
 }
 
-- (OEThemeColorStates *)colorStatesForKey:(NSString *)key
+- (OEThemeColor *)themeColorForKey:(NSString *)key
 {
-    return (OEThemeColorStates *)[self OE_itemForType:OEThemeColorKey forKey:key];
+    return (OEThemeColor *)[self OE_itemForType:OEThemeColorKey forKey:key];
 }
 
 - (NSColor *)colorForKey:(NSString *)key forState:(OEThemeState)state
 {
-    return [[self colorStatesForKey:key] colorForState:state];
+    return [[self themeColorForKey:key] colorForState:state];
 }
 
-- (OEThemeFontStates *)fontStatesForKey:(NSString *)key
+- (OEThemeTextAttributes *)themeTextAttributesForKey:(NSString *)key
 {
-    return (OEThemeFontStates *)[self OE_itemForType:OEThemeFontKey forKey:key];
+    return (OEThemeTextAttributes *)[self OE_itemForType:OEThemeFontKey forKey:key];
 }
 
-- (OEThemeFont *)themeFontForKey:(NSString *)key forState:(OEThemeState)state
+- (OETextAttributes *)textAttributesForKey:(NSString *)key forState:(OEThemeState)state
 {
-    return [[self fontStatesForKey:key] themeFontForState:state];
+    return [[self themeTextAttributesForKey:key] textAttributesForState:state];
 }
 
 - (NSFont *)fontForKey:(NSString *)key forState:(OEThemeState)state
 {
-    return [[self themeFontForKey:key forState:state] font];
+    return [[self textAttributesForKey:key forState:state] font];
 }
 
 - (NSColor *)fontColorForKey:(NSString *)key forState:(OEThemeState)state
 {
-    return [[self themeFontForKey:key forState:state] color];
+    return [[self textAttributesForKey:key forState:state] color];
 }
 
 - (NSShadow *)fontShadowForKey:(NSString *)key forState:(OEThemeState)state;
 {
-    return [[self themeFontForKey:key forState:state] shadow];
+    return [[self textAttributesForKey:key forState:state] shadow];
 }
 
-- (OEThemeImageStates *)imageStatesForKey:(NSString *)key
+- (OEThemeImage *)themeImageForKey:(NSString *)key
 {
-    return (OEThemeImageStates *)[self OE_itemForType:OEThemeImageKey forKey:key];
+    return (OEThemeImage *)[self OE_itemForType:OEThemeImageKey forKey:key];
 }
 
 - (NSImage *)imageForKey:(NSString *)key forState:(OEThemeState)state
 {
-    return [[self imageStatesForKey:key] imageForState:state];
+    return [[self themeImageForKey:key] imageForState:state];
 }
 
-- (OEThemeGradientStates *)gradientStatesForKey:(NSString *)key
+- (OEThemeGradient *)themeGradientForKey:(NSString *)key
 {
-    return (OEThemeGradientStates *)[self OE_itemForType:OEThemeGradientKey forKey:key];
+    return (OEThemeGradient *)[self OE_itemForType:OEThemeGradientKey forKey:key];
 }
 
 - (NSGradient *)gradientForKey:(NSString *)key forState:(OEThemeState)state
 {
-    return [[self gradientStatesForKey:key] gradientForState:state];
+    return [[self themeGradientForKey:key] gradientForState:state];
 }
 
 @end

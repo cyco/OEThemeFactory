@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
-		EF37DA4114FC3F110098A077 /* OEThemeImageStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImageStates.m */; };
-		EF910A27150240580071A0A8 /* OEThemeGradientStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradientStates.m */; };
+		EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImage.m */; };
+		EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradient.m */; };
 		EF910A6215025CA00071A0A8 /* OEThemeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A6115025CA00071A0A8 /* OEThemeButton.m */; };
 		EF910A68150266C90071A0A8 /* toolbar_view_buttons.png in Resources */ = {isa = PBXBuildFile; fileRef = EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */; };
 		EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */; };
@@ -21,22 +21,22 @@
 		EFD9BE3614FA3DB500397397 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = EFD9BE3414FA3DB500397397 /* MainMenu.xib */; };
 		EFD9BE3E14FA3DCB00397397 /* Theme.plist in Resources */ = {isa = PBXBuildFile; fileRef = EFD9BE3D14FA3DCB00397397 /* Theme.plist */; };
 		EFD9BE4114FA442900397397 /* OETheme.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE4014FA442900397397 /* OETheme.m */; };
-		EFD9BE4414FA49E700397397 /* OEThemeItemStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE4314FA49E700397397 /* OEThemeItemStates.m */; };
-		EFD9BE4714FA49F300397397 /* OEThemeColorStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE4614FA49F300397397 /* OEThemeColorStates.m */; };
-		EFD9BE5214FA823800397397 /* OEThemeFontStates.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE5114FA823800397397 /* OEThemeFontStates.m */; };
-		EFD9BE5514FA83A700397397 /* OEThemeFont.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE5414FA83A700397397 /* OEThemeFont.m */; };
+		EFD9BE4414FA49E700397397 /* OEThemeObject.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE4314FA49E700397397 /* OEThemeObject.m */; };
+		EFD9BE4714FA49F300397397 /* OEThemeColor.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE4614FA49F300397397 /* OEThemeColor.m */; };
+		EFD9BE5214FA823800397397 /* OEThemeTextAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE5114FA823800397397 /* OEThemeTextAttributes.m */; };
+		EFD9BE5514FA83A700397397 /* OETextAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE5414FA83A700397397 /* OETextAttributes.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSColor+OEAdditions.h"; path = "../NSColor+OEAdditions.h"; sourceTree = "<group>"; };
 		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSColor+OEAdditions.m"; path = "../NSColor+OEAdditions.m"; sourceTree = "<group>"; };
 		EF37DA3D14FC3E850098A077 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		EF37DA3F14FC3F110098A077 /* OEThemeImageStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeImageStates.h; sourceTree = "<group>"; };
-		EF37DA4014FC3F110098A077 /* OEThemeImageStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeImageStates.m; sourceTree = "<group>"; };
+		EF37DA3F14FC3F110098A077 /* OEThemeImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeImage.h; sourceTree = "<group>"; };
+		EF37DA4014FC3F110098A077 /* OEThemeImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeImage.m; sourceTree = "<group>"; };
 		EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSImage+OEDrawingAdditions.h"; path = "../NSImage+OEDrawingAdditions.h"; sourceTree = "<group>"; };
 		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSImage+OEDrawingAdditions.m"; path = "../NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
-		EF910A25150240580071A0A8 /* OEThemeGradientStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeGradientStates.h; sourceTree = "<group>"; };
-		EF910A26150240580071A0A8 /* OEThemeGradientStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeGradientStates.m; sourceTree = "<group>"; };
+		EF910A25150240580071A0A8 /* OEThemeGradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeGradient.h; sourceTree = "<group>"; };
+		EF910A26150240580071A0A8 /* OEThemeGradient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeGradient.m; sourceTree = "<group>"; };
 		EF910A6015025CA00071A0A8 /* OEThemeButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeButton.h; sourceTree = "<group>"; };
 		EF910A6115025CA00071A0A8 /* OEThemeButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeButton.m; sourceTree = "<group>"; };
 		EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toolbar_view_buttons.png; sourceTree = "<group>"; };
@@ -56,14 +56,14 @@
 		EFD9BE3D14FA3DCB00397397 /* Theme.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Theme.plist; sourceTree = "<group>"; };
 		EFD9BE3F14FA442900397397 /* OETheme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OETheme.h; sourceTree = "<group>"; };
 		EFD9BE4014FA442900397397 /* OETheme.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OETheme.m; sourceTree = "<group>"; };
-		EFD9BE4214FA49E700397397 /* OEThemeItemStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeItemStates.h; sourceTree = "<group>"; };
-		EFD9BE4314FA49E700397397 /* OEThemeItemStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeItemStates.m; sourceTree = "<group>"; };
-		EFD9BE4514FA49F300397397 /* OEThemeColorStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeColorStates.h; sourceTree = "<group>"; };
-		EFD9BE4614FA49F300397397 /* OEThemeColorStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeColorStates.m; sourceTree = "<group>"; };
-		EFD9BE5014FA823800397397 /* OEThemeFontStates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeFontStates.h; sourceTree = "<group>"; };
-		EFD9BE5114FA823800397397 /* OEThemeFontStates.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeFontStates.m; sourceTree = "<group>"; };
-		EFD9BE5314FA83A700397397 /* OEThemeFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeFont.h; sourceTree = "<group>"; };
-		EFD9BE5414FA83A700397397 /* OEThemeFont.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeFont.m; sourceTree = "<group>"; };
+		EFD9BE4214FA49E700397397 /* OEThemeObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeObject.h; sourceTree = "<group>"; };
+		EFD9BE4314FA49E700397397 /* OEThemeObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeObject.m; sourceTree = "<group>"; };
+		EFD9BE4514FA49F300397397 /* OEThemeColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeColor.h; sourceTree = "<group>"; };
+		EFD9BE4614FA49F300397397 /* OEThemeColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeColor.m; sourceTree = "<group>"; };
+		EFD9BE5014FA823800397397 /* OEThemeTextAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeTextAttributes.h; sourceTree = "<group>"; };
+		EFD9BE5114FA823800397397 /* OEThemeTextAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeTextAttributes.m; sourceTree = "<group>"; };
+		EFD9BE5314FA83A700397397 /* OETextAttributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OETextAttributes.h; sourceTree = "<group>"; };
+		EFD9BE5414FA83A700397397 /* OETextAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OETextAttributes.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,18 +151,18 @@
 				EFD9BE3D14FA3DCB00397397 /* Theme.plist */,
 				EFD9BE3F14FA442900397397 /* OETheme.h */,
 				EFD9BE4014FA442900397397 /* OETheme.m */,
-				EFD9BE4214FA49E700397397 /* OEThemeItemStates.h */,
-				EFD9BE4314FA49E700397397 /* OEThemeItemStates.m */,
-				EFD9BE4514FA49F300397397 /* OEThemeColorStates.h */,
-				EFD9BE4614FA49F300397397 /* OEThemeColorStates.m */,
-				EFD9BE5014FA823800397397 /* OEThemeFontStates.h */,
-				EFD9BE5114FA823800397397 /* OEThemeFontStates.m */,
-				EF37DA3F14FC3F110098A077 /* OEThemeImageStates.h */,
-				EF37DA4014FC3F110098A077 /* OEThemeImageStates.m */,
-				EF910A25150240580071A0A8 /* OEThemeGradientStates.h */,
-				EF910A26150240580071A0A8 /* OEThemeGradientStates.m */,
-				EFD9BE5314FA83A700397397 /* OEThemeFont.h */,
-				EFD9BE5414FA83A700397397 /* OEThemeFont.m */,
+				EFD9BE4214FA49E700397397 /* OEThemeObject.h */,
+				EFD9BE4314FA49E700397397 /* OEThemeObject.m */,
+				EFD9BE4514FA49F300397397 /* OEThemeColor.h */,
+				EFD9BE4614FA49F300397397 /* OEThemeColor.m */,
+				EFD9BE5014FA823800397397 /* OEThemeTextAttributes.h */,
+				EFD9BE5114FA823800397397 /* OEThemeTextAttributes.m */,
+				EF37DA3F14FC3F110098A077 /* OEThemeImage.h */,
+				EF37DA4014FC3F110098A077 /* OEThemeImage.m */,
+				EF910A25150240580071A0A8 /* OEThemeGradient.h */,
+				EF910A26150240580071A0A8 /* OEThemeGradient.m */,
+				EFD9BE5314FA83A700397397 /* OETextAttributes.h */,
+				EFD9BE5414FA83A700397397 /* OETextAttributes.m */,
 				EF910A6015025CA00071A0A8 /* OEThemeButton.h */,
 				EF910A6115025CA00071A0A8 /* OEThemeButton.m */,
 			);
@@ -238,12 +238,12 @@
 				EFD9BE2C14FA3DB500397397 /* main.m in Sources */,
 				EFD9BE3314FA3DB500397397 /* OEAppDelegate.m in Sources */,
 				EFD9BE4114FA442900397397 /* OETheme.m in Sources */,
-				EFD9BE4414FA49E700397397 /* OEThemeItemStates.m in Sources */,
-				EFD9BE4714FA49F300397397 /* OEThemeColorStates.m in Sources */,
-				EFD9BE5214FA823800397397 /* OEThemeFontStates.m in Sources */,
-				EFD9BE5514FA83A700397397 /* OEThemeFont.m in Sources */,
-				EF37DA4114FC3F110098A077 /* OEThemeImageStates.m in Sources */,
-				EF910A27150240580071A0A8 /* OEThemeGradientStates.m in Sources */,
+				EFD9BE4414FA49E700397397 /* OEThemeObject.m in Sources */,
+				EFD9BE4714FA49F300397397 /* OEThemeColor.m in Sources */,
+				EFD9BE5214FA823800397397 /* OEThemeTextAttributes.m in Sources */,
+				EFD9BE5514FA83A700397397 /* OETextAttributes.m in Sources */,
+				EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */,
+				EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */,
 				EF910A6215025CA00071A0A8 /* OEThemeButton.m in Sources */,
 				EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */,
 			);

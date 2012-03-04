@@ -6,14 +6,14 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeImageStates.h"
+#import "OEThemeImage.h"
 #import "NSImage+OEDrawingAdditions.h"
 
 static NSString * const OEThemeImageResourceAttributeName = @"Resource";
 static NSString * const OEThemeImagePartsAttributeName    = @"Parts";
 static NSString * const OEThemeImageVerticalAttributeName = @"Vertical";
 
-@implementation OEThemeImageStates
+@implementation OEThemeImage
 
 + (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
 {

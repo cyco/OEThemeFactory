@@ -6,11 +6,11 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeFontStates.h"
-#import "OEThemeFont.h"
+#import "OEThemeTextAttributes.h"
+#import "OETextAttributes.h"
 #import "NSColor+OEAdditions.h"
 
-@implementation OEThemeFontStates
+@implementation OEThemeTextAttributes
 
 + (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
 {
@@ -28,20 +28,20 @@
             newDefinition = [definition mutableCopy];
         }
 
-        result = [[OEThemeFont alloc] initWithDictionary:newDefinition];
+        result = [[OETextAttributes alloc] initWithDictionary:newDefinition];
     }
 
     return result;
 }
 
-- (OEThemeFont *)themeFontForState:(OEThemeState)state
+- (OETextAttributes *)textAttributesForState:(OEThemeState)state
 {
-    return (OEThemeFont *)[self itemForState:state];
+    return (OETextAttributes *)[self itemForState:state];
 }
 
 - (void)setInContext:(CGContextRef)ctx withState:(OEThemeState)state
 {
-    OEThemeFont *themeFont = [self themeFontForState:state];
+    OETextAttributes *themeFont = [self textAttributesForState:state];
     CGContextSetFont(ctx, (__bridge CGFontRef)[themeFont font]);
     CGContextSetFontSize(ctx, [[themeFont font] pointSize]);
     CGContextSetStrokeColorWithColor(ctx, [[themeFont color] CGColor]);
@@ -54,7 +54,7 @@
 
 - (void)setWithState:(OEThemeState)state
 {
-    OEThemeFont *themeFont = [self themeFontForState:state];
+    OETextAttributes *themeFont = [self textAttributesForState:state];
     [[themeFont font] set];
     [[themeFont color] set];
     [[themeFont shadow] set];
@@ -64,7 +64,7 @@
 {
     if([layer isKindOfClass:[CATextLayer class]])
     {
-        OEThemeFont *themeFont = [self themeFontForState:state];
+        OETextAttributes *themeFont = [self textAttributesForState:state];
         CATextLayer *textLayer = (CATextLayer*)layer;
         [textLayer setFont:(__bridge CFTypeRef)[themeFont font]];
         [textLayer setFontSize:[[themeFont font] pointSize]];

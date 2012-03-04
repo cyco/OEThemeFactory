@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface OEThemeFont : NSObject
+@interface OETextAttributes : NSObject
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 

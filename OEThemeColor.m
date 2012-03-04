@@ -6,16 +6,16 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeColorStates.h"
+#import "OEThemeColor.h"
 #import "NSColor+OEAdditions.h"
 
-@implementation OEThemeColorStates
+@implementation OEThemeColor
 
 + (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
 {
     id result = nil;
 
-    if([definition isKindOfClass:[NSDictionary class]])  result = NSColorFromString([definition valueForKey:OEThemeItemValueAttributeName]);
+    if([definition isKindOfClass:[NSDictionary class]])  result = NSColorFromString([definition valueForKey:OEThemeObjectValueAttributeName]);
     else if([definition isKindOfClass:[NSString class]]) result = NSColorFromString(definition);
 
     return result;
@@ -23,7 +23,7 @@
 
 - (NSColor *)colorForState:(OEThemeState)state
 {
-    return (NSColor *)[self itemForState:state];
+    return (NSColor *)[self objectForState:state];
 }
 
 - (void)setInContext:(CGContextRef)ctx withState:(OEThemeState)state
