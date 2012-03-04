@@ -26,6 +26,23 @@
 
 #import "NSImage+OEDrawingAdditions.h"
 
+@interface OENSThreePartImage : NSImage
+
+- (id)initWithImageParts:(NSArray *)imageParts vertical:(BOOL)vertical;
+
+@property (nonatomic, readonly) NSArray *parts;
+@property (nonatomic, readonly, getter = isVertical) BOOL vertical;
+
+@end
+
+@interface OENSNinePartImage : NSImage
+
+- (id)initWithImageParts:(NSArray *)imageParts;
+
+@property (nonatomic, readonly) NSArray *parts;
+
+@end
+
 @implementation NSImage (NSImage_OEDrawingAdditions)
 
 - (void)drawInRect:(NSRect)targetRect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(CGFloat)frac respectFlipped:(BOOL)flipped hints:(NSDictionary *)hints leftBorder:(float)leftBorder rightBorder:(float)rightBorder topBorder:(float)topBorder bottomBorder:(float)bottomBorder{
@@ -252,40 +269,113 @@
 {
     if(parts == nil || [parts count] == 0) return self;
 
-    NSImage        *result    = nil;
-    NSMutableArray *rectParts = [NSMutableArray arrayWithCapacity:[parts count]];
-    const NSSize    size      = [self size];
-    NSRect          rect;
+    const NSSize    size       = [self size];
+    NSMutableArray *imageParts = [NSMutableArray arrayWithCapacity:[parts count]];
+    NSUInteger      count      = 0;
 
-    for(id part in parts)
+    NSRect rect;
+    id     part;
+
+    if([parts count] >= 9)      count = 9;
+    else if([parts count] >= 3) count = 3;
+    else if([parts count] >= 1) count = 1;
+
+    for(NSUInteger i = 0; i < count; i++)
     {
         rect = NSZeroRect;
+        part = [parts objectAtIndex:i];
 
         if([part isKindOfClass:[NSString class]])     rect = NSRectFromString(part);
         else if([part isKindOfClass:[NSValue class]]) rect = [part rectValue];
         else                                          NSLog(@"Unable to parse NSRect from part: %@", part);
 
         // Flip coordinate system (if it is not already flipped)
-        if(![self isFlipped] && !NSIsEmptyRect(rect)) rect.origin.y = size.height - rect.origin.y - rect.size.height;
-
-        [rectParts addObject:[NSValue valueWithRect:rect]];
+        if(!NSIsEmptyRect(rect))
+        {
+            if(![self isFlipped]) rect.origin.y = size.height - rect.origin.y - rect.size.height;
+            [imageParts addObject:[self subImageFromRect:rect]];
+        }
+        else
+        {
+            [imageParts addObject:[NSNull null]];
+        }
     }
 
-    if([rectParts count] == 1)
-    {
-        NSRect sourceRect = [[rectParts objectAtIndex:0] rectValue];
-        if(!NSIsEmptyRect(sourceRect)) result = [self subImageFromRect:sourceRect];
-    }
-    else if([parts count] >= 9)
-    {
-        // TODO: return nine part image
-    }
-    else if([parts count] >= 3)
-    {
-        // TODO: return three part image
-    }
+    NSImage *result = nil;
+    if(count == 1)      result = [imageParts lastObject];
+    else if(count == 3) result = [[OENSThreePartImage alloc] initWithImageParts:imageParts vertical:vertical];
+    else if(count == 9) result = [[OENSNinePartImage alloc] initWithImageParts:imageParts];
 
     return result;
+}
+
+@end
+
+@implementation OENSThreePartImage
+
+@synthesize parts = _parts;
+@synthesize vertical = _vertical;
+
+- (id)initWithImageParts:(NSArray *)imageParts vertical:(BOOL)vertical
+{
+    if((self = [super init]))
+    {
+        _parts = [imageParts copy];
+        _vertical = vertical;
+    }
+
+    return self;
+}
+
+- (void)drawInRect:(NSRect)rect fromRect:(NSRect)fromRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta
+{
+    [self drawInRect:rect fromRect:fromRect operation:op fraction:delta respectFlipped:NO hints:nil];
+}
+
+- (void)drawInRect:(NSRect)dstSpacePortionRect fromRect:(NSRect)srcSpacePortionRect operation:(NSCompositingOperation)op fraction:(CGFloat)requestedAlpha respectFlipped:(BOOL)respectContextIsFlipped hints:(NSDictionary *)hints
+{
+    NSImage *startCap   = ([_parts objectAtIndex:0] == [NSNull null] ? nil : [_parts objectAtIndex:0]);
+    NSImage *centerFill = ([_parts objectAtIndex:1] == [NSNull null] ? nil : [_parts objectAtIndex:1]);
+    NSImage *endCap     = ([_parts objectAtIndex:2] == [NSNull null] ? nil : [_parts objectAtIndex:2]);
+
+    NSDrawThreePartImage(dstSpacePortionRect, startCap, centerFill, endCap, _vertical, op, requestedAlpha, respectContextIsFlipped);
+}
+
+@end
+
+@implementation OENSNinePartImage
+
+@synthesize parts = _parts;
+
+- (id)initWithImageParts:(NSArray *)imageParts
+{
+    if((self = [super init]))
+    {
+        _parts = [imageParts copy];
+    }
+
+    return self;
+}
+
+
+- (void)drawInRect:(NSRect)rect fromRect:(NSRect)fromRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta
+{
+    [self drawInRect:rect fromRect:fromRect operation:op fraction:delta respectFlipped:NO hints:nil];
+}
+
+- (void)drawInRect:(NSRect)dstSpacePortionRect fromRect:(NSRect)srcSpacePortionRect operation:(NSCompositingOperation)op fraction:(CGFloat)requestedAlpha respectFlipped:(BOOL)respectContextIsFlipped hints:(NSDictionary *)hints
+{
+    NSImage *topLeftCorner     = ([_parts objectAtIndex:0] == [NSNull null] ? nil : [_parts objectAtIndex:0]);
+    NSImage *topEdgeFill       = ([_parts objectAtIndex:1] == [NSNull null] ? nil : [_parts objectAtIndex:1]);
+    NSImage *topRightCorner    = ([_parts objectAtIndex:2] == [NSNull null] ? nil : [_parts objectAtIndex:2]);
+    NSImage *leftEdgeFill      = ([_parts objectAtIndex:3] == [NSNull null] ? nil : [_parts objectAtIndex:3]);
+    NSImage *centerFill        = ([_parts objectAtIndex:4] == [NSNull null] ? nil : [_parts objectAtIndex:4]);
+    NSImage *rightEdgeFill     = ([_parts objectAtIndex:5] == [NSNull null] ? nil : [_parts objectAtIndex:5]);
+    NSImage *bottomLeftCorner  = ([_parts objectAtIndex:6] == [NSNull null] ? nil : [_parts objectAtIndex:6]);
+    NSImage *bottomEdgeFill    = ([_parts objectAtIndex:7] == [NSNull null] ? nil : [_parts objectAtIndex:7]);
+    NSImage *bottomRightCorner = ([_parts objectAtIndex:8] == [NSNull null] ? nil : [_parts objectAtIndex:8]);
+
+    NSDrawNinePartImage(dstSpacePortionRect, topLeftCorner, topEdgeFill, topRightCorner, leftEdgeFill, centerFill, rightEdgeFill, bottomLeftCorner, bottomEdgeFill, bottomRightCorner, op, requestedAlpha, respectContextIsFlipped);
 }
 
 @end
