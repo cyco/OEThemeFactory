@@ -27,7 +27,6 @@
 #import "NSImage+OEDrawingAdditions.h"
 
 @implementation NSImage (NSImage_OEDrawingAdditions)
-static NSMutableArray* interfaceImages;
 
 - (void)drawInRect:(NSRect)targetRect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(CGFloat)frac respectFlipped:(BOOL)flipped hints:(NSDictionary *)hints leftBorder:(float)leftBorder rightBorder:(float)rightBorder topBorder:(float)topBorder bottomBorder:(float)bottomBorder{
 
@@ -240,8 +239,8 @@ static NSMutableArray* interfaceImages;
 
 - (void)setName:(NSString*)name forSubimageInRect:(NSRect)aRect
 {
-    if(!interfaceImages)
-        interfaceImages = [[NSMutableArray alloc] init];
+    static NSMutableArray *interfaceImages;
+    if(!interfaceImages) interfaceImages = [[NSMutableArray alloc] init];
 
     NSImage *resultImage = [self subImageFromRect:aRect];
     [resultImage setName:name];
