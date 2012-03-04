@@ -33,6 +33,22 @@
 				</dict>
 			</dict>
 		</dict>
+		<key>weblink_arrow</key>
+		<dict>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Foreground Color</key>
+					<string>rgb(204,204,204)</string>
+				</dict>
+				<key>Mouse Over</key>
+				<dict>
+					<key>Foreground Color</key>
+					<string>white</string>
+				</dict>
+			</dict>
+		</dict>
 	</dict>
 	<key>Images</key>
 	<dict>
@@ -270,6 +286,28 @@
 				</dict>
 			</dict>
 		</dict>
+		<key>weblink_arrow</key>
+		<dict>
+			<key>Resource</key>
+			<string>open_weblink_arrow</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,20},{20,20}}</string>
+					</array>
+				</dict>
+				<key>Mouse Over</key>
+				<dict>
+					<key>Parts</key>
+					<array>
+						<string>{{0,40},{20,20}}</string>
+					</array>
+				</dict>
+			</dict>
+		</dict>
 	</dict>
 	<key>Gradients</key>
 	<dict>
@@ -297,14 +335,16 @@
 					<key>Locations</key>
 					<array>
 						<integer>0</integer>
-						<real>0.5</real>
-						<real>1</real>
+						<real>0.25</real>
+						<string>0.75</string>
+						<integer>1</integer>
 					</array>
 					<key>Colors</key>
 					<array>
-						<string>gray</string>
+						<string>blue</string>
 						<string>pink</string>
-						<string>yellow</string>
+						<string>pink</string>
+						<string>green</string>
 					</array>
 				</dict>
 			</dict>

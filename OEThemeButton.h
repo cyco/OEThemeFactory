@@ -22,9 +22,11 @@
 }
 
 - (void)setBackgroundThemeImageKey:(NSString *)key;
+- (void)setThemeImageKey:(NSString *)key;
 - (void)setThemeTextAttributesKey:(NSString *)key;
 
 @property (nonatomic, retain) OEThemeImage *backgroundThemeImage;
+@property (nonatomic, retain) OEThemeImage *themeImage;
 @property (nonatomic, retain) OEThemeTextAttributes *themeTextAttributes;
 
 @end
@@ -38,6 +40,7 @@
 }
 
 @property (nonatomic, retain) OEThemeImage *backgroundThemeImage;
+@property (nonatomic, retain) OEThemeImage *themeImage;
 @property (nonatomic, retain) OEThemeTextAttributes *themeTextAttributes;
 
 @end

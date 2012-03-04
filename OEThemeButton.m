@@ -73,9 +73,10 @@
     if([cell isKindOfClass:[OEThemeButtonCell class]])
     {
         OEThemeImage          *backgroundThemeImage = [cell backgroundThemeImage];
+        OEThemeImage          *themeImage           = [cell themeImage];
         OEThemeTextAttributes *themeTextAttributes  = [cell themeTextAttributes];
 
-        NSUInteger stateMask = [backgroundThemeImage stateMask] | [themeTextAttributes stateMask];
+        NSUInteger stateMask = [backgroundThemeImage stateMask] | [themeImage stateMask] | [themeTextAttributes stateMask];
 
         BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivityMask) != (stateMask & OEThemeStateAnyWindowActivityMask);
         BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouseMask)          != (stateMask & OEThemeStateAnyMouseMask);
@@ -100,6 +101,11 @@
     [self setBackgroundThemeImage:[[OETheme sharedTheme] themeImageForKey:key]];
 }
 
+- (void)setThemeImageKey:(NSString *)key
+{
+    [self setThemeImage:[[OETheme sharedTheme] themeImageForKey:key]];
+}
+
 - (void)setThemeTextAttributesKey:(NSString *)key
 {
     [self setThemeTextAttributes:[[OETheme sharedTheme] themeTextAttributesForKey:key]];
@@ -120,6 +126,23 @@
 {
     OEThemeButtonCell *cell = [self cell];
     return ([cell isKindOfClass:[OEThemeButtonCell class]] ? [cell backgroundThemeImage] : nil);
+}
+
+- (void)setThemeImage:(OEThemeImage *)themeImage
+{
+    OEThemeButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEThemeButtonCell class]])
+    {
+        [cell setThemeImage:themeImage];
+        [self OE_updateNotifications];
+        [self setNeedsDisplay];
+    }
+}
+
+- (OEThemeImage *)themeImage
+{
+    OEThemeButtonCell *cell = [self cell];
+    return ([cell isKindOfClass:[OEThemeButtonCell class]] ? [cell themeImage] : nil);
 }
 
 - (void)setThemeTextAttributes:(OEThemeTextAttributes *)themeTextAttributes
@@ -152,6 +175,7 @@
 @implementation OEThemeButtonCell
 
 @synthesize backgroundThemeImage = _backgroundThemeImage;
+@synthesize themeImage = _themeImage;
 @synthesize themeTextAttributes = _themeTextAttributes;
 
 - (OEThemeState)OE_currentState
@@ -205,6 +229,26 @@
 
         [[_backgroundThemeImage imageForState:state] drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [self drawInteriorWithFrame:[self drawingRectForBounds:cellFrame] inView:controlView];
+    }
+}
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
+{
+    NSRect imageRect = [self imageRectForBounds:cellFrame];
+    NSRect textRect  = [self titleRectForBounds:cellFrame];
+    [[self attributedTitle] drawInRect:textRect];
+    [[self image] drawAtPoint:imageRect.origin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+}
+
+- (NSImage *)image
+{
+    if(_themeImage == nil)
+    {
+        return [super image];
+    }
+    else
+    {
+        return [_themeImage imageForState:[self OE_currentState]];
     }
 }
 
