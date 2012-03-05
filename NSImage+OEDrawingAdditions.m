@@ -30,8 +30,8 @@
 
 - (id)initWithImageParts:(NSArray *)imageParts vertical:(BOOL)vertical;
 
-@property (nonatomic, readonly) NSArray *parts;
-@property (nonatomic, readonly, getter = isVertical) BOOL vertical;
+@property(nonatomic, readonly, retain) NSArray *parts;
+@property(nonatomic, readonly, getter = isVertical) BOOL vertical;
 
 @end
 
@@ -39,7 +39,7 @@
 
 - (id)initWithImageParts:(NSArray *)imageParts;
 
-@property (nonatomic, readonly) NSArray *parts;
+@property(nonatomic, readonly, retain) NSArray *parts;
 
 @end
 
