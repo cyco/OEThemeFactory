@@ -11,9 +11,9 @@
 NSString * const OEThemeObjectStatesAttributeName         = @"States";
 NSString * const OEThemeObjectValueAttributeName          = @"Value";
 
-static inline NSString *OEKeyForState(OEThemeState state)
+static inline id OEKeyForState(OEThemeState state)
 {
-    return [NSString stringWithFormat:@"0x%04x", state];
+    return [NSNumber numberWithUnsignedInteger:state];
 }
 
 @interface OEThemeObject ()
@@ -35,15 +35,17 @@ static inline NSString *OEKeyForState(OEThemeState state)
 
         if([definition isKindOfClass:[NSDictionary class]])
         {
+            // Create a root definition that is inherited by the sttes specified
             NSMutableDictionary *rootDefinition = [definition mutableCopy];
             [rootDefinition removeObjectForKey:OEThemeObjectStatesAttributeName];
             [self OE_setValue:[isa parseWithDefinition:rootDefinition inheritedDefinition:nil] forState:OEThemeStateDefault];
 
+            // Iterate through each of the state descriptions and create a state table
             NSDictionary *states = [definition valueForKey:OEThemeObjectStatesAttributeName];
             if([states isKindOfClass:[NSDictionary class]])
             {
                 [states enumerateKeysAndObjectsUsingBlock:
-                 ^(id key, id obj, BOOL *stop)
+                 ^ (id key, id obj, BOOL *stop)
                  {
                      NSString     *trimmedKey = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                      OEThemeState  state      = ([trimmedKey length] == 0 ? OEThemeStateDefault : OEThemeStateFromString(trimmedKey));
@@ -56,12 +58,40 @@ static inline NSString *OEKeyForState(OEThemeState state)
 
             if(_stateMask != OEThemeStateDefault)
             {
+                // Accumulate the bit-mask that all the state's cover
                 if(_stateMask & OEThemeStateAnyWindowActivityMask) _stateMask |= OEThemeStateAnyWindowActivityMask;
                 if(_stateMask & OEThemeStateAnyStateMask)          _stateMask |= OEThemeStateAnyStateMask;
                 if(_stateMask & OEThemeStateAnySelectionMask)      _stateMask |= OEThemeStateAnySelectionMask;
                 if(_stateMask & OEThemeStateAnyInteractionMask)    _stateMask |= OEThemeStateAnyInteractionMask;
                 if(_stateMask & OEThemeStateAnyFocusMask)          _stateMask |= OEThemeStateAnyFocusMask;
                 if(_stateMask & OEThemeStateAnyMouseMask)          _stateMask |= OEThemeStateAnyMouseMask;
+
+                // Iterate through each state to determine if unspecified inputs should be discarded
+                __block BOOL updateStates = FALSE;
+                [_states enumerateObjectsUsingBlock:
+                 ^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
+                     NSUInteger state = [obj unsignedIntegerValue];
+                     if(state != OEThemeStateDefault)
+                     {
+                         if(!(state & OEThemeStateAnyWindowActivityMask)) state |= OEThemeStateAnyWindowActivityMask;
+                         if(!(state & OEThemeStateAnyStateMask))          state |= OEThemeStateAnyStateMask;
+                         if(!(state & OEThemeStateAnySelectionMask))      state |= OEThemeStateAnySelectionMask;
+                         if(!(state & OEThemeStateAnyInteractionMask))    state |= OEThemeStateAnyInteractionMask;
+                         if(!(state & OEThemeStateAnyFocusMask))          state |= OEThemeStateAnyFocusMask;
+                         if(!(state & OEThemeStateAnyMouseMask))          state |= OEThemeStateAnyMouseMask;
+
+                         state &= _stateMask;
+
+                         if(state != [obj unsignedIntegerValue])
+                         {
+                             [_objectByState setValue:[_objectByState objectForKey:obj] forKey:OEKeyForState(state)];
+                             [_objectByState removeObjectForKey:obj];
+                             updateStates = YES;
+                         }
+                     }
+                 }];
+
+                if(updateStates) _states = [[[_objectByState allKeys] sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
             }
         }
         else
@@ -119,18 +149,18 @@ static inline NSString *OEKeyForState(OEThemeState state)
     __block id results = nil;
     if(maskedState == 0)
     {
-        results = [_objectByState valueForKey:OEKeyForState(OEThemeStateDefault)];
+        results = [_objectByState objectForKey:OEKeyForState(OEThemeStateDefault)];
     }
     else
     {
-        results = [_objectByState valueForKey:OEKeyForState(maskedState)];
+        results = [_objectByState objectForKey:OEKeyForState(maskedState)];
         if(results == nil)
         {
             [_states enumerateObjectsUsingBlock:
              ^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
                 if(([obj unsignedIntegerValue] & maskedState) == maskedState)
                 {
-                    results = [_objectByState valueForKey:OEKeyForState([obj unsignedIntegerValue])];
+                    results = [_objectByState objectForKey:OEKeyForState([obj unsignedIntegerValue])];
                     if(state != OEThemeStateDefault) [self OE_setValue:results forState:maskedState];
                     *stop = YES;
                 }
