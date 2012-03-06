@@ -8,22 +8,33 @@
 
 #import <Foundation/Foundation.h>
 
+/*
+ The following available state inputs that a state mask is composed of:
+ - Window Activity
+ - Toggle State
+ - Pressed State
+ - Interaction State
+ - Mouse State
+
+ When all 5 state inputs are either zero's (0x0000) or ones (0xFFFF), it is considered a default state mask. When a
+ looking for the most appropriate object, based a system's state, the default state mask is used if no other state mask
+ could be found.
+ */
 enum
 {
-    OEThemeStateWindowInactive = 1 <<  0,
-    OEThemeStateWindowActive   = 1 <<  1,
-    OEThemeStateOff            = 1 <<  2,
-    OEThemeStateOn             = 1 <<  3,
-    OEThemeStateMixed          = 1 <<  4,
-    OEThemeStateUnselected     = 1 <<  5,
-    OEThemeStateSelected       = 1 <<  6,
-    OEThemeStateDisabled       = 1 <<  7,
-    OEThemeStateEnabled        = 1 <<  8,
-    OEThemeStateUnfocused      = 1 <<  9,
-    OEThemeStateFocused        = 1 << 10,
-    OEThemeStateMouseOff       = 1 << 11,
-    OEThemeStateMouseOver      = 1 << 12,
-    OEThemeStateDefault        = 0xFFFF,
+    OEThemeStateWindowInactive = 1 <<  0,  // Parent window inactive
+    OEThemeStateWindowActive   = 1 <<  1,  // Parent window active
+    OEThemeStateOff            = 1 <<  2,  // Toggle off
+    OEThemeStateOn             = 1 <<  3,  // Toggle on
+    OEThemeStateMixed          = 1 <<  4,  // Toggle mixed
+    OEThemeStateUnselected     = 1 <<  5,  // Unpressed
+    OEThemeStateSelected       = 1 <<  6,  // Pressed
+    OEThemeStateDisabled       = 1 <<  7,  // Disabled
+    OEThemeStateEnabled        = 1 <<  8,  // Enabled
+    OEThemeStateUnfocused      = 1 <<  9,  // Is not first responder
+    OEThemeStateFocused        = 1 << 10,  // Is first responder
+    OEThemeStateMouseOff       = 1 << 11,  // Mouse not hovering
+    OEThemeStateMouseOver      = 1 << 12,  // Mouse hovering
 };
 typedef NSUInteger OEThemeState;
 

@@ -181,7 +181,7 @@
 - (OEThemeState)OE_currentState
 {
     OEThemeButton *button = (OEThemeButton *)[self controlView];
-    if(![button isKindOfClass:[OEThemeButton class]]) return OEThemeStateDefault;
+    if(![button isKindOfClass:[OEThemeButton class]]) return OEThemeStateDefaultMask;
 
     NSWindow   *window       = [[self controlView] window];
     const BOOL  focused      = [window firstResponder] == [self controlView];
