@@ -153,7 +153,7 @@ NSString *NSStringFromThemeState(OEThemeState state)
 {
     NSMutableArray *results = [NSMutableArray array];
 
-    if(state == 0 || state == OEThemeStateDefault) [results addObject:OEThemeStateDefaultName];
+    if(state == 0 || state == OEThemeStateDefaultMask) [results addObject:OEThemeStateDefaultName];
     else
     {
         if((state & OEThemeStateAnyWindowActivityMask) == OEThemeStateAnyWindowActivityMask) [results addObject:OEThemeStateAnyWindowActivityName];
@@ -193,11 +193,7 @@ OEThemeState OEThemeStateFromString(NSString *state)
     for(id component in components)
     {
         NSString *trimmedComponent = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        if([trimmedComponent caseInsensitiveCompare:OEThemeStateDefaultName] == NSOrderedSame)
-        {
-            result = OEThemeStateDefault;
-            break;
-        }
+        if([trimmedComponent caseInsensitiveCompare:OEThemeStateDefaultName] == NSOrderedSame)                break;
         else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyWindowActivityName] == NSOrderedSame) result |= OEThemeStateAnyWindowActivityMask;
         else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyStateName] == NSOrderedSame)          result |= OEThemeStateAnyStateMask;
         else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnySelectionName] == NSOrderedSame)      result |= OEThemeStateAnySelectionMask;
@@ -219,5 +215,5 @@ OEThemeState OEThemeStateFromString(NSString *state)
         else if([trimmedComponent caseInsensitiveCompare:OEThemeStateMouseOverName] == NSOrderedSame)         result |= OEThemeStateMouseOver;
     }
 
-    return result;
+    return (result == 0 ? OEThemeStateDefaultMask : result);
 }

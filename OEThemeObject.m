@@ -38,7 +38,7 @@ static inline id OEKeyForState(OEThemeState state)
             // Create a root definition that is inherited by the sttes specified
             NSMutableDictionary *rootDefinition = [definition mutableCopy];
             [rootDefinition removeObjectForKey:OEThemeObjectStatesAttributeName];
-            [self OE_setValue:[isa parseWithDefinition:rootDefinition inheritedDefinition:nil] forState:OEThemeStateDefault];
+            [self OE_setValue:[isa parseWithDefinition:rootDefinition inheritedDefinition:nil] forState:OEThemeStateDefaultMask];
 
             // Iterate through each of the state descriptions and create a state table
             NSDictionary *states = [definition valueForKey:OEThemeObjectStatesAttributeName];
@@ -48,15 +48,15 @@ static inline id OEKeyForState(OEThemeState state)
                  ^ (id key, id obj, BOOL *stop)
                  {
                      NSString     *trimmedKey = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                     OEThemeState  state      = ([trimmedKey length] == 0 ? OEThemeStateDefault : OEThemeStateFromString(trimmedKey));
+                     OEThemeState  state      = ([trimmedKey length] == 0 ? OEThemeStateDefaultMask : OEThemeStateFromString(trimmedKey));
                      id            value      = [isa parseWithDefinition:obj inheritedDefinition:rootDefinition];
 
-                     if(state != OEThemeStateDefault) _stateMask |= state;
+                     if(state != OEThemeStateDefaultMask) _stateMask |= state;
                      [self OE_setValue:value forState:state];
                  }];
             }
 
-            if(_stateMask != OEThemeStateDefault)
+            if(_stateMask != OEThemeStateDefaultMask)
             {
                 // Accumulate the bit-mask that all the state's cover
                 if(_stateMask & OEThemeStateAnyWindowActivityMask) _stateMask |= OEThemeStateAnyWindowActivityMask;
@@ -71,7 +71,7 @@ static inline id OEKeyForState(OEThemeState state)
                 [_states enumerateObjectsUsingBlock:
                  ^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
                      NSUInteger state = [obj unsignedIntegerValue];
-                     if(state != OEThemeStateDefault)
+                     if(state != OEThemeStateDefaultMask)
                      {
                          if(!(state & OEThemeStateAnyWindowActivityMask)) state |= OEThemeStateAnyWindowActivityMask;
                          if(!(state & OEThemeStateAnyStateMask))          state |= OEThemeStateAnyStateMask;
@@ -96,7 +96,7 @@ static inline id OEKeyForState(OEThemeState state)
         }
         else
         {
-            [self OE_setValue:[isa parseWithDefinition:definition inheritedDefinition:nil] forState:OEThemeStateDefault];
+            [self OE_setValue:[isa parseWithDefinition:definition inheritedDefinition:nil] forState:OEThemeStateDefaultMask];
         }
     }
     return self;
@@ -149,7 +149,7 @@ static inline id OEKeyForState(OEThemeState state)
     __block id results = nil;
     if(maskedState == 0)
     {
-        results = [_objectByState objectForKey:OEKeyForState(OEThemeStateDefault)];
+        results = [_objectByState objectForKey:OEKeyForState(OEThemeStateDefaultMask)];
     }
     else
     {
@@ -161,7 +161,7 @@ static inline id OEKeyForState(OEThemeState state)
                 if(([obj unsignedIntegerValue] & maskedState) == maskedState)
                 {
                     results = [_objectByState objectForKey:OEKeyForState([obj unsignedIntegerValue])];
-                    if(state != OEThemeStateDefault) [self OE_setValue:results forState:maskedState];
+                    if(state != OEThemeStateDefaultMask) [self OE_setValue:results forState:maskedState];
                     *stop = YES;
                 }
              }];
