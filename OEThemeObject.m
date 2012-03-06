@@ -160,9 +160,10 @@ static inline id OEKeyForState(OEThemeState state)
             [_states enumerateObjectsUsingBlock:
              ^ (NSNumber *obj, NSUInteger idx, BOOL *stop)
              {
-                 if(([obj unsignedIntegerValue] & maskedState) == maskedState)
+                 const OEThemeState state = [obj unsignedIntegerValue];
+                 if((maskedState & state) == maskedState)
                  {
-                     results = [_objectByState objectForKey:OEKeyForState([obj unsignedIntegerValue])];
+                     results = [_objectByState objectForKey:OEKeyForState(state)];
                      if(state != OEThemeStateDefaultMask) [self OE_setValue:results forState:maskedState];
                      *stop = YES;
                  }
