@@ -38,7 +38,7 @@ static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
             // Translate color strings to NSColor
             NSMutableArray *colors = [NSMutableArray arrayWithCapacity:[rawColorStrings count]];
             [rawColorStrings enumerateObjectsUsingBlock:
-             ^(id obj, NSUInteger idx, BOOL *stop)
+             ^ (id obj, NSUInteger idx, BOOL *stop)
              {
                  [colors addObject:(NSColorFromString(obj) ?: [NSColor blackColor])];
              }];
@@ -50,7 +50,7 @@ static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
                 if((locations = calloc([colors count], sizeof(CGFloat))) != NULL)
                 {
                     [rawLocations enumerateObjectsUsingBlock:
-                     ^(id obj, NSUInteger idx, BOOL *stop)
+                     ^ (id obj, NSUInteger idx, BOOL *stop)
                      {
                          locations[idx] = [obj floatValue];
                      }];

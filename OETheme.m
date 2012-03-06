@@ -67,7 +67,7 @@ static NSString * const OEThemeGradientKey                = @"Gradients";
 
         __block NSMutableDictionary *itemsByType = [NSMutableDictionary dictionary];
         [classesBySection enumerateKeysAndObjectsUsingBlock:
-         ^(id key, id obj, BOOL *stop)
+         ^ (id key, id obj, BOOL *stop)
          {
              NSDictionary *items = [self OE_parseThemeSection:[dictionary valueForKey:key] forThemeClass:obj];
              [itemsByType setValue:(items ?: [NSDictionary dictionary]) forKey:key];
@@ -93,11 +93,11 @@ static NSString * const OEThemeGradientKey                = @"Gradients";
 {
     __block NSMutableDictionary *results = [NSMutableDictionary dictionary];
     [section enumerateKeysAndObjectsUsingBlock:
-     ^(id key, id obj, BOOL *stop)
-    {
-        id themeItem = [[class alloc] initWithDefinition:obj];
-        if(themeItem) [results setValue:themeItem forKey:key];
-    }];
+     ^ (id key, id obj, BOOL *stop)
+     {
+         id themeItem = [[class alloc] initWithDefinition:obj];
+         if(themeItem) [results setValue:themeItem forKey:key];
+     }];
 
     return [results copy];
 }

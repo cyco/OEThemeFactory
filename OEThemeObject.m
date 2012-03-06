@@ -8,8 +8,8 @@
 
 #import "OEThemeObject.h"
 
-NSString * const OEThemeObjectStatesAttributeName         = @"States";
-NSString * const OEThemeObjectValueAttributeName          = @"Value";
+NSString * const OEThemeObjectStatesAttributeName = @"States";
+NSString * const OEThemeObjectValueAttributeName  = @"Value";
 
 static inline id OEKeyForState(OEThemeState state)
 {
@@ -69,7 +69,8 @@ static inline id OEKeyForState(OEThemeState state)
                 // Iterate through each state to determine if unspecified inputs should be discarded
                 __block BOOL updateStates = FALSE;
                 [_states enumerateObjectsUsingBlock:
-                 ^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
+                 ^ (NSNumber *obj, NSUInteger idx, BOOL *stop)
+                 {
                      NSUInteger state = [obj unsignedIntegerValue];
                      if(state != OEThemeStateDefaultMask)
                      {
@@ -157,13 +158,14 @@ static inline id OEKeyForState(OEThemeState state)
         if(results == nil)
         {
             [_states enumerateObjectsUsingBlock:
-             ^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
-                if(([obj unsignedIntegerValue] & maskedState) == maskedState)
-                {
-                    results = [_objectByState objectForKey:OEKeyForState([obj unsignedIntegerValue])];
-                    if(state != OEThemeStateDefaultMask) [self OE_setValue:results forState:maskedState];
-                    *stop = YES;
-                }
+             ^ (NSNumber *obj, NSUInteger idx, BOOL *stop)
+             {
+                 if(([obj unsignedIntegerValue] & maskedState) == maskedState)
+                 {
+                     results = [_objectByState objectForKey:OEKeyForState([obj unsignedIntegerValue])];
+                     if(state != OEThemeStateDefaultMask) [self OE_setValue:results forState:maskedState];
+                     *stop = YES;
+                 }
              }];
 
             if(results == nil) [self OE_setValue:[NSNull null] forState:maskedState];
