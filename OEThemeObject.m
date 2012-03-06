@@ -38,7 +38,7 @@ static inline id OEKeyForState(OEThemeState state)
             // Create a root definition that is inherited by the sttes specified
             NSMutableDictionary *rootDefinition = [definition mutableCopy];
             [rootDefinition removeObjectForKey:OEThemeObjectStatesAttributeName];
-            [self OE_setValue:[isa parseWithDefinition:rootDefinition inheritedDefinition:nil] forState:OEThemeStateDefaultMask];
+            [self OE_setValue:[isa parseWithDefinition:rootDefinition inheritedDefinition:nil] forState:OEThemeStateDefault];
 
             // Iterate through each of the state descriptions and create a state table
             NSDictionary *states = [definition valueForKey:OEThemeObjectStatesAttributeName];
@@ -48,23 +48,23 @@ static inline id OEKeyForState(OEThemeState state)
                  ^ (id key, id obj, BOOL *stop)
                  {
                      NSString     *trimmedKey = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-                     OEThemeState  state      = ([trimmedKey length] == 0 ? OEThemeStateDefaultMask : OEThemeStateFromString(trimmedKey));
+                     OEThemeState  state      = ([trimmedKey length] == 0 ? OEThemeStateDefault : OEThemeStateFromString(trimmedKey));
                      id            value      = [isa parseWithDefinition:obj inheritedDefinition:rootDefinition];
 
-                     if(state != OEThemeStateDefaultMask) _stateMask |= state;
+                     if(state != OEThemeStateDefault) _stateMask |= state;
                      [self OE_setValue:value forState:state];
                  }];
             }
 
-            if(_stateMask != OEThemeStateDefaultMask)
+            if(_stateMask != OEThemeStateDefault)
             {
                 // Accumulate the bit-mask that all the state's cover
-                if(_stateMask & OEThemeStateAnyWindowActivityMask) _stateMask |= OEThemeStateAnyWindowActivityMask;
-                if(_stateMask & OEThemeStateAnyToggleMask)         _stateMask |= OEThemeStateAnyToggleMask;
-                if(_stateMask & OEThemeStateAnySelectionMask)      _stateMask |= OEThemeStateAnySelectionMask;
-                if(_stateMask & OEThemeStateAnyInteractionMask)    _stateMask |= OEThemeStateAnyInteractionMask;
-                if(_stateMask & OEThemeStateAnyFocusMask)          _stateMask |= OEThemeStateAnyFocusMask;
-                if(_stateMask & OEThemeStateAnyMouseMask)          _stateMask |= OEThemeStateAnyMouseMask;
+                if(_stateMask & OEThemeStateAnyWindowActivity) _stateMask |= OEThemeStateAnyWindowActivity;
+                if(_stateMask & OEThemeStateAnyToggle)         _stateMask |= OEThemeStateAnyToggle;
+                if(_stateMask & OEThemeStateAnySelection)      _stateMask |= OEThemeStateAnySelection;
+                if(_stateMask & OEThemeStateAnyInteraction)    _stateMask |= OEThemeStateAnyInteraction;
+                if(_stateMask & OEThemeStateAnyFocus)          _stateMask |= OEThemeStateAnyFocus;
+                if(_stateMask & OEThemeStateAnyMouse)          _stateMask |= OEThemeStateAnyMouse;
 
                 // Iterate through each state to determine if unspecified inputs should be discarded
                 __block BOOL updateStates = FALSE;
@@ -72,14 +72,14 @@ static inline id OEKeyForState(OEThemeState state)
                  ^ (NSNumber *obj, NSUInteger idx, BOOL *stop)
                  {
                      OEThemeState state = [obj unsignedIntegerValue];
-                     if(state != OEThemeStateDefaultMask)
+                     if(state != OEThemeStateDefault)
                      {
-                         if(!(state & OEThemeStateAnyWindowActivityMask)) state |= OEThemeStateAnyWindowActivityMask;
-                         if(!(state & OEThemeStateAnyToggleMask))         state |= OEThemeStateAnyToggleMask;
-                         if(!(state & OEThemeStateAnySelectionMask))      state |= OEThemeStateAnySelectionMask;
-                         if(!(state & OEThemeStateAnyInteractionMask))    state |= OEThemeStateAnyInteractionMask;
-                         if(!(state & OEThemeStateAnyFocusMask))          state |= OEThemeStateAnyFocusMask;
-                         if(!(state & OEThemeStateAnyMouseMask))          state |= OEThemeStateAnyMouseMask;
+                         if(!(state & OEThemeStateAnyWindowActivity)) state |= OEThemeStateAnyWindowActivity;
+                         if(!(state & OEThemeStateAnyToggle))         state |= OEThemeStateAnyToggle;
+                         if(!(state & OEThemeStateAnySelection))      state |= OEThemeStateAnySelection;
+                         if(!(state & OEThemeStateAnyInteraction))    state |= OEThemeStateAnyInteraction;
+                         if(!(state & OEThemeStateAnyFocus))          state |= OEThemeStateAnyFocus;
+                         if(!(state & OEThemeStateAnyMouse))          state |= OEThemeStateAnyMouse;
 
                          state &= _stateMask;
 
@@ -97,7 +97,7 @@ static inline id OEKeyForState(OEThemeState state)
         }
         else
         {
-            [self OE_setValue:[isa parseWithDefinition:definition inheritedDefinition:nil] forState:OEThemeStateDefaultMask];
+            [self OE_setValue:[isa parseWithDefinition:definition inheritedDefinition:nil] forState:OEThemeStateDefault];
         }
     }
     return self;
@@ -111,12 +111,12 @@ static inline id OEKeyForState(OEThemeState state)
 
 + (OEThemeState)themeStateWithWindowActive:(BOOL)windowActive buttonState:(NSInteger)state selected:(BOOL)selected enabled:(BOOL)enabled focused:(BOOL)focused houseHover:(BOOL)hover
 {
-    return ((windowActive ? OEThemeStateWindowActive : OEThemeStateWindowInactive) |
-            (selected     ? OEThemeStatePressed      : OEThemeStateUnpressed)      |
-            (enabled      ? OEThemeStateEnabled      : OEThemeStateDisabled)       |
-            (focused      ? OEThemeStateFocused      : OEThemeStateUnfocused)      |
-            (hover        ? OEThemeStateMouseOver    : OEThemeStateMouseOff)       |
-            (state == NSOnState ? OEThemeStateToggleOn : (state == NSMixedState ? OEThemeStateToggleMixed : OEThemeStateToggleOff)));
+    return ((windowActive ? OEThemeInputStateWindowActive : OEThemeInputStateWindowInactive) |
+            (selected     ? OEThemeInputStatePressed      : OEThemeInputStateUnpressed)      |
+            (enabled      ? OEThemeInputStateEnabled      : OEThemeInputStateDisabled)       |
+            (focused      ? OEThemeInputStateFocused      : OEThemeInputStateUnfocused)      |
+            (hover        ? OEThemeInputStateMouseOver    : OEThemeInputStateMouseOff)       |
+            (state == NSOnState ? OEThemeInputStateToggleOn : (state == NSMixedState ? OEThemeInputStateToggleMixed : OEThemeInputStateToggleOff)));
 }
 
 - (NSString *)description
@@ -150,7 +150,7 @@ static inline id OEKeyForState(OEThemeState state)
     __block id results = nil;
     if(maskedState == 0)
     {
-        results = [_objectByState objectForKey:OEKeyForState(OEThemeStateDefaultMask)];
+        results = [_objectByState objectForKey:OEKeyForState(OEThemeStateDefault)];
     }
     else
     {
@@ -164,7 +164,7 @@ static inline id OEKeyForState(OEThemeState state)
                  if((maskedState & state) == maskedState)
                  {
                      results = [_objectByState objectForKey:OEKeyForState(state)];
-                     if(state != OEThemeStateDefaultMask) [self OE_setValue:results forState:maskedState];
+                     if(state != OEThemeStateDefault) [self OE_setValue:results forState:maskedState];
                      *stop = YES;
                  }
              }];

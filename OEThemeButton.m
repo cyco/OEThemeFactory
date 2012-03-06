@@ -28,7 +28,7 @@
     }
 
     OEThemeButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEThemeButtonCell class]] && newWindow && (_cachedStateMask & OEThemeStateAnyWindowActivityMask))
+    if([cell isKindOfClass:[OEThemeButtonCell class]] && newWindow && (_cachedStateMask & OEThemeStateAnyWindowActivity))
     {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidBecomeMainNotification object:newWindow];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidResignMainNotification object:newWindow];
@@ -45,7 +45,7 @@
 {
     if(_mouseTrackingArea) [self removeTrackingArea:_mouseTrackingArea];
     OEThemeButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEThemeButtonCell class]] && (_cachedStateMask & OEThemeStateAnyMouseMask))
+    if([cell isKindOfClass:[OEThemeButtonCell class]] && (_cachedStateMask & OEThemeStateAnyMouse))
     {
         _mouseTrackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
         [self addTrackingArea:_mouseTrackingArea];
@@ -76,10 +76,10 @@
         OEThemeImage          *themeImage           = [cell themeImage];
         OEThemeTextAttributes *themeTextAttributes  = [cell themeTextAttributes];
 
-        OEThemeState stateMask = [backgroundThemeImage stateMask] | [themeImage stateMask] | [themeTextAttributes stateMask];
+        NSUInteger stateMask = [backgroundThemeImage stateMask] | [themeImage stateMask] | [themeTextAttributes stateMask];
 
-        BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivityMask) != (stateMask & OEThemeStateAnyWindowActivityMask);
-        BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouseMask)          != (stateMask & OEThemeStateAnyMouseMask);
+        BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivity) != (stateMask & OEThemeStateAnyWindowActivity);
+        BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouse)          != (stateMask & OEThemeStateAnyMouse);
 
         _cachedStateMask = stateMask;
         if(updateWindowActivity)
@@ -181,14 +181,14 @@
 - (OEThemeState)OE_currentState
 {
     OEThemeButton *button = (OEThemeButton *)[self controlView];
-    if(![button isKindOfClass:[OEThemeButton class]]) return OEThemeStateDefaultMask;
+    if(![button isKindOfClass:[OEThemeButton class]]) return OEThemeStateDefault;
 
     NSWindow   *window       = [[self controlView] window];
     const BOOL  focused      = [window firstResponder] == [self controlView];
-    const BOOL  windowActive = (button->_cachedStateMask & OEThemeStateAnyWindowActivityMask) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
+    const BOOL  windowActive = (button->_cachedStateMask & OEThemeStateAnyWindowActivity) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
     BOOL        hover        = NO;
 
-    if(button->_cachedStateMask & OEThemeStateAnyMouseMask)
+    if(button->_cachedStateMask & OEThemeStateAnyMouse)
     {
         const NSPoint p = [[self controlView] convertPointFromBase:[window convertScreenToBase:[NSEvent mouseLocation]]];
         hover           = NSPointInRect(p, [[self controlView] bounds]);

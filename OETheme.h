@@ -22,32 +22,32 @@
  */
 enum
 {
-    OEThemeStateWindowInactive = 1 <<  0,
-    OEThemeStateWindowActive   = 1 <<  1,
-    OEThemeStateToggleOff      = 1 <<  2,
-    OEThemeStateToggleOn       = 1 <<  3,
-    OEThemeStateToggleMixed    = 1 <<  4,
-    OEThemeStateUnpressed      = 1 <<  5,
-    OEThemeStatePressed        = 1 <<  6,
-    OEThemeStateDisabled       = 1 <<  7,
-    OEThemeStateEnabled        = 1 <<  8,
-    OEThemeStateUnfocused      = 1 <<  9,
-    OEThemeStateFocused        = 1 << 10,
-    OEThemeStateMouseOff       = 1 << 11,
-    OEThemeStateMouseOver      = 1 << 12,
+    OEThemeInputStateWindowInactive = 1 <<  0,
+    OEThemeInputStateWindowActive   = 1 <<  1,
+    OEThemeInputStateToggleOff      = 1 <<  2,
+    OEThemeInputStateToggleOn       = 1 <<  3,
+    OEThemeInputStateToggleMixed    = 1 <<  4,
+    OEThemeInputStateUnpressed      = 1 <<  5,
+    OEThemeInputStatePressed        = 1 <<  6,
+    OEThemeInputStateDisabled       = 1 <<  7,
+    OEThemeInputStateEnabled        = 1 <<  8,
+    OEThemeInputStateUnfocused      = 1 <<  9,
+    OEThemeInputStateFocused        = 1 << 10,
+    OEThemeInputStateMouseOff       = 1 << 11,
+    OEThemeInputStateMouseOver      = 1 << 12,
 };
-typedef NSUInteger OEThemeState;
 
 enum
 {
-    OEThemeStateAnyWindowActivityMask = OEThemeStateWindowInactive | OEThemeStateWindowActive,
-    OEThemeStateAnyToggleMask         = OEThemeStateToggleOff      | OEThemeStateToggleOn      | OEThemeStateToggleMixed,
-    OEThemeStateAnySelectionMask      = OEThemeStateUnpressed      | OEThemeStatePressed,
-    OEThemeStateAnyInteractionMask    = OEThemeStateDisabled       | OEThemeStateEnabled,
-    OEThemeStateAnyFocusMask          = OEThemeStateUnfocused      | OEThemeStateFocused,
-    OEThemeStateAnyMouseMask          = OEThemeStateMouseOff       | OEThemeStateMouseOver,
-    OEThemeStateDefaultMask           = 0xFFFF,
+    OEThemeStateAnyWindowActivity = OEThemeInputStateWindowInactive | OEThemeInputStateWindowActive,
+    OEThemeStateAnyToggle         = OEThemeInputStateToggleOff      | OEThemeInputStateToggleOn      | OEThemeInputStateToggleMixed,
+    OEThemeStateAnySelection      = OEThemeInputStateUnpressed      | OEThemeInputStatePressed,
+    OEThemeStateAnyInteraction    = OEThemeInputStateDisabled       | OEThemeInputStateEnabled,
+    OEThemeStateAnyFocus          = OEThemeInputStateUnfocused      | OEThemeInputStateFocused,
+    OEThemeStateAnyMouse          = OEThemeInputStateMouseOff       | OEThemeInputStateMouseOver,
+    OEThemeStateDefault           = 0xFFFF,
 };
+typedef NSUInteger OEThemeState;
 
 extern NSString     *NSStringFromThemeState(OEThemeState state);
 extern OEThemeState  OEThemeStateFromString(NSString *state);

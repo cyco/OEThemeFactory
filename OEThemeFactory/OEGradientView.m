@@ -25,10 +25,10 @@
 {
     NSWindow   *window       = [self window];
     const BOOL  focused      = [window firstResponder] == self;
-    const BOOL  windowActive = (_cachedStateMask & OEThemeStateAnyWindowActivityMask) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
+    const BOOL  windowActive = (_cachedStateMask & OEThemeStateAnyWindowActivity) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
     BOOL        hover        = NO;
 
-    if(_cachedStateMask & OEThemeStateAnyMouseMask)
+    if(_cachedStateMask & OEThemeStateAnyMouse)
     {
         const NSPoint p = [self convertPointFromBase:[window convertScreenToBase:[NSEvent mouseLocation]]];
         hover           = NSPointInRect(p, [self bounds]);
@@ -53,7 +53,7 @@
         [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:[self window]];
     }
 
-    if(newWindow && (_cachedStateMask & OEThemeStateAnyWindowActivityMask))
+    if(newWindow && (_cachedStateMask & OEThemeStateAnyWindowActivity))
     {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidBecomeMainNotification object:newWindow];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidResignMainNotification object:newWindow];
@@ -69,7 +69,7 @@
 - (void)updateTrackingAreas
 {
     if(_mouseTrackingArea) [self removeTrackingArea:_mouseTrackingArea];
-    if(_cachedStateMask & OEThemeStateAnyMouseMask)
+    if(_cachedStateMask & OEThemeStateAnyMouse)
     {
         _mouseTrackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
         [self addTrackingArea:_mouseTrackingArea];
@@ -93,10 +93,10 @@
 
 - (void)OE_updateNotifications
 {
-    OEThemeState stateMask = [_themeGradient stateMask];
+    NSUInteger stateMask = [_themeGradient stateMask];
 
-    BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivityMask) != (stateMask & OEThemeStateAnyWindowActivityMask);
-    BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouseMask)          != (stateMask & OEThemeStateAnyMouseMask);
+    BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivity) != (stateMask & OEThemeStateAnyWindowActivity);
+    BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouse)          != (stateMask & OEThemeStateAnyMouse);
 
     _cachedStateMask = stateMask;
     if(updateWindowActivity)

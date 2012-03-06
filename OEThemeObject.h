@@ -31,6 +31,6 @@ extern NSString * const OEThemeObjectValueAttributeName;
 - (void)setWithState:(OEThemeState)state;
 - (void)setInLayer:(CALayer *)layer withState:(OEThemeState)state;
 
-@property (nonatomic, readonly) OEThemeState stateMask;
+@property (nonatomic, readonly) NSUInteger stateMask;
 
 @end

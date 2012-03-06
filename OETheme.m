@@ -12,32 +12,32 @@
 #import "OEThemeImage.h"
 #import "OEThemeGradient.h"
 
-static NSString * const OEThemeStateDefaultName           = @"Default";
-static NSString * const OEThemeStateWindowInactiveName    = @"Window Inactive";
-static NSString * const OEThemeStateWindowActiveName      = @"Window Active";
-static NSString * const OEThemeStateToggleOffName         = @"Toggle Off";
-static NSString * const OEThemeStateToggleOnName          = @"Toggle On";
-static NSString * const OEThemeStateToggleMixedName       = @"Toggle Mixed";
-static NSString * const OEThemeStateUnpressedName         = @"Unpressed";
-static NSString * const OEThemeStatePressedName           = @"Pressed";
-static NSString * const OEThemeStateDisabledName          = @"Disabled";
-static NSString * const OEThemeStateEnabledName           = @"Enabled";
-static NSString * const OEThemeStateUnfocusedName         = @"Unfocused";
-static NSString * const OEThemeStateFocusedName           = @"Focused";
-static NSString * const OEThemeStateMouseOverName         = @"Mouse Over";
-static NSString * const OEThemeStateMouseOffName          = @"Mouse Off";
+static NSString * const OEThemeInputStateDefaultName        = @"Default";
+static NSString * const OEThemeInputStateWindowInactiveName = @"Window Inactive";
+static NSString * const OEThemeInputStateWindowActiveName   = @"Window Active";
+static NSString * const OEThemeInputStateToggleOffName      = @"Toggle Off";
+static NSString * const OEThemeInputStateToggleOnName       = @"Toggle On";
+static NSString * const OEThemeInputStateToggleMixedName    = @"Toggle Mixed";
+static NSString * const OEThemeInputStateUnpressedName      = @"Unpressed";
+static NSString * const OEThemeInputStatePressedName        = @"Pressed";
+static NSString * const OEThemeInputStateDisabledName       = @"Disabled";
+static NSString * const OEThemeInputStateEnabledName        = @"Enabled";
+static NSString * const OEThemeInputStateUnfocusedName      = @"Unfocused";
+static NSString * const OEThemeInputStateFocusedName        = @"Focused";
+static NSString * const OEThemeInputStateMouseOverName      = @"Mouse Over";
+static NSString * const OEThemeInputStateMouseOffName       = @"Mouse Off";
 
-static NSString * const OEThemeStateAnyWindowActivityName = @"Any Window State";
-static NSString * const OEThemeStateAnyToggleName         = @"Any Toggle";
-static NSString * const OEThemeStateAnySelectionName      = @"Any Selection";
-static NSString * const OEThemeStateAnyInteractionName    = @"Any Interaction";
-static NSString * const OEThemeStateAnyFocusName          = @"Any Focus";
-static NSString * const OEThemeStateAnyMouseName          = @"Any Mouse State";
+static NSString * const OEThemeStateAnyWindowActivityName   = @"Any Window State";
+static NSString * const OEThemeStateAnyToggleName           = @"Any Toggle";
+static NSString * const OEThemeStateAnySelectionName        = @"Any Selection";
+static NSString * const OEThemeStateAnyInteractionName      = @"Any Interaction";
+static NSString * const OEThemeStateAnyFocusName            = @"Any Focus";
+static NSString * const OEThemeStateAnyMouseName            = @"Any Mouse State";
 
-static NSString * const OEThemeColorKey                   = @"Colors";
-static NSString * const OEThemeFontKey                    = @"Fonts";
-static NSString * const OEThemeImageKey                   = @"Images";
-static NSString * const OEThemeGradientKey                = @"Gradients";
+static NSString * const OEThemeColorKey                     = @"Colors";
+static NSString * const OEThemeFontKey                      = @"Fonts";
+static NSString * const OEThemeImageKey                     = @"Images";
+static NSString * const OEThemeGradientKey                  = @"Gradients";
 
 @interface OETheme ()
 
@@ -153,33 +153,33 @@ NSString *NSStringFromThemeState(OEThemeState state)
 {
     NSMutableArray *results = [NSMutableArray array];
 
-    if(state == 0 || state == OEThemeStateDefaultMask) [results addObject:OEThemeStateDefaultName];
+    if(state == 0 || state == OEThemeStateDefault) [results addObject:OEThemeInputStateDefaultName];
     else
     {
-        if((state & OEThemeStateAnyWindowActivityMask) == OEThemeStateAnyWindowActivityMask) [results addObject:OEThemeStateAnyWindowActivityName];
-        else if(state & OEThemeStateWindowActive)                                            [results addObject:OEThemeStateWindowActiveName];
-        else if(state & OEThemeStateWindowInactive)                                          [results addObject:OEThemeStateWindowInactiveName];
+        if((state & OEThemeStateAnyWindowActivity) == OEThemeStateAnyWindowActivity) [results addObject:OEThemeStateAnyWindowActivityName];
+        else if(state & OEThemeInputStateWindowActive)                               [results addObject:OEThemeInputStateWindowActiveName];
+        else if(state & OEThemeInputStateWindowInactive)                             [results addObject:OEThemeInputStateWindowInactiveName];
 
-        if((state & OEThemeStateAnyToggleMask) == OEThemeStateAnyToggleMask)                 [results addObject:OEThemeStateAnyToggleName];
-        else if(state & OEThemeStateToggleOn)                                                [results addObject:OEThemeStateToggleOnName];
-        else if(state & OEThemeStateToggleMixed)                                             [results addObject:OEThemeStateToggleMixedName];
-        else if(state & OEThemeStateToggleOff)                                               [results addObject:OEThemeStateToggleOffName];
+        if((state & OEThemeStateAnyToggle) == OEThemeStateAnyToggle)                 [results addObject:OEThemeStateAnyToggleName];
+        else if(state & OEThemeInputStateToggleOn)                                   [results addObject:OEThemeInputStateToggleOnName];
+        else if(state & OEThemeInputStateToggleMixed)                                [results addObject:OEThemeInputStateToggleMixedName];
+        else if(state & OEThemeInputStateToggleOff)                                  [results addObject:OEThemeInputStateToggleOffName];
 
-        if((state & OEThemeStateAnySelectionMask) == OEThemeStateAnySelectionMask)           [results addObject:OEThemeStateAnySelectionName];
-        else if(state & OEThemeStatePressed)                                                 [results addObject:OEThemeStatePressedName];
-        else if(state & OEThemeStateUnpressed)                                               [results addObject:OEThemeStateUnpressedName];
+        if((state & OEThemeStateAnySelection) == OEThemeStateAnySelection)           [results addObject:OEThemeStateAnySelectionName];
+        else if(state & OEThemeInputStatePressed)                                    [results addObject:OEThemeInputStatePressedName];
+        else if(state & OEThemeInputStateUnpressed)                                  [results addObject:OEThemeInputStateUnpressedName];
 
-        if((state & OEThemeStateAnyInteractionMask) == OEThemeStateAnyInteractionMask)       [results addObject:OEThemeStateAnyInteractionName];
-        else if(state & OEThemeStateEnabled)                                                 [results addObject:OEThemeStateEnabledName];
-        else if(state & OEThemeStateDisabled)                                                [results addObject:OEThemeStateDisabledName];
+        if((state & OEThemeStateAnyInteraction) == OEThemeStateAnyInteraction)       [results addObject:OEThemeStateAnyInteractionName];
+        else if(state & OEThemeInputStateEnabled)                                    [results addObject:OEThemeInputStateEnabledName];
+        else if(state & OEThemeInputStateDisabled)                                   [results addObject:OEThemeInputStateDisabledName];
 
-        if((state & OEThemeStateAnyFocusMask) == OEThemeStateAnyFocusMask)                   [results addObject:OEThemeStateAnyFocusName];
-        else if(state & OEThemeStateFocused)                                                 [results addObject:OEThemeStateFocusedName];
-        else if(state & OEThemeStateUnfocused)                                               [results addObject:OEThemeStateUnfocusedName];
+        if((state & OEThemeStateAnyFocus) == OEThemeStateAnyFocus)                   [results addObject:OEThemeStateAnyFocusName];
+        else if(state & OEThemeInputStateFocused)                                    [results addObject:OEThemeInputStateFocusedName];
+        else if(state & OEThemeInputStateUnfocused)                                  [results addObject:OEThemeInputStateUnfocusedName];
 
-        if((state & OEThemeStateAnyMouseMask) == OEThemeStateAnyMouseMask)                   [results addObject:OEThemeStateAnyMouseName];
-        else if(state & OEThemeStateMouseOver)                                               [results addObject:OEThemeStateMouseOverName];
-        else if(state & OEThemeStateMouseOff)                                                [results addObject:OEThemeStateMouseOffName];
+        if((state & OEThemeStateAnyMouse) == OEThemeStateAnyMouse)                   [results addObject:OEThemeStateAnyMouseName];
+        else if(state & OEThemeInputStateMouseOver)                                  [results addObject:OEThemeInputStateMouseOverName];
+        else if(state & OEThemeInputStateMouseOff)                                   [results addObject:OEThemeInputStateMouseOffName];
     }
 
     return [results componentsJoinedByString:@", "];
@@ -193,27 +193,27 @@ OEThemeState OEThemeStateFromString(NSString *state)
     for(id component in components)
     {
         NSString *trimmedComponent = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        if([trimmedComponent caseInsensitiveCompare:OEThemeStateDefaultName] == NSOrderedSame)                break;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyWindowActivityName] == NSOrderedSame) result |= OEThemeStateAnyWindowActivityMask;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyToggleName] == NSOrderedSame)         result |= OEThemeStateAnyToggleMask;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnySelectionName] == NSOrderedSame)      result |= OEThemeStateAnySelectionMask;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyInteractionName] == NSOrderedSame)    result |= OEThemeStateAnyInteractionMask;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyFocusName] == NSOrderedSame)          result |= OEThemeStateAnyFocusMask;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyMouseName] == NSOrderedSame)          result |= OEThemeStateAnyMouseMask;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateWindowInactiveName] == NSOrderedSame)    result |= OEThemeStateWindowInactive;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateWindowActiveName] == NSOrderedSame)      result |= OEThemeStateWindowActive;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateToggleOffName] == NSOrderedSame)         result |= OEThemeStateToggleOff;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateToggleOnName] == NSOrderedSame)          result |= OEThemeStateToggleOn;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateToggleMixedName] == NSOrderedSame)       result |= OEThemeStateToggleMixed;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateUnpressedName] == NSOrderedSame)         result |= OEThemeStateUnpressed;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStatePressedName] == NSOrderedSame)           result |= OEThemeStatePressed;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateDisabledName] == NSOrderedSame)          result |= OEThemeStateDisabled;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateEnabledName] == NSOrderedSame)           result |= OEThemeStateEnabled;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateUnfocusedName] == NSOrderedSame)         result |= OEThemeStateUnfocused;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateFocusedName] == NSOrderedSame)           result |= OEThemeStateFocused;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateMouseOffName] == NSOrderedSame)          result |= OEThemeStateMouseOff;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateMouseOverName] == NSOrderedSame)         result |= OEThemeStateMouseOver;
+        if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateDefaultName] == NSOrderedSame)             break;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyWindowActivityName] == NSOrderedSame)   result |= OEThemeStateAnyWindowActivity;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyToggleName] == NSOrderedSame)           result |= OEThemeStateAnyToggle;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnySelectionName] == NSOrderedSame)        result |= OEThemeStateAnySelection;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyInteractionName] == NSOrderedSame)      result |= OEThemeStateAnyInteraction;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyFocusName] == NSOrderedSame)            result |= OEThemeStateAnyFocus;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyMouseName] == NSOrderedSame)            result |= OEThemeStateAnyMouse;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateWindowInactiveName] == NSOrderedSame) result |= OEThemeInputStateWindowInactive;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateWindowActiveName] == NSOrderedSame)   result |= OEThemeInputStateWindowActive;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateToggleOffName] == NSOrderedSame)      result |= OEThemeInputStateToggleOff;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateToggleOnName] == NSOrderedSame)       result |= OEThemeInputStateToggleOn;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateToggleMixedName] == NSOrderedSame)    result |= OEThemeInputStateToggleMixed;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateUnpressedName] == NSOrderedSame)      result |= OEThemeInputStateUnpressed;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStatePressedName] == NSOrderedSame)        result |= OEThemeInputStatePressed;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateDisabledName] == NSOrderedSame)       result |= OEThemeInputStateDisabled;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateEnabledName] == NSOrderedSame)        result |= OEThemeInputStateEnabled;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateUnfocusedName] == NSOrderedSame)      result |= OEThemeInputStateUnfocused;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateFocusedName] == NSOrderedSame)        result |= OEThemeInputStateFocused;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateMouseOffName] == NSOrderedSame)       result |= OEThemeInputStateMouseOff;
+        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateMouseOverName] == NSOrderedSame)      result |= OEThemeInputStateMouseOver;
     }
 
-    return (result == 0 ? OEThemeStateDefaultMask : result);
+    return (result == 0 ? OEThemeStateDefault : result);
 }
