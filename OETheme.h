@@ -22,27 +22,27 @@
  */
 enum
 {
-    OEThemeStateWindowInactive = 1 <<  0,  // Parent window inactive
-    OEThemeStateWindowActive   = 1 <<  1,  // Parent window active
-    OEThemeStateOff            = 1 <<  2,  // Toggle off
-    OEThemeStateOn             = 1 <<  3,  // Toggle on
-    OEThemeStateMixed          = 1 <<  4,  // Toggle mixed
-    OEThemeStateUnselected     = 1 <<  5,  // Unpressed
-    OEThemeStateSelected       = 1 <<  6,  // Pressed
-    OEThemeStateDisabled       = 1 <<  7,  // Disabled
-    OEThemeStateEnabled        = 1 <<  8,  // Enabled
-    OEThemeStateUnfocused      = 1 <<  9,  // Is not first responder
-    OEThemeStateFocused        = 1 << 10,  // Is first responder
-    OEThemeStateMouseOff       = 1 << 11,  // Mouse not hovering
-    OEThemeStateMouseOver      = 1 << 12,  // Mouse hovering
+    OEThemeStateWindowInactive = 1 <<  0,
+    OEThemeStateWindowActive   = 1 <<  1,
+    OEThemeStateToggleOff      = 1 <<  2,
+    OEThemeStateToggleOn       = 1 <<  3,
+    OEThemeStateToggleMixed    = 1 <<  4,
+    OEThemeStateUnpressed      = 1 <<  5,
+    OEThemeStatePressed        = 1 <<  6,
+    OEThemeStateDisabled       = 1 <<  7,
+    OEThemeStateEnabled        = 1 <<  8,
+    OEThemeStateUnfocused      = 1 <<  9,
+    OEThemeStateFocused        = 1 << 10,
+    OEThemeStateMouseOff       = 1 << 11,
+    OEThemeStateMouseOver      = 1 << 12,
 };
 typedef NSUInteger OEThemeState;
 
 enum
 {
     OEThemeStateAnyWindowActivityMask = OEThemeStateWindowInactive | OEThemeStateWindowActive,
-    OEThemeStateAnyStateMask          = OEThemeStateOff            | OEThemeStateOn             | OEThemeStateMixed,
-    OEThemeStateAnySelectionMask      = OEThemeStateUnselected     | OEThemeStateSelected,
+    OEThemeStateAnyToggleMask         = OEThemeStateToggleOff      | OEThemeStateToggleOn      | OEThemeStateToggleMixed,
+    OEThemeStateAnySelectionMask      = OEThemeStateUnpressed      | OEThemeStatePressed,
     OEThemeStateAnyInteractionMask    = OEThemeStateDisabled       | OEThemeStateEnabled,
     OEThemeStateAnyFocusMask          = OEThemeStateUnfocused      | OEThemeStateFocused,
     OEThemeStateAnyMouseMask          = OEThemeStateMouseOff       | OEThemeStateMouseOver,

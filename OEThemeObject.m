@@ -60,7 +60,7 @@ static inline id OEKeyForState(OEThemeState state)
             {
                 // Accumulate the bit-mask that all the state's cover
                 if(_stateMask & OEThemeStateAnyWindowActivityMask) _stateMask |= OEThemeStateAnyWindowActivityMask;
-                if(_stateMask & OEThemeStateAnyStateMask)          _stateMask |= OEThemeStateAnyStateMask;
+                if(_stateMask & OEThemeStateAnyToggleMask)         _stateMask |= OEThemeStateAnyToggleMask;
                 if(_stateMask & OEThemeStateAnySelectionMask)      _stateMask |= OEThemeStateAnySelectionMask;
                 if(_stateMask & OEThemeStateAnyInteractionMask)    _stateMask |= OEThemeStateAnyInteractionMask;
                 if(_stateMask & OEThemeStateAnyFocusMask)          _stateMask |= OEThemeStateAnyFocusMask;
@@ -75,7 +75,7 @@ static inline id OEKeyForState(OEThemeState state)
                      if(state != OEThemeStateDefaultMask)
                      {
                          if(!(state & OEThemeStateAnyWindowActivityMask)) state |= OEThemeStateAnyWindowActivityMask;
-                         if(!(state & OEThemeStateAnyStateMask))          state |= OEThemeStateAnyStateMask;
+                         if(!(state & OEThemeStateAnyToggleMask))         state |= OEThemeStateAnyToggleMask;
                          if(!(state & OEThemeStateAnySelectionMask))      state |= OEThemeStateAnySelectionMask;
                          if(!(state & OEThemeStateAnyInteractionMask))    state |= OEThemeStateAnyInteractionMask;
                          if(!(state & OEThemeStateAnyFocusMask))          state |= OEThemeStateAnyFocusMask;
@@ -112,11 +112,11 @@ static inline id OEKeyForState(OEThemeState state)
 + (OEThemeState)themeStateWithWindowActive:(BOOL)windowActive buttonState:(NSInteger)state selected:(BOOL)selected enabled:(BOOL)enabled focused:(BOOL)focused houseHover:(BOOL)hover
 {
     return ((windowActive ? OEThemeStateWindowActive : OEThemeStateWindowInactive) |
-            (selected     ? OEThemeStateSelected     : OEThemeStateUnselected)     |
+            (selected     ? OEThemeStatePressed      : OEThemeStateUnpressed)      |
             (enabled      ? OEThemeStateEnabled      : OEThemeStateDisabled)       |
             (focused      ? OEThemeStateFocused      : OEThemeStateUnfocused)      |
             (hover        ? OEThemeStateMouseOver    : OEThemeStateMouseOff)       |
-            (state == NSOnState ? OEThemeStateOn : (state == NSMixedState ? OEThemeStateMixed : OEThemeStateOff)));
+            (state == NSOnState ? OEThemeStateToggleOn : (state == NSMixedState ? OEThemeStateToggleMixed : OEThemeStateToggleOff)));
 }
 
 - (NSString *)description
