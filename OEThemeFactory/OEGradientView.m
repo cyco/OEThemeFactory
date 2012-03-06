@@ -93,7 +93,7 @@
 
 - (void)OE_updateNotifications
 {
-    NSUInteger stateMask = [_themeGradient stateMask];
+    OEThemeState stateMask = [_themeGradient stateMask];
 
     BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivityMask) != (stateMask & OEThemeStateAnyWindowActivityMask);
     BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouseMask)          != (stateMask & OEThemeStateAnyMouseMask);

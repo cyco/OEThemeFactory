@@ -76,7 +76,7 @@
         OEThemeImage          *themeImage           = [cell themeImage];
         OEThemeTextAttributes *themeTextAttributes  = [cell themeTextAttributes];
 
-        NSUInteger stateMask = [backgroundThemeImage stateMask] | [themeImage stateMask] | [themeTextAttributes stateMask];
+        OEThemeState stateMask = [backgroundThemeImage stateMask] | [themeImage stateMask] | [themeTextAttributes stateMask];
 
         BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivityMask) != (stateMask & OEThemeStateAnyWindowActivityMask);
         BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouseMask)          != (stateMask & OEThemeStateAnyMouseMask);

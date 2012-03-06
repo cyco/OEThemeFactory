@@ -71,7 +71,7 @@ static inline id OEKeyForState(OEThemeState state)
                 [_states enumerateObjectsUsingBlock:
                  ^ (NSNumber *obj, NSUInteger idx, BOOL *stop)
                  {
-                     NSUInteger state = [obj unsignedIntegerValue];
+                     OEThemeState state = [obj unsignedIntegerValue];
                      if(state != OEThemeStateDefaultMask)
                      {
                          if(!(state & OEThemeStateAnyWindowActivityMask)) state |= OEThemeStateAnyWindowActivityMask;

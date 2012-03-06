@@ -12,7 +12,7 @@
 @interface OEGradientView : NSView
 {
 @private
-    NSUInteger _cachedStateMask;
+    OEThemeState _cachedStateMask;
     OEThemeGradient *_themeGradient;
     NSTrackingArea *_mouseTrackingArea;
 }

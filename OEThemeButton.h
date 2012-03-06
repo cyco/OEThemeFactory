@@ -15,7 +15,7 @@
 @interface OEThemeButton : NSButton
 {
 @package
-    NSUInteger _cachedStateMask;
+    OEThemeState _cachedStateMask;
 
 @private
     NSTrackingArea *_mouseTrackingArea;
