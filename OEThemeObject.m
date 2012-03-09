@@ -121,7 +121,7 @@ static inline id OEKeyForState(OEThemeState state)
     return nil;
 }
 
-+ (OEThemeState)themeStateWithWindowActive:(BOOL)windowActive buttonState:(NSInteger)state selected:(BOOL)selected enabled:(BOOL)enabled focused:(BOOL)focused houseHover:(BOOL)hover
++ (OEThemeState)themeStateWithWindowActive:(BOOL)windowActive buttonState:(NSCellStateValue)state selected:(BOOL)selected enabled:(BOOL)enabled focused:(BOOL)focused houseHover:(BOOL)hover
 {
     return ((windowActive ? OEThemeInputStateWindowActive : OEThemeInputStateWindowInactive) |
             (selected     ? OEThemeInputStatePressed      : OEThemeInputStateUnpressed)      |
