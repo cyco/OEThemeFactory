@@ -216,53 +216,39 @@
     return attributes;
 }
 
-- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
+- (void)drawBezelWithFrame:(NSRect)frame inView:(NSView*)controlView
 {
-    if(_backgroundThemeImage == nil)
-    {
-        [super drawWithFrame:cellFrame inView:controlView];
-    }
-    else
-    {
-        const OEThemeState state      = [self OE_currentState];
-        const NSRect       targetRect = cellFrame;
+    if(_backgroundThemeImage == nil) return;
 
-        [[_backgroundThemeImage imageForState:state] drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-        [self drawInteriorWithFrame:[self drawingRectForBounds:cellFrame] inView:controlView];
-    }
+    const OEThemeState state      = [self OE_currentState];
+    const NSRect       targetRect = frame;
+
+    [[_backgroundThemeImage imageForState:state] drawInRect:targetRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+}
+
+- (void)drawImage:(NSImage *)image withFrame:(NSRect)frame inView:(NSView *)controlView
+{
+    [super drawImage:[self image] withFrame:frame inView:controlView];
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    NSRect imageRect = [self imageRectForBounds:cellFrame];
     NSRect textRect  = [self titleRectForBounds:cellFrame];
-    [[self attributedTitle] drawInRect:textRect];
-    [[self image] drawAtPoint:imageRect.origin fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    NSRect imageRect = [self imageRectForBounds:cellFrame];
+
+    if(!NSIsEmptyRect(textRect))  [super drawTitle:[self attributedTitle] withFrame:textRect inView:controlView];
+    if(!NSIsEmptyRect(imageRect)) [super drawImage:[self image] withFrame:imageRect inView:controlView];
 }
 
 - (NSImage *)image
 {
-    if(_themeImage == nil)
-    {
-        return [super image];
-    }
-    else
-    {
-        return [_themeImage imageForState:[self OE_currentState]];
-    }
+    return (_themeImage == nil ? [super image] : [_themeImage imageForState:[self OE_currentState]]);
 }
 
 - (NSAttributedString *)attributedTitle
 {
-    if(_themeTextAttributes == nil)
-    {
-        return [super attributedTitle];
-    }
-    else
-    {
-        NSDictionary *attributes = [self OE_attributesForState:[self OE_currentState]];
-        return (!attributes ? [super attributedTitle] : [[NSAttributedString alloc] initWithString:[self title] attributes:attributes]);
-    }
+    NSDictionary *attributes = [self OE_attributesForState:[self OE_currentState]];
+    return (!attributes ? [super attributedTitle] : [[NSAttributedString alloc] initWithString:[self title] attributes:attributes]);
 }
 
 @end
