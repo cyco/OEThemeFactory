@@ -30,6 +30,7 @@
     OEThemeButtonCell *cell = [self cell];
     if([cell isKindOfClass:[OEThemeButtonCell class]] && newWindow && (_cachedStateMask & OEThemeStateAnyWindowActivity))
     {
+        // Register with the default notification center for changes in the window's keyedness only if one of the themed elements (the state mask) is influenced by the window's activity
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidBecomeMainNotification object:newWindow];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidResignMainNotification object:newWindow];
     }
@@ -47,6 +48,7 @@
     OEThemeButtonCell *cell = [self cell];
     if([cell isKindOfClass:[OEThemeButtonCell class]] && (_cachedStateMask & OEThemeStateAnyMouse))
     {
+        // Track mouse enter and exit (hover and off) events only if the one of the themed elements (the state mask) is influenced by the mouse
         _mouseTrackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
         [self addTrackingArea:_mouseTrackingArea];
     }
@@ -54,21 +56,25 @@
 
 - (void)mouseEntered:(NSEvent *)theEvent
 {
+    // Mouse has entered / mouse hover, we want to redisplay the button with the new state...this is only fired when the mouse tracking is installed
     [self setNeedsDisplay];
 }
 
 - (void)mouseExited:(NSEvent *)theEvent
 {
+    // Mouse has exited / mouse off, we want to redisplay the button with the new state...this is only fired when the mouse tracking is installed
     [self setNeedsDisplay];
 }
 
 - (void)OE_windowKeyChanged:(NSNotification *)notification
 {
+    // The keyedness of the window has changed, we want to redisplay the button with the new state, this is only fired when NSWindowDidBecomeMainNotification and NSWindowDidResignMainNotification is registered.
     [self setNeedsDisplay];
 }
 
 - (void)OE_updateNotifications
 {
+    // This method determins if we need to register ourselves with the notification center and/or we need to add mouse tracking
     OEThemeButtonCell *cell = [self cell];
     if([cell isKindOfClass:[OEThemeButtonCell class]])
     {
@@ -76,11 +82,14 @@
         OEThemeImage          *themeImage           = [cell themeImage];
         OEThemeTextAttributes *themeTextAttributes  = [cell themeTextAttributes];
 
+        // Create a new stateMask that is an aggregate of all the themed elements
         NSUInteger stateMask = [backgroundThemeImage stateMask] | [themeImage stateMask] | [themeTextAttributes stateMask];
 
+        // Check to see if there are any changes to the window activity and mouse components of the state mask
         BOOL updateWindowActivity = (_cachedStateMask & OEThemeStateAnyWindowActivity) != (stateMask & OEThemeStateAnyWindowActivity);
         BOOL updateMouseActivity  = (_cachedStateMask & OEThemeStateAnyMouse)          != (stateMask & OEThemeStateAnyMouse);
 
+        // Update the state mask and register for notifications as necessary
         _cachedStateMask = stateMask;
         if(updateWindowActivity)
         {
@@ -180,18 +189,29 @@
 
 - (OEThemeState)OE_currentState
 {
+    // This is a convenience method that retrieves the current state of the button
     OEThemeButton *button = (OEThemeButton *)[self controlView];
     if(![button isKindOfClass:[OEThemeButton class]]) return OEThemeStateDefault;
 
-    NSWindow   *window       = [[self controlView] window];
-    const BOOL  focused      = [window firstResponder] == [self controlView];
-    const BOOL  windowActive = (button->_cachedStateMask & OEThemeStateAnyWindowActivity) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
-    BOOL        hover        = NO;
+    NSUInteger stateMask = button->_cachedStateMask;
 
-    if(button->_cachedStateMask & OEThemeStateAnyMouse)
+    BOOL focused      = NO;
+    BOOL windowActive = NO;
+    BOOL hover        = NO;
+
+    if((stateMask & OEThemeStateAnyFocus) || (stateMask & OEThemeStateAnyMouse) || (stateMask & OEThemeStateAnyWindowActivity))
     {
-        const NSPoint p = [[self controlView] convertPointFromBase:[window convertScreenToBase:[NSEvent mouseLocation]]];
-        hover           = NSPointInRect(p, [[self controlView] bounds]);
+        // Set the focused, windowActive, and hover properties only if the state mask is tracking the button's focus, mouse hover, and window activity properties
+        NSWindow   *window       = [[self controlView] window];
+
+        focused      = [window firstResponder] == [self controlView];
+        windowActive = (stateMask & OEThemeStateAnyWindowActivity) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
+
+        if(button->_cachedStateMask & OEThemeStateAnyMouse)
+        {
+            const NSPoint p = [[self controlView] convertPointFromBase:[window convertScreenToBase:[NSEvent mouseLocation]]];
+            hover           = NSPointInRect(p, [[self controlView] bounds]);
+        }
     }
 
     return [OEThemeObject themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:hover];
@@ -199,6 +219,7 @@
 
 - (NSDictionary *)OE_attributesForState:(OEThemeState)state
 {
+    // This is a convenience method for creating the attributes for an NSAttributedString
     if(!_themeTextAttributes) return nil;
     if(!_style) _style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
 
