@@ -32,9 +32,4 @@ static NSString * const OEThemeImageVerticalAttributeName = @"Vertical";
     return (NSImage *)[self objectForState:state];
 }
 
-- (void)setInLayer:(CALayer *)layer withState:(OEThemeState)state
-{
-    [layer setContents:[self imageForState:state]];
-}
-
 @end

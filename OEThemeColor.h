@@ -12,9 +12,4 @@
 
 - (NSColor *)colorForState:(OEThemeState)state;
 
-- (void)setFillInContext:(CGContextRef)ctx withState:(OEThemeState)state;
-- (void)setStrokeInContext:(CGContextRef)ctx withState:(OEThemeState)state;
-- (void)setFillWithState:(OEThemeState)state;
-- (void)setStrokeWithState:(OEThemeState)state;
-
 @end

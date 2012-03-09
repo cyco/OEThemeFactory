@@ -31,11 +31,6 @@ extern NSString * const OEThemeObjectValueAttributeName;
 // Retrieves UI object for state specified
 - (id)objectForState:(OEThemeState)state;
 
-// Convenience functions for setting NSGraphicContext, CGContextRef, and CALayer attributes
-- (void)setInContext:(CGContextRef)ctx withState:(OEThemeState)state;
-- (void)setWithState:(OEThemeState)state;
-- (void)setInLayer:(CALayer *)layer withState:(OEThemeState)state;
-
 // Aggregate mask that filters out any unspecified state input
 @property (nonatomic, readonly) NSUInteger stateMask;
 

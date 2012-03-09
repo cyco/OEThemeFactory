@@ -201,16 +201,4 @@ static inline id OEKeyForState(OEThemeState state)
     return (results == [NSNull null] ? nil : results);
 }
 
-- (void)setInContext:(CGContextRef)ctx withState:(OEThemeState)state
-{
-}
-
-- (void)setWithState:(OEThemeState)state
-{
-}
-
-- (void)setInLayer:(CALayer *)layer withState:(OEThemeState)state
-{
-}
-
 @end
