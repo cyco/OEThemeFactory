@@ -11,14 +11,9 @@
 
 @implementation OEThemeColor
 
-+ (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
++ (id)parseWithDefinition:(NSDictionary *)definition
 {
-    id result = nil;
-
-    if([definition isKindOfClass:[NSDictionary class]])  result = NSColorFromString([definition valueForKey:OEThemeObjectValueAttributeName]);
-    else if([definition isKindOfClass:[NSString class]]) result = NSColorFromString(definition);
-
-    return result;
+    return NSColorFromString([definition valueForKey:OEThemeObjectValueAttributeName]);
 }
 
 - (NSColor *)colorForState:(OEThemeState)state

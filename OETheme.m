@@ -12,6 +12,10 @@
 #import "OEThemeImage.h"
 #import "OEThemeGradient.h"
 
+/*
+ Input state tokens used by OEThemeStateFromString to parse an NSString into an OEThemeState. The 'Default' token
+ takes precedent over any other token and will automatically set the OEThemeState to OEThemeStateDefault.
+ */
 static NSString * const OEThemeInputStateDefaultName        = @"Default";
 static NSString * const OEThemeInputStateWindowInactiveName = @"Window Inactive";
 static NSString * const OEThemeInputStateWindowActiveName   = @"Window Active";
@@ -27,6 +31,10 @@ static NSString * const OEThemeInputStateFocusedName        = @"Focused";
 static NSString * const OEThemeInputStateMouseOverName      = @"Mouse Over";
 static NSString * const OEThemeInputStateMouseOffName       = @"Mouse Off";
 
+/*
+ These are extended input state tokens to create OEThemeStates with a 'wild card' for the input states specified. If
+ a particular input state is left unspecified, these wild cards are implicitly specified.
+ */
 static NSString * const OEThemeStateAnyWindowActivityName   = @"Any Window State";
 static NSString * const OEThemeStateAnyToggleName           = @"Any Toggle";
 static NSString * const OEThemeStateAnySelectionName        = @"Any Selection";
@@ -34,6 +42,7 @@ static NSString * const OEThemeStateAnyInteractionName      = @"Any Interaction"
 static NSString * const OEThemeStateAnyFocusName            = @"Any Focus";
 static NSString * const OEThemeStateAnyMouseName            = @"Any Mouse State";
 
+//  Theme.plist Key Names
 static NSString * const OEThemeColorKey                     = @"Colors";
 static NSString * const OEThemeFontKey                      = @"Fonts";
 static NSString * const OEThemeImageKey                     = @"Images";
@@ -50,19 +59,24 @@ static NSString * const OEThemeGradientKey                  = @"Gradients";
 
 - (id)init
 {
+    // Dealloc self if there is no Theme file to parse, the caller should raise a critical error here and halt
+    // the application's progress
     NSString *themeFile = [[NSBundle mainBundle] pathForResource:@"Theme" ofType:@"plist"];
     if(!themeFile) return nil;
 
     if((self = [super init]))
     {
+        // Dealloc self if the Theme.plist failed to load, as in previous critical error, the application should halt
+        // at this point.
         NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:themeFile];
         if(!dictionary) return nil;
 
+        // Parse through all the types of UI elements: Colors, Fonts, Images, and Gradients
         NSDictionary *classesBySection = [NSDictionary dictionaryWithObjectsAndKeys:
-                                          [OEThemeColor class], OEThemeColorKey,
+                                          [OEThemeColor class],          OEThemeColorKey,
                                           [OEThemeTextAttributes class], OEThemeFontKey,
-                                          [OEThemeImage class], OEThemeImageKey,
-                                          [OEThemeGradient class], OEThemeGradientKey,
+                                          [OEThemeImage class],          OEThemeImageKey,
+                                          [OEThemeGradient class],       OEThemeGradientKey,
                                           nil];
 
         __block NSMutableDictionary *itemsByType = [NSMutableDictionary dictionary];
@@ -91,10 +105,13 @@ static NSString * const OEThemeGradientKey                  = @"Gradients";
 
 - (NSDictionary *)OE_parseThemeSection:(NSDictionary *)section forThemeClass:(Class)class
 {
+    // Each type of UI element represented in the Theme.plist should have an associated subclass of OEThemeObject.
+    // OEThemeObject is responsible for parsing the elements specified in that section of the Theme.plist
     __block NSMutableDictionary *results = [NSMutableDictionary dictionary];
     [section enumerateKeysAndObjectsUsingBlock:
      ^ (id key, id obj, BOOL *stop)
      {
+         // Each subclass of OEThemeObject should implement a customized version of +parseWithDefinition:inheritedDefinition: to be able to parse objects
          id themeItem = [[class alloc] initWithDefinition:obj];
          if(themeItem) [results setValue:themeItem forKey:key];
      }];
@@ -153,6 +170,7 @@ NSString *NSStringFromThemeState(OEThemeState state)
 {
     NSMutableArray *results = [NSMutableArray array];
 
+    // Empty states implicitly represent the 'Default' state
     if(state == 0 || state == OEThemeStateDefault) [results addObject:OEThemeInputStateDefaultName];
     else
     {
@@ -187,33 +205,39 @@ NSString *NSStringFromThemeState(OEThemeState state)
 
 OEThemeState OEThemeStateFromString(NSString *state)
 {
-    OEThemeState  result     = 0;
-    NSArray      *components = [state componentsSeparatedByString:@","];
+    __block OEThemeState result = 0;
+    [[state componentsSeparatedByString:@","] enumerateObjectsUsingBlock:
+     ^ (NSString *obj, NSUInteger idx, BOOL *stop)
+     {
+         NSString *component = [obj stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 
-    for(id component in components)
-    {
-        NSString *trimmedComponent = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateDefaultName] == NSOrderedSame)             break;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyWindowActivityName] == NSOrderedSame)   result |= OEThemeStateAnyWindowActivity;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyToggleName] == NSOrderedSame)           result |= OEThemeStateAnyToggle;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnySelectionName] == NSOrderedSame)        result |= OEThemeStateAnySelection;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyInteractionName] == NSOrderedSame)      result |= OEThemeStateAnyInteraction;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyFocusName] == NSOrderedSame)            result |= OEThemeStateAnyFocus;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeStateAnyMouseName] == NSOrderedSame)            result |= OEThemeStateAnyMouse;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateWindowInactiveName] == NSOrderedSame) result |= OEThemeInputStateWindowInactive;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateWindowActiveName] == NSOrderedSame)   result |= OEThemeInputStateWindowActive;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateToggleOffName] == NSOrderedSame)      result |= OEThemeInputStateToggleOff;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateToggleOnName] == NSOrderedSame)       result |= OEThemeInputStateToggleOn;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateToggleMixedName] == NSOrderedSame)    result |= OEThemeInputStateToggleMixed;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateUnpressedName] == NSOrderedSame)      result |= OEThemeInputStateUnpressed;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStatePressedName] == NSOrderedSame)        result |= OEThemeInputStatePressed;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateDisabledName] == NSOrderedSame)       result |= OEThemeInputStateDisabled;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateEnabledName] == NSOrderedSame)        result |= OEThemeInputStateEnabled;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateUnfocusedName] == NSOrderedSame)      result |= OEThemeInputStateUnfocused;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateFocusedName] == NSOrderedSame)        result |= OEThemeInputStateFocused;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateMouseOffName] == NSOrderedSame)       result |= OEThemeInputStateMouseOff;
-        else if([trimmedComponent caseInsensitiveCompare:OEThemeInputStateMouseOverName] == NSOrderedSame)      result |= OEThemeInputStateMouseOver;
-    }
+         if([component caseInsensitiveCompare:OEThemeInputStateDefaultName] == NSOrderedSame)
+         {
+             // The 'Default' input state takes precendent over any other input state
+             result = OEThemeStateDefault;
+             *stop  = YES;
+         }
+         else if([component caseInsensitiveCompare:OEThemeStateAnyWindowActivityName]   == NSOrderedSame) result |= OEThemeStateAnyWindowActivity;
+         else if([component caseInsensitiveCompare:OEThemeStateAnyToggleName]           == NSOrderedSame) result |= OEThemeStateAnyToggle;
+         else if([component caseInsensitiveCompare:OEThemeStateAnySelectionName]        == NSOrderedSame) result |= OEThemeStateAnySelection;
+         else if([component caseInsensitiveCompare:OEThemeStateAnyInteractionName]      == NSOrderedSame) result |= OEThemeStateAnyInteraction;
+         else if([component caseInsensitiveCompare:OEThemeStateAnyFocusName]            == NSOrderedSame) result |= OEThemeStateAnyFocus;
+         else if([component caseInsensitiveCompare:OEThemeStateAnyMouseName]            == NSOrderedSame) result |= OEThemeStateAnyMouse;
+         else if([component caseInsensitiveCompare:OEThemeInputStateWindowInactiveName] == NSOrderedSame) result |= OEThemeInputStateWindowInactive;
+         else if([component caseInsensitiveCompare:OEThemeInputStateWindowActiveName]   == NSOrderedSame) result |= OEThemeInputStateWindowActive;
+         else if([component caseInsensitiveCompare:OEThemeInputStateToggleOffName]      == NSOrderedSame) result |= OEThemeInputStateToggleOff;
+         else if([component caseInsensitiveCompare:OEThemeInputStateToggleOnName]       == NSOrderedSame) result |= OEThemeInputStateToggleOn;
+         else if([component caseInsensitiveCompare:OEThemeInputStateToggleMixedName]    == NSOrderedSame) result |= OEThemeInputStateToggleMixed;
+         else if([component caseInsensitiveCompare:OEThemeInputStateUnpressedName]      == NSOrderedSame) result |= OEThemeInputStateUnpressed;
+         else if([component caseInsensitiveCompare:OEThemeInputStatePressedName]        == NSOrderedSame) result |= OEThemeInputStatePressed;
+         else if([component caseInsensitiveCompare:OEThemeInputStateDisabledName]       == NSOrderedSame) result |= OEThemeInputStateDisabled;
+         else if([component caseInsensitiveCompare:OEThemeInputStateEnabledName]        == NSOrderedSame) result |= OEThemeInputStateEnabled;
+         else if([component caseInsensitiveCompare:OEThemeInputStateUnfocusedName]      == NSOrderedSame) result |= OEThemeInputStateUnfocused;
+         else if([component caseInsensitiveCompare:OEThemeInputStateFocusedName]        == NSOrderedSame) result |= OEThemeInputStateFocused;
+         else if([component caseInsensitiveCompare:OEThemeInputStateMouseOffName]       == NSOrderedSame) result |= OEThemeInputStateMouseOff;
+         else if([component caseInsensitiveCompare:OEThemeInputStateMouseOverName]      == NSOrderedSame) result |= OEThemeInputStateMouseOver;
+     }];
 
+    // Implicitly return the default state, if no input state was specified
     return (result == 0 ? OEThemeStateDefault : result);
 }

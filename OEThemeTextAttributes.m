@@ -22,98 +22,92 @@ static NSString * const OEThemeShadowOffsetAttributeName        = @"Offset";
 static NSString * const OEThemeShadowBlurRadiusAttributeName    = @"BlurRadius";
 static NSString * const OEThemeShadowColorAttributeName         = @"Color";
 
+static NSString * const OEThemeFontTraitBoldName   = @"Bold";
+static NSString * const OEThemeFontTraitUnboldName = @"Unbold";
+static NSString * const OEThemeFontTraitItalicName = @"Italic";
+static NSString * const OEThemeFontTraitUnitalic   = @"Unitalic";
+
+// Parses a common separated NSString that specifies font traits
 NSFontTraitMask NSFontTraitMaskFromString(NSString *string)
 {
-    NSFontTraitMask  mask = 0;
-    NSArray         *components = [string componentsSeparatedByString:@","];
+    __block NSFontTraitMask mask = 0;
 
-    for(NSString *component in components)
-    {
-        NSString *trimmedComponent = [component stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        if([trimmedComponent caseInsensitiveCompare:@"Bold"])          mask |= NSBoldFontMask;
-        else if([trimmedComponent caseInsensitiveCompare:@"Unbold"])   mask |= NSUnboldFontMask;
-        else if([trimmedComponent caseInsensitiveCompare:@"Italic"])   mask |= NSItalicFontMask;
-        else if([trimmedComponent caseInsensitiveCompare:@"Unitalic"]) mask |= NSUnitalicFontMask;
-    }
+    [[string componentsSeparatedByString:@","] enumerateObjectsUsingBlock:
+     ^ (NSString *obj, NSUInteger idx, BOOL *stop)
+     {
+         NSString *trait = [obj stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+
+         if([trait caseInsensitiveCompare:OEThemeFontTraitBoldName])        mask |= NSBoldFontMask;
+         else if([trait caseInsensitiveCompare:OEThemeFontTraitUnboldName]) mask |= NSUnboldFontMask;
+         else if([trait caseInsensitiveCompare:OEThemeFontTraitItalicName]) mask |= NSItalicFontMask;
+         else if([trait caseInsensitiveCompare:OEThemeFontTraitUnitalic])   mask |= NSUnitalicFontMask;
+     }];
 
     return mask;
 }
 
-id _OEObjectFromDictionary(NSDictionary *dictionary, NSString *attributeName, Class expectedClass, id (^extract)(id obj))
+// This is a convenience function that allows us to retrieve an object from the specified dictionary
+id _OEObjectFromDictionary(NSDictionary *dictionary, NSString *attributeName, Class expectedClass, id (^parse)(id obj))
 {
     id obj = [dictionary objectForKey:attributeName];
-    return ([obj isKindOfClass:expectedClass] ? obj : extract(obj));
+
+    // If the object already conforms to the requested class, then return the object, other wise parse the object
+    return ([obj isKindOfClass:expectedClass] ? obj : parse(obj));
 }
 
 @implementation OEThemeTextAttributes
 
-+ (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
++ (id)parseWithDefinition:(NSDictionary *)definition
 {
-    id result = nil;
-    if([definition isKindOfClass:[NSDictionary class]])
-    {
-        NSMutableDictionary *newDefinition = nil;
-        if(inherited)
-        {
-            newDefinition = [inherited mutableCopy];
-            [newDefinition setValuesForKeysWithDictionary:definition];
-        }
-        else
-        {
-            newDefinition = [definition mutableCopy];
-        }
+    // Parse the values from the new definition
+    NSColor *foregroundColor = _OEObjectFromDictionary(definition, OEThemeFontForegroundColorAttributeName, [NSColor class],
+                                                       ^ id (id color) {
+                                                           return ([color isKindOfClass:[NSString class]] ? (NSColorFromString(color) ?: [NSColor blackColor]) : [NSColor blackColor]);
+                                                       });
 
-        NSColor *foregroundColor = _OEObjectFromDictionary(newDefinition, OEThemeFontForegroundColorAttributeName, [NSColor class],
-                                                           ^ id (id color) {
-                                                               return ([color isKindOfClass:[NSString class]] ? (NSColorFromString(color) ?: [NSColor blackColor]) : [NSColor blackColor]);
-                                                           });
+    NSColor *backgroundColor = _OEObjectFromDictionary(definition, OEThemeFontBackgroundColorAttributeName, [NSColor class],
+                                                       ^ id (id color) {
+                                                           return ([color isKindOfClass:[NSString class]] ? (NSColorFromString(color) ?: nil) : nil);
+                                                       });
 
-        NSColor *backgroundColor = _OEObjectFromDictionary(newDefinition, OEThemeFontBackgroundColorAttributeName, [NSColor class],
-                                                           ^ id (id color) {
-                                                               return ([color isKindOfClass:[NSString class]] ? (NSColorFromString(color) ?: nil) : nil);
-                                                           });
+    NSShadow *shadow = _OEObjectFromDictionary(definition, OEThemeFontShadowAttributeName, [NSShadow class],
+                                               ^ id (id shadow) {
+                                                   if(![shadow isKindOfClass:[NSDictionary class]]) return nil;
 
-        NSShadow *shadow = _OEObjectFromDictionary(newDefinition, OEThemeFontShadowAttributeName, [NSShadow class],
-                                                   ^ id (id shadow) {
-                                                       if(![shadow isKindOfClass:[NSDictionary class]]) return nil;
+                                                   NSSize  offset     = [[shadow valueForKey:OEThemeShadowOffsetAttributeName] sizeValue];
+                                                   CGFloat blurRadius = [[shadow valueForKey:OEThemeShadowBlurRadiusAttributeName] floatValue];
+                                                   id      color      = [shadow objectForKey:OEThemeShadowColorAttributeName];
 
-                                                       NSSize  offset     = [[shadow valueForKey:OEThemeShadowOffsetAttributeName] sizeValue];
-                                                       CGFloat blurRadius = [[shadow valueForKey:OEThemeShadowBlurRadiusAttributeName] floatValue];
-                                                       id      color      = [shadow objectForKey:OEThemeShadowColorAttributeName];
+                                                   if([color isKindOfClass:[NSString class]])      color = (NSColorFromString(color) ?: [NSColor blackColor]);
+                                                   else if(![color isKindOfClass:[NSColor class]]) color = [NSColor blackColor];
 
-                                                       if([color isKindOfClass:[NSString class]])      color = (NSColorFromString(color) ?: [NSColor blackColor]);
-                                                       else if(![color isKindOfClass:[NSColor class]]) color = [NSColor blackColor];
+                                                   NSShadow *result = [[NSShadow alloc] init];
+                                                   [result setShadowOffset:offset];
+                                                   [result setShadowBlurRadius:blurRadius];
+                                                   [result setShadowColor:color];
 
-                                                       NSShadow *result = [[NSShadow alloc] init];
-                                                       [result setShadowOffset:offset];
-                                                       [result setShadowBlurRadius:blurRadius];
-                                                       [result setShadowColor:color];
+                                                   return result;
+                                               });
 
-                                                       return result;
-                                                   });
+    NSString   *familyAttribute = ([definition valueForKey:OEThemeFontFamilyAttributeName]   ?: [definition objectForKey:OEThemeObjectValueAttributeName]);
+    CGFloat     size            = [([definition objectForKey:OEThemeFontSizeAttributeName]   ?: [NSNumber numberWithFloat:12.0]) floatValue];
+    NSUInteger  weight          = [([definition objectForKey:OEThemeFontWeightAttributeName] ?: [NSNumber numberWithInt:5]) intValue];
 
-        NSString   *familyAttribute = [newDefinition valueForKey:OEThemeFontFamilyAttributeName];
-        CGFloat     size            = [([newDefinition objectForKey:OEThemeFontSizeAttributeName] ?: [NSNumber numberWithFloat:12.0]) floatValue];
-        NSUInteger  weight          = [([newDefinition objectForKey:OEThemeFontWeightAttributeName] ?: [NSNumber numberWithInt:5]) intValue];
+    NSFontTraitMask  mask = [_OEObjectFromDictionary(definition, OEThemeFontTraitsAttributeName, [NSNumber class],
+                                                     ^ id (id mask) {
+                                                         if(![mask isKindOfClass:[NSString class]]) return [NSNumber numberWithInt:0];
+                                                         return [NSNumber numberWithUnsignedInteger:NSFontTraitMaskFromString(mask)];
+                                                     }) unsignedIntegerValue];
 
-        NSFontTraitMask  mask = [_OEObjectFromDictionary(newDefinition, OEThemeFontTraitsAttributeName, [NSNumber class],
-                                                         ^ id (id mask) {
-                                                             if(![mask isKindOfClass:[NSString class]]) return [NSNumber numberWithInt:0];
-                                                             return [NSNumber numberWithUnsignedInteger:NSFontTraitMaskFromString(mask)];
-                                                         }) unsignedIntegerValue];
+    NSFont *font = [[NSFontManager sharedFontManager] fontWithFamily:familyAttribute traits:mask weight:weight size:size];
 
-        NSFont *font = [[NSFontManager sharedFontManager] fontWithFamily:familyAttribute traits:mask weight:weight size:size];
+    NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
+    if(font)            [attributes setValue:font            forKey:NSFontAttributeName];
+    if(shadow)          [attributes setValue:shadow          forKey:NSShadowAttributeName];
+    if(foregroundColor) [attributes setValue:foregroundColor forKey:NSForegroundColorAttributeName];
+    if(backgroundColor) [attributes setValue:backgroundColor forKey:NSBackgroundColorAttributeName];
 
-        NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-        if(font)            [attributes setValue:font            forKey:NSFontAttributeName];
-        if(shadow)          [attributes setValue:shadow          forKey:NSShadowAttributeName];
-        if(foregroundColor) [attributes setValue:foregroundColor forKey:NSForegroundColorAttributeName];
-        if(backgroundColor) [attributes setValue:backgroundColor forKey:NSBackgroundColorAttributeName];
-
-        result = [attributes copy];
-    }
-
-    return result;
+    return [attributes copy];
 }
 
 - (NSDictionary *)textAttributesForState:(OEThemeState)state

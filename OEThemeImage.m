@@ -15,38 +15,16 @@ static NSString * const OEThemeImageVerticalAttributeName = @"Vertical";
 
 @implementation OEThemeImage
 
-+ (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
++ (id)parseWithDefinition:(NSDictionary *)definition
 {
-    id result = nil;
-    if([definition isKindOfClass:[NSDictionary class]])
-    {
-        NSMutableDictionary *newDefinition = nil;
-        if(inherited)
-        {
-            newDefinition = [inherited mutableCopy];
-            [newDefinition setValuesForKeysWithDictionary:definition];
-        }
-        else
-        {
-            newDefinition = [definition mutableCopy];
-        }
+    NSString *resource = ([definition valueForKey:OEThemeImageResourceAttributeName] ?: [definition valueForKey:OEThemeObjectValueAttributeName]);
+    if (resource == nil) return nil;
 
-        NSString *resource = [newDefinition valueForKey:OEThemeImageResourceAttributeName];
-        if(resource)
-        {
-            NSArray *parts = [newDefinition valueForKey:OEThemeImagePartsAttributeName];
-            BOOL vertical  = [[newDefinition objectForKey:OEThemeImageVerticalAttributeName] boolValue];
+    NSArray *parts    = [definition valueForKey:OEThemeImagePartsAttributeName];
+    BOOL     vertical = [[definition objectForKey:OEThemeImageVerticalAttributeName] boolValue];
 
-            if(![parts isKindOfClass:[NSArray class]]) parts = [NSArray array];
-            result = [[NSImage imageNamed:resource] imageFromParts:parts vertical:vertical];
-        }
-    }
-    else if([definition isKindOfClass:[NSString class]])
-    {
-        result = [self parseWithDefinition:[NSDictionary dictionaryWithObject:definition forKey:OEThemeImageResourceAttributeName] inheritedDefinition:inherited];
-    }
-
-    return result;
+    if(![parts isKindOfClass:[NSArray class]]) parts = nil;
+    return [[NSImage imageNamed:resource] imageFromParts:parts vertical:vertical];
 }
 
 - (NSImage *)imageForState:(OEThemeState)state

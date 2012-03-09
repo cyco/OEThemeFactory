@@ -37,6 +37,11 @@ enum
     OEThemeInputStateMouseOver      = 1 << 12,
 };
 
+/*
+ In the Theme.plist you can define an 'Any' input state for input states that should be ignored when determining which
+ object to apply.  'Any' input states can be set explicitly, if an input state is unspecified then the 'Any' mask is
+ set implicitly.
+ */
 enum
 {
     OEThemeStateAnyWindowActivity = OEThemeInputStateWindowInactive | OEThemeInputStateWindowActive,
@@ -49,7 +54,11 @@ enum
 };
 typedef NSUInteger OEThemeState;
 
+// Retrieves an NSString from an OEThemeState
 extern NSString     *NSStringFromThemeState(OEThemeState state);
+
+// Parses an NSString into an OEThemeState, the NSString is a comma separated list of tokens. The order of the token's
+// appearance has no effect on the final value.
 extern OEThemeState  OEThemeStateFromString(NSString *state);
 
 @class OEThemeColor;
@@ -57,10 +66,19 @@ extern OEThemeState  OEThemeStateFromString(NSString *state);
 @class OEThemeImage;
 @class OEThemeGradient;
 
+/*
+ The theme manager is accessed using OETheme's singleton method +sharedTheme.  For example:
+   [[OETheme sharedTheme] themeColorForKey:@"my color"];
+
+ This singleton method is responsible for loading / parsing the Theme.plist file and maintaining the necessary UI
+ elements to drive the application's interface.  The first call to +sharedTheme will instantiate all the necessary
+ objects, therefore, it should be called as early on in the application's lifecycle as possible. If +sharedTheme fails
+ to load then (in theory) the application should not be able to function.
+ */
 @interface OETheme : NSObject
 {
 @private
-    NSMutableDictionary *_objectsByType;
+    NSMutableDictionary *_objectsByType;  // Storage location where the themed objects for the various types are stored
 }
 
 + (id)sharedTheme;

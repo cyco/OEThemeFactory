@@ -14,57 +14,41 @@ static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
 
 @implementation OEThemeGradient
 
-+ (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
++ (id)parseWithDefinition:(NSDictionary *)definition
 {
-    id result = nil;
-    if([definition isKindOfClass:[NSDictionary class]])
+    NSArray *rawLocations    = [definition valueForKey:OEThemeGradientLocationsAttributeName];
+    NSArray *rawColorStrings = [definition valueForKey:OEThemeGradientColorsAttributeName];
+
+    if([rawLocations count] == 0 || [rawColorStrings count] == 0 || [rawLocations count] != [rawColorStrings count]) return nil;
+
+    // Translate color strings to NSColor
+    id              result = nil;
+    NSMutableArray *colors = [NSMutableArray arrayWithCapacity:[rawColorStrings count]];
+
+    [rawColorStrings enumerateObjectsUsingBlock:
+     ^ (id obj, NSUInteger idx, BOOL *stop)
+     {
+         [colors addObject:(NSColorFromString(obj) ?: [NSColor blackColor])];
+     }];
+
+    // Translate NSNumber objects to CGFloats
+    CGFloat *locations = NULL;
+    @try
     {
-        NSMutableDictionary *newDefinition = nil;
-        if(inherited)
+        if((locations = calloc([colors count], sizeof(CGFloat))) != NULL)
         {
-            newDefinition = [inherited mutableCopy];
-            [newDefinition setValuesForKeysWithDictionary:definition];
-        }
-        else
-        {
-            newDefinition = [definition mutableCopy];
-        }
-
-        NSArray *rawLocations    = [definition valueForKey:OEThemeGradientLocationsAttributeName];
-        NSArray *rawColorStrings = [definition valueForKey:OEThemeGradientColorsAttributeName];
-
-        if([rawLocations count] == [rawColorStrings count])
-        {
-            // Translate color strings to NSColor
-            NSMutableArray *colors = [NSMutableArray arrayWithCapacity:[rawColorStrings count]];
-            [rawColorStrings enumerateObjectsUsingBlock:
+            [rawLocations enumerateObjectsUsingBlock:
              ^ (id obj, NSUInteger idx, BOOL *stop)
              {
-                 [colors addObject:(NSColorFromString(obj) ?: [NSColor blackColor])];
+                 locations[idx] = [obj floatValue];
              }];
 
-            // Translate NSNumber objects to CGFloats
-            CGFloat *locations = NULL;
-            @try
-            {
-                if((locations = calloc([colors count], sizeof(CGFloat))) != NULL)
-                {
-                    [rawLocations enumerateObjectsUsingBlock:
-                     ^ (id obj, NSUInteger idx, BOOL *stop)
-                     {
-                         locations[idx] = [obj floatValue];
-                     }];
-
-                    result = [[NSGradient alloc] initWithColors:colors atLocations:locations colorSpace:[NSColorSpace genericRGBColorSpace]];
-                }
-            }
-            @finally
-            {
-                if(locations != NULL) free(locations);
-            }
+            result = [[NSGradient alloc] initWithColors:colors atLocations:locations colorSpace:[NSColorSpace genericRGBColorSpace]];
         }
-        else
-            NSLog(@"Inconsistent number of colors and color stops.");
+    }
+    @finally
+    {
+        if(locations != NULL) free(locations);
     }
 
     return result;

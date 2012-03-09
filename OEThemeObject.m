@@ -13,7 +13,8 @@ NSString * const OEThemeObjectValueAttributeName  = @"Value";
 
 static inline id OEKeyForState(OEThemeState state)
 {
-    return [NSNumber numberWithUnsignedInteger:state];
+    // Implicitly define a zero state as the default state
+    return [NSNumber numberWithUnsignedInteger:(state == 0 ? OEThemeStateDefault : state)];
 }
 
 @interface OEThemeObject ()
@@ -35,10 +36,10 @@ static inline id OEKeyForState(OEThemeState state)
 
         if([definition isKindOfClass:[NSDictionary class]])
         {
-            // Create a root definition that is inherited by the sttes specified
+            // Create a root definition that can be inherited by the states specified
             NSMutableDictionary *rootDefinition = [definition mutableCopy];
             [rootDefinition removeObjectForKey:OEThemeObjectStatesAttributeName];
-            [self OE_setValue:[isa parseWithDefinition:rootDefinition inheritedDefinition:nil] forState:OEThemeStateDefault];
+            [self OE_setValue:[isa parseWithDefinition:rootDefinition] forState:OEThemeStateDefault];
 
             // Iterate through each of the state descriptions and create a state table
             NSDictionary *states = [definition valueForKey:OEThemeObjectStatesAttributeName];
@@ -47,18 +48,23 @@ static inline id OEKeyForState(OEThemeState state)
                 [states enumerateKeysAndObjectsUsingBlock:
                  ^ (id key, id obj, BOOL *stop)
                  {
+                     NSMutableDictionary *newDefinition = [rootDefinition mutableCopy];
+                     if([obj isKindOfClass:[NSDictionary class]]) [newDefinition setValuesForKeysWithDictionary:obj];
+                     else                                         [newDefinition setValue:obj forKey:OEThemeObjectValueAttributeName];
+
                      NSString     *trimmedKey = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                      OEThemeState  state      = ([trimmedKey length] == 0 ? OEThemeStateDefault : OEThemeStateFromString(trimmedKey));
-                     id            value      = [isa parseWithDefinition:obj inheritedDefinition:rootDefinition];
-
-                     if(state != OEThemeStateDefault) _stateMask |= state;
+                     id            value      = [isa parseWithDefinition:newDefinition];
                      [self OE_setValue:value forState:state];
+
+                     // Append the state to the state mask
+                     if(state != OEThemeStateDefault) _stateMask |= state;
                  }];
             }
 
             if(_stateMask != OEThemeStateDefault)
             {
-                // Accumulate the bit-mask that all the state's cover
+                // Aggregate the bit-mask that all the state's cover
                 if(_stateMask & OEThemeStateAnyWindowActivity) _stateMask |= OEThemeStateAnyWindowActivity;
                 if(_stateMask & OEThemeStateAnyToggle)         _stateMask |= OEThemeStateAnyToggle;
                 if(_stateMask & OEThemeStateAnySelection)      _stateMask |= OEThemeStateAnySelection;
@@ -74,6 +80,7 @@ static inline id OEKeyForState(OEThemeState state)
                      OEThemeState state = [obj unsignedIntegerValue];
                      if(state != OEThemeStateDefault)
                      {
+                         // Implicitly set any unspecified input state with it's wild card counter part
                          if(!(state & OEThemeStateAnyWindowActivity)) state |= OEThemeStateAnyWindowActivity;
                          if(!(state & OEThemeStateAnyToggle))         state |= OEThemeStateAnyToggle;
                          if(!(state & OEThemeStateAnySelection))      state |= OEThemeStateAnySelection;
@@ -81,8 +88,10 @@ static inline id OEKeyForState(OEThemeState state)
                          if(!(state & OEThemeStateAnyFocus))          state |= OEThemeStateAnyFocus;
                          if(!(state & OEThemeStateAnyMouse))          state |= OEThemeStateAnyMouse;
 
+                         // Trim bits not specified in the state mask
                          state &= _stateMask;
 
+                         // Update state table if the state was modified
                          if(state != [obj unsignedIntegerValue])
                          {
                              [_objectByState setValue:[_objectByState objectForKey:obj] forKey:OEKeyForState(state)];
@@ -92,19 +101,22 @@ static inline id OEKeyForState(OEThemeState state)
                      }
                  }];
 
+                // If the state table was modified then get a sorted list of states that can be used by -objectForState:
                 if(updateStates) _states = [[[_objectByState allKeys] sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
             }
         }
         else
         {
-            [self OE_setValue:[isa parseWithDefinition:definition inheritedDefinition:nil] forState:OEThemeStateDefault];
+            NSDictionary *newDefinition = [NSDictionary dictionaryWithObject:definition forKey:OEThemeObjectValueAttributeName];
+            [self OE_setValue:[isa parseWithDefinition:newDefinition] forState:OEThemeStateDefault];
         }
     }
     return self;
 }
 
-+ (id)parseWithDefinition:(id)definition inheritedDefinition:(NSDictionary *)inherited
++ (id)parseWithDefinition:(id)definition
 {
+    // It is critical that the subclass implements this method
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
@@ -126,53 +138,66 @@ static inline id OEKeyForState(OEThemeState state)
 
 - (void)OE_setValue:(id)value forState:(OEThemeState)state
 {
+    // Assign the state look up table
+    [_objectByState setValue:(value ?: [NSNull null]) forKey:OEKeyForState(state)];
+
+    // Insert the state in the states array (while maintaining a sorted array)
     const NSUInteger  count      = [_states count];
     NSNumber         *stateValue = [NSNumber numberWithUnsignedInteger:state];
-    NSUInteger        index      = 0;
 
-    if(count)
+    if(count > 0)
     {
-        index = [_states indexOfObject:stateValue inSortedRange:NSMakeRange(0, [_states count]) options:NSBinarySearchingFirstEqual | NSBinarySearchingInsertionIndex usingComparator:
-                 ^ NSComparisonResult(id obj1, id obj2)
-                 {
-                     return [obj1 compare:obj2];
-                 }];
+        NSUInteger index = [_states indexOfObject:stateValue inSortedRange:NSMakeRange(0, [_states count]) options:NSBinarySearchingFirstEqual | NSBinarySearchingInsertionIndex usingComparator:
+                            ^ NSComparisonResult(id obj1, id obj2)
+                            {
+                                return [obj1 compare:obj2];
+                            }];
+
+        if(![[_states objectAtIndex:index] isEqualToNumber:stateValue]) [_states insertObject:stateValue atIndex:index];
     }
-
-    if(((index == 0) && (count == 0)) || ((index < count) && ![[_states objectAtIndex:index] isEqualToNumber:stateValue])) [_states insertObject:stateValue atIndex:index];
-
-    [_objectByState setValue:(value ?: [NSNull null]) forKey:OEKeyForState(state)];
+    else
+    {
+        [_states addObject:stateValue];
+    }
 }
 
 - (id)objectForState:(OEThemeState)state
 {
-    OEThemeState maskedState = state & _stateMask;
-    __block id results = nil;
+    OEThemeState maskedState = state & _stateMask; // Trim unused bits
+    __block id   results     = nil;
+
     if(maskedState == 0)
     {
         results = [_objectByState objectForKey:OEKeyForState(OEThemeStateDefault)];
     }
     else
     {
+        // Return object explicitly defined by state
         results = [_objectByState objectForKey:OEKeyForState(maskedState)];
         if(results == nil)
         {
+            // Try to implicitly determine what object represents the supplied state
             [_states enumerateObjectsUsingBlock:
              ^ (NSNumber *obj, NSUInteger idx, BOOL *stop)
              {
                  const OEThemeState state = [obj unsignedIntegerValue];
                  if((maskedState & state) == maskedState)
                  {
+                     // This state is the best we are going to get for the requested state
                      results = [_objectByState objectForKey:OEKeyForState(state)];
-                     if(state != OEThemeStateDefault) [self OE_setValue:results forState:maskedState];
+
+                     // Explicitly set the state table to contain the requested state to the object we have just implicitly discovered
+                     if(state != 0 && state != OEThemeStateDefault) [self OE_setValue:results forState:maskedState];
                      *stop = YES;
                  }
              }];
 
+            // If no object was found, then explicitly set it to Null, so the next time we try to obtain an object for the specified state we will quickly return nil
             if(results == nil) [self OE_setValue:[NSNull null] forState:maskedState];
         }
     }
 
+    // Return nil vice [NSNull null]
     return (results == [NSNull null] ? nil : results);
 }
 
