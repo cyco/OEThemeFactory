@@ -249,7 +249,7 @@
 
 - (void)drawImage:(NSImage *)image withFrame:(NSRect)frame inView:(NSView *)controlView
 {
-    [super drawImage:[self image] withFrame:frame inView:controlView];
+    [image drawInRect:frame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
@@ -257,8 +257,8 @@
     NSRect textRect  = [self titleRectForBounds:cellFrame];
     NSRect imageRect = [self imageRectForBounds:cellFrame];
 
-    if(!NSIsEmptyRect(textRect))  [super drawTitle:[self attributedTitle] withFrame:textRect inView:controlView];
-    if(!NSIsEmptyRect(imageRect)) [super drawImage:[self image] withFrame:imageRect inView:controlView];
+    if(!NSIsEmptyRect(textRect))  [self drawTitle:[self attributedTitle] withFrame:textRect inView:controlView];
+    if(!NSIsEmptyRect(imageRect)) [self drawImage:[self image] withFrame:imageRect inView:controlView];
 }
 
 - (NSImage *)image
