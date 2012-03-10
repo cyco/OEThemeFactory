@@ -3,353 +3,91 @@
 <plist version="1.0">
 <dict>
 	<key>Colors</key>
-	<dict>
-		<key>color1</key>
-		<dict>
-			<key>Value</key>
-			<string>red</string>
-			<key>States</key>
-			<dict>
-				<key>Toggle Off,Toggle On</key>
-				<string>black</string>
-			</dict>
-		</dict>
-	</dict>
+	<dict/>
 	<key>Fonts</key>
 	<dict>
-		<key>gloss_blue</key>
+		<key>dark_checkbox</key>
 		<dict>
-			<key>States</key>
+			<key>Family</key>
+			<string>Lucida Grande</string>
+			<key>Traits</key>
+			<string>Bold</string>
+			<key>Size</key>
+			<integer>11</integer>
+			<key>Shadow</key>
 			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Foreground Color</key>
-					<string>White</string>
-				</dict>
-				<key>Window Inactive,Any Selection</key>
-				<dict>
-					<key>Foreground Color</key>
-					<string>Gray</string>
-				</dict>
+				<key>Blur Radius</key>
+				<real>1</real>
+				<key>Color</key>
+				<string>rgba(0,0,0,0.4)</string>
+				<key>Offset</key>
+				<string>{0,-1}</string>
 			</dict>
+			<key>Color</key>
+			<string>rgb(227,227,227)</string>
 		</dict>
-		<key>weblink_arrow</key>
+		<key>gloss_checkbox</key>
 		<dict>
-			<key>States</key>
+			<key>Family</key>
+			<string>Lucida Grande</string>
+			<key>Traits</key>
+			<string>Bold</string>
+			<key>Size</key>
+			<integer>11</integer>
+			<key>Shadow</key>
 			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Foreground Color</key>
-					<string>rgb(204,204,204)</string>
-				</dict>
-				<key>Mouse Over</key>
-				<dict>
-					<key>Foreground Color</key>
-					<string>white</string>
-				</dict>
+				<key>Blur Radius</key>
+				<real>1</real>
+				<key>Color</key>
+				<string>rgba(0,0,0,0.4)</string>
+				<key>Offset</key>
+				<string>{0,-1}</string>
 			</dict>
+			<key>Color</key>
+			<string>rgb(227,227,227)</string>
 		</dict>
 	</dict>
 	<key>Images</key>
 	<dict>
-		<key>image1</key>
+		<key>dark_checkbox</key>
 		<dict>
 			<key>Resource</key>
-			<string>toolbar_view_buttons</string>
+			<string>dark_checkbox</string>
 			<key>States</key>
 			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,46},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Pressed</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,92},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Toggle On</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,69},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive,Toggle Off</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,0},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive,Toggle On</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,23},[27,23}}</string>
-					</array>
-				</dict>
+				<key>Toggle Off</key>
+				<string>{{0,0},{16,16}}</string>
+				<key>Toggle Off, Pressed</key>
+				<string>{{16,0},{16,16}}</string>
+				<key>Toggle On</key>
+				<string>{{0,16},{16,16}}</string>
+				<key>Toggle On, Pressed</key>
+				<string>{{16,16},{16,16}}</string>
 			</dict>
 		</dict>
-		<key>image2</key>
+		<key>gloss_checkbox</key>
 		<dict>
 			<key>Resource</key>
-			<string>toolbar_view_buttons</string>
+			<string>gloss_checkbox</string>
 			<key>States</key>
 			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{27,46},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Pressed</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{27,92},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Toggle On</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{27,69},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive,Toggle Off</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{27,0},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive,Toggle On</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{27,23},[27,23}}</string>
-					</array>
-				</dict>
-			</dict>
-		</dict>
-		<key>image3</key>
-		<dict>
-			<key>Resource</key>
-			<string>toolbar_view_buttons</string>
-			<key>States</key>
-			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{54,46},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Pressed</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{54,92},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Toggle On</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{54,69},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive,Toggle Off</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{54,0},[27,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive,Toggle On</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{54,23},[27,23}}</string>
-					</array>
-				</dict>
-			</dict>
-		</dict>
-		<key>gloss_default</key>
-		<dict>
-			<key>Resource</key>
-			<string>gloss_button</string>
-			<key>States</key>
-			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,46},{5,23}}</string>
-						<string>{{5,46},{41,23}}</string>
-						<string>{{46,46},{5,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,0},{5,23}}</string>
-						<string>{{5,0},{41,23}}</string>
-						<string>{{46,0},{5,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Pressed</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,23},{5,23}}</string>
-						<string>{{5,23},{41,23}}</string>
-						<string>{{46,23},{5,23}}</string>
-					</array>
-				</dict>
-			</dict>
-		</dict>
-		<key>gloss_blue</key>
-		<dict>
-			<key>Resource</key>
-			<string>gloss_button</string>
-			<key>States</key>
-			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,92},{5,23}}</string>
-						<string>{{5,92},{41,23}}</string>
-						<string>{{46,92},{5,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,69},{5,23}}</string>
-						<string>{{5,69},{41,23}}</string>
-						<string>{{46,69},{5,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Pressed</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,23},{5,23}}</string>
-						<string>{{5,23},{41,23}}</string>
-						<string>{{46,23},{5,23}}</string>
-					</array>
-				</dict>
-			</dict>
-		</dict>
-		<key>gloss_green</key>
-		<dict>
-			<key>Resource</key>
-			<string>gloss_button</string>
-			<key>States</key>
-			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,46},{5,23}}</string>
-						<string>{{5,46},{41,23}}</string>
-						<string>{{46,46},{5,23}}</string>
-					</array>
-				</dict>
-				<key>Window Inactive</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,0},{5,23}}</string>
-						<string>{{5,0},{41,23}}</string>
-						<string>{{46,0},{5,23}}</string>
-					</array>
-				</dict>
-				<key>Window Active,Pressed</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,23},{5,23}}</string>
-						<string>{{5,23},{41,23}}</string>
-						<string>{{46,23},{5,23}}</string>
-					</array>
-				</dict>
-			</dict>
-		</dict>
-		<key>weblink_arrow</key>
-		<dict>
-			<key>Resource</key>
-			<string>open_weblink_arrow</string>
-			<key>States</key>
-			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,20},{20,20}}</string>
-					</array>
-				</dict>
-				<key>Mouse Over</key>
-				<dict>
-					<key>Parts</key>
-					<array>
-						<string>{{0,40},{20,20}}</string>
-					</array>
-				</dict>
+				<key>Toggle Off</key>
+				<string>{{0,0},{16,16}}</string>
+				<key>Toggle Off, Pressed</key>
+				<string>{{16,0},{16,16}}</string>
+				<key>Toggle On</key>
+				<string>{{0,16},{16,16}}</string>
+				<key>Toggle On, Pressed</key>
+				<string>{{16,16},{16,16}}</string>
+				<key>Window Inactive, Toggle Off</key>
+				<string>{{0,32},{16,16}}</string>
+				<key>Window Inactive, Toggle On</key>
+				<string>{{16,32},{16,16}}</string>
 			</dict>
 		</dict>
 	</dict>
 	<key>Gradients</key>
-	<dict>
-		<key>gradient1</key>
-		<dict>
-			<key>States</key>
-			<dict>
-				<key>Default</key>
-				<dict>
-					<key>Locations</key>
-					<array>
-						<integer>0</integer>
-						<real>0.5</real>
-						<real>1</real>
-					</array>
-					<key>Colors</key>
-					<array>
-						<string>black</string>
-						<string>red</string>
-						<string>green</string>
-					</array>
-				</dict>
-				<key>Window Inactive,Any Selection</key>
-				<dict>
-					<key>Locations</key>
-					<array>
-						<integer>0</integer>
-						<real>0.25</real>
-						<string>0.75</string>
-						<integer>1</integer>
-					</array>
-					<key>Colors</key>
-					<array>
-						<string>blue</string>
-						<string>pink</string>
-						<string>pink</string>
-						<string>green</string>
-					</array>
-				</dict>
-			</dict>
-		</dict>
-	</dict>
+	<dict/>
 	<key>Name</key>
 	<string>Default</string>
 	<key>Version</key>

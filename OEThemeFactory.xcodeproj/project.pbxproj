@@ -11,6 +11,8 @@
 		EF1027E21503B708003BC6C0 /* gloss_button.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E11503B708003BC6C0 /* gloss_button.png */; };
 		EF1027E51503FC78003BC6C0 /* OEGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF1027E41503FC78003BC6C0 /* OEGradientView.m */; };
 		EF1027E7150403A8003BC6C0 /* open_weblink_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */; };
+		EF33D80C150B5A3E00B93D87 /* dark_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */; };
+		EF33D80E150B5FAF00B93D87 /* gloss_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */; };
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
 		EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImage.m */; };
 		EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradient.m */; };
@@ -35,6 +37,8 @@
 		EF1027E31503FC78003BC6C0 /* OEGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEGradientView.h; sourceTree = "<group>"; };
 		EF1027E41503FC78003BC6C0 /* OEGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEGradientView.m; sourceTree = "<group>"; };
 		EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = open_weblink_arrow.png; sourceTree = "<group>"; };
+		EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_checkbox.png; sourceTree = "<group>"; };
+		EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_checkbox.png; sourceTree = "<group>"; };
 		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSColor+OEAdditions.h"; path = "../NSColor+OEAdditions.h"; sourceTree = "<group>"; };
 		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSColor+OEAdditions.m"; path = "../NSColor+OEAdditions.m"; sourceTree = "<group>"; };
 		EF37DA3D14FC3E850098A077 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -129,15 +133,17 @@
 				EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */,
 				EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */,
 				EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */,
+				EF1027E31503FC78003BC6C0 /* OEGradientView.h */,
+				EF1027E41503FC78003BC6C0 /* OEGradientView.m */,
 				EFD9BE3114FA3DB500397397 /* OEAppDelegate.h */,
 				EFD9BE3214FA3DB500397397 /* OEAppDelegate.m */,
 				EFD9BE3414FA3DB500397397 /* MainMenu.xib */,
 				EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */,
 				EF1027E11503B708003BC6C0 /* gloss_button.png */,
 				EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */,
+				EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */,
+				EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */,
 				EFD9BE2614FA3DB500397397 /* Supporting Files */,
-				EF1027E31503FC78003BC6C0 /* OEGradientView.h */,
-				EF1027E41503FC78003BC6C0 /* OEGradientView.m */,
 			);
 			path = OEThemeFactory;
 			sourceTree = "<group>";
@@ -234,6 +240,8 @@
 				EF910A68150266C90071A0A8 /* toolbar_view_buttons.png in Resources */,
 				EF1027E21503B708003BC6C0 /* gloss_button.png in Resources */,
 				EF1027E7150403A8003BC6C0 /* open_weblink_arrow.png in Resources */,
+				EF33D80C150B5A3E00B93D87 /* dark_checkbox.png in Resources */,
+				EF33D80E150B5FAF00B93D87 /* gloss_checkbox.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

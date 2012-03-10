@@ -13,11 +13,7 @@
 @interface OEAppDelegate : NSObject <NSApplicationDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
-@property (assign) IBOutlet OEThemeButton *button1;
-@property (assign) IBOutlet OEThemeButton *button2;
-@property (assign) IBOutlet OEThemeButton *button3;
-@property (assign) IBOutlet OEThemeButton *button4;
-@property (assign) IBOutlet OEThemeButton *button5;
-@property (assign) IBOutlet OEGradientView *view;
+@property (assign) IBOutlet OEThemeButton *darkCheckBox;
+@property (assign) IBOutlet OEThemeButton *glossCheckBox;
 
 @end
