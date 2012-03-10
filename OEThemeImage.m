@@ -17,13 +17,15 @@ static NSString * const OEThemeImageVerticalAttributeName = @"Vertical";
 
 + (id)parseWithDefinition:(NSDictionary *)definition
 {
-    NSString *resource = ([definition valueForKey:OEThemeImageResourceAttributeName] ?: [definition valueForKey:OEThemeObjectValueAttributeName]);
+    NSString *resource = [definition valueForKey:OEThemeImageResourceAttributeName];
     if (resource == nil) return nil;
 
-    NSArray *parts    = [definition valueForKey:OEThemeImagePartsAttributeName];
-    BOOL     vertical = [[definition objectForKey:OEThemeImageVerticalAttributeName] boolValue];
+    id   parts    = ([definition objectForKey:OEThemeImagePartsAttributeName] ?: [definition objectForKey:OEThemeObjectValueAttributeName]);
+    BOOL vertical = [[definition objectForKey:OEThemeImageVerticalAttributeName] boolValue];
 
-    if(![parts isKindOfClass:[NSArray class]]) parts = nil;
+    if([parts isKindOfClass:[NSString class]])      parts = [NSArray arrayWithObject:parts];
+    else if(![parts isKindOfClass:[NSArray class]]) parts = nil;
+
     return [[NSImage imageNamed:resource] imageFromParts:parts vertical:vertical];
 }
 
