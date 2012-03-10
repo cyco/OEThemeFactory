@@ -74,7 +74,7 @@ id _OEObjectFromDictionary(NSDictionary *dictionary, NSString *attributeName, Cl
                                                ^ id (id shadow) {
                                                    if(![shadow isKindOfClass:[NSDictionary class]]) return nil;
 
-                                                   NSSize  offset     = [[shadow valueForKey:OEThemeShadowOffsetAttributeName] sizeValue];
+                                                   NSSize  offset     = NSSizeFromString([shadow valueForKey:OEThemeShadowOffsetAttributeName]);
                                                    CGFloat blurRadius = [[shadow valueForKey:OEThemeShadowBlurRadiusAttributeName] floatValue];
                                                    id      color      = [shadow objectForKey:OEThemeShadowColorAttributeName];
 
