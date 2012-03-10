@@ -236,6 +236,8 @@ OEThemeState OEThemeStateFromString(NSString *state)
          else if([component caseInsensitiveCompare:OEThemeInputStateFocusedName]        == NSOrderedSame) result |= OEThemeInputStateFocused;
          else if([component caseInsensitiveCompare:OEThemeInputStateMouseOffName]       == NSOrderedSame) result |= OEThemeInputStateMouseOff;
          else if([component caseInsensitiveCompare:OEThemeInputStateMouseOverName]      == NSOrderedSame) result |= OEThemeInputStateMouseOver;
+         else
+             NSLog(@"- Unknown State Input: %@", component);
      }];
 
     // Implicitly return the default state, if no input state was specified
