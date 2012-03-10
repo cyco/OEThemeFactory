@@ -9,7 +9,7 @@
 #import "OEThemeTextAttributes.h"
 #import "NSColor+OEAdditions.h"
 
-static NSString * const OEThemeFontForegroundColorAttributeName = @"Foreground Color";
+static NSString * const OEThemeFontForegroundColorAttributeName = @"Color";
 static NSString * const OEThemeFontBackgroundColorAttributeName = @"Background Color";
 
 static NSString * const OEThemeFontFamilyAttributeName          = @"Family";
@@ -19,7 +19,7 @@ static NSString * const OEThemeFontTraitsAttributeName          = @"Traits";
 
 static NSString * const OEThemeFontShadowAttributeName          = @"Shadow";
 static NSString * const OEThemeShadowOffsetAttributeName        = @"Offset";
-static NSString * const OEThemeShadowBlurRadiusAttributeName    = @"BlurRadius";
+static NSString * const OEThemeShadowBlurRadiusAttributeName    = @"Blur Radius";
 static NSString * const OEThemeShadowColorAttributeName         = @"Color";
 
 static NSString * const OEThemeFontTraitBoldName   = @"Bold";
