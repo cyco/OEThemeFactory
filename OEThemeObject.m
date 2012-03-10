@@ -54,11 +54,15 @@ static inline id OEKeyForState(OEThemeState state)
 
                      NSString     *trimmedKey = [key stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
                      OEThemeState  state      = ([trimmedKey length] == 0 ? OEThemeStateDefault : OEThemeStateFromString(trimmedKey));
-                     id            value      = [isa parseWithDefinition:newDefinition];
-                     [self OE_setValue:value forState:state];
 
-                     // Append the state to the state mask
-                     if(state != OEThemeStateDefault) _stateMask |= state;
+                     if(state == 0) NSLog(@"Error parsing state: %@", trimmedKey);
+                     else
+                     {
+                         [self OE_setValue:[isa parseWithDefinition:newDefinition] forState:state];
+
+                         // Append the state to the state mask
+                         if(state != OEThemeStateDefault) _stateMask |= state;
+                     }
                  }];
             }
 

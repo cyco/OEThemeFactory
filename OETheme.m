@@ -239,5 +239,5 @@ OEThemeState OEThemeStateFromString(NSString *state)
      }];
 
     // Implicitly return the default state, if no input state was specified
-    return (result == 0 ? OEThemeStateDefault : result);
+    return result;
 }
