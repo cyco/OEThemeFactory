@@ -13,6 +13,7 @@
 		EF1027E7150403A8003BC6C0 /* open_weblink_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */; };
 		EF33D80C150B5A3E00B93D87 /* dark_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */; };
 		EF33D80E150B5FAF00B93D87 /* gloss_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */; };
+		EF33D817150B6F6E00B93D87 /* OEThemeButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = EF33D816150B6F6E00B93D87 /* OEThemeButtonCell.m */; };
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
 		EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImage.m */; };
 		EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradient.m */; };
@@ -39,6 +40,8 @@
 		EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = open_weblink_arrow.png; sourceTree = "<group>"; };
 		EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_checkbox.png; sourceTree = "<group>"; };
 		EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_checkbox.png; sourceTree = "<group>"; };
+		EF33D815150B6F6E00B93D87 /* OEThemeButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeButtonCell.h; sourceTree = "<group>"; };
+		EF33D816150B6F6E00B93D87 /* OEThemeButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeButtonCell.m; sourceTree = "<group>"; };
 		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSColor+OEAdditions.h"; path = "../NSColor+OEAdditions.h"; sourceTree = "<group>"; };
 		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSColor+OEAdditions.m"; path = "../NSColor+OEAdditions.m"; sourceTree = "<group>"; };
 		EF37DA3D14FC3E850098A077 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };

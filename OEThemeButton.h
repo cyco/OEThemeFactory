@@ -7,37 +7,20 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "OETheme.h"
-#import "OEThemeObject.h"
-#import "OEThemeImage.h"
-#import "OEThemeTextAttributes.h"
+#import "OEThemeButtonCell.h"
 
 @interface OEThemeButton : NSButton
 {
-@package
-    NSUInteger _cachedStateMask;
-
 @private
     NSTrackingArea *_mouseTrackingArea;
+
+    BOOL _shouldTrackWindowActivity;
+    BOOL _shouldTrackMouseActivity;
 }
 
 - (void)setBackgroundThemeImageKey:(NSString *)key;
 - (void)setThemeImageKey:(NSString *)key;
 - (void)setThemeTextAttributesKey:(NSString *)key;
-
-@property (nonatomic, retain) OEThemeImage *backgroundThemeImage;
-@property (nonatomic, retain) OEThemeImage *themeImage;
-@property (nonatomic, retain) OEThemeTextAttributes *themeTextAttributes;
-
-@end
-
-#pragma mark -
-
-@interface OEThemeButtonCell : NSButtonCell
-{
-@private
-    NSMutableParagraphStyle *_style;
-}
 
 @property (nonatomic, retain) OEThemeImage *backgroundThemeImage;
 @property (nonatomic, retain) OEThemeImage *themeImage;
