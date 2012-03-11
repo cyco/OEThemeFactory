@@ -43,7 +43,7 @@
 
 @end
 
-@implementation NSImage (NSImage_OEDrawingAdditions)
+@implementation NSImage (OEDrawingAdditions)
 
 - (void)drawInRect:(NSRect)targetRect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(CGFloat)frac respectFlipped:(BOOL)flipped hints:(NSDictionary *)hints leftBorder:(float)leftBorder rightBorder:(float)rightBorder topBorder:(float)topBorder bottomBorder:(float)bottomBorder{
 
@@ -243,7 +243,7 @@
     [self drawInRect:workingTargetRect fromRect:workingSourceRect operation:op fraction:frac respectFlipped:flipped hints:drawingHints];
 }
 
-- (NSImage*)subImageFromRect:(NSRect)rect
+- (NSImage *)subImageFromRect:(NSRect)rect
 {
     NSImage *newImage = [[NSImage alloc] initWithSize:rect.size];
 
@@ -254,7 +254,7 @@
     return newImage;
 }
 
-- (void)setName:(NSString*)name forSubimageInRect:(NSRect)aRect
+- (void)setName:(NSString *)name forSubimageInRect:(NSRect)aRect
 {
     static NSMutableArray *interfaceImages;
     if(!interfaceImages) interfaceImages = [[NSMutableArray alloc] init];
