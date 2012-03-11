@@ -6,16 +6,16 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEThemeButton.h"
+#import "OEButton.h"
 
-@interface OEThemeButton ()
+@interface OEButton ()
 
 - (void)OE_windowKeyChanged:(NSNotification *)notification;
 - (void)OE_updateNotifications;
 
 @end
 
-@implementation OEThemeButton
+@implementation OEButton
 
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow
 {
@@ -93,8 +93,8 @@
 - (void)OE_updateNotifications
 {
     // This method determins if we need to register ourselves with the notification center and/or we need to add mouse tracking
-    OEThemeButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEThemeButtonCell class]])
+    OEButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEButtonCell class]])
     {
         [self OE_setShouldTrackWindowActivity:[cell stateMask] & OEThemeStateAnyWindowActivity];
         [self OE_setShouldTrackMouseActivity:[cell stateMask] & OEThemeStateAnyMouse];
@@ -118,8 +118,8 @@
 
 - (void)setBackgroundThemeImage:(OEThemeImage *)backgroundThemeImage
 {
-    OEThemeButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEThemeButtonCell class]])
+    OEButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEButtonCell class]])
     {
         [cell setBackgroundThemeImage:backgroundThemeImage];
         [self OE_updateNotifications];
@@ -129,14 +129,14 @@
 
 - (OEThemeImage *)backgroundThemeImage
 {
-    OEThemeButtonCell *cell = [self cell];
-    return ([cell isKindOfClass:[OEThemeButtonCell class]] ? [cell backgroundThemeImage] : nil);
+    OEButtonCell *cell = [self cell];
+    return ([cell isKindOfClass:[OEButtonCell class]] ? [cell backgroundThemeImage] : nil);
 }
 
 - (void)setThemeImage:(OEThemeImage *)themeImage
 {
-    OEThemeButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEThemeButtonCell class]])
+    OEButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEButtonCell class]])
     {
         [cell setThemeImage:themeImage];
         [self OE_updateNotifications];
@@ -146,14 +146,14 @@
 
 - (OEThemeImage *)themeImage
 {
-    OEThemeButtonCell *cell = [self cell];
-    return ([cell isKindOfClass:[OEThemeButtonCell class]] ? [cell themeImage] : nil);
+    OEButtonCell *cell = [self cell];
+    return ([cell isKindOfClass:[OEButtonCell class]] ? [cell themeImage] : nil);
 }
 
 - (void)setThemeTextAttributes:(OEThemeTextAttributes *)themeTextAttributes
 {
-    OEThemeButtonCell *cell = [self cell];
-    if([cell isKindOfClass:[OEThemeButtonCell class]])
+    OEButtonCell *cell = [self cell];
+    if([cell isKindOfClass:[OEButtonCell class]])
     {
         [cell setThemeTextAttributes:themeTextAttributes];
         [self OE_updateNotifications];
@@ -163,8 +163,8 @@
 
 - (OEThemeTextAttributes *)themeTextAttributes
 {
-    OEThemeButtonCell *cell = [self cell];
-    return ([cell isKindOfClass:[OEThemeButtonCell class]] ? [cell themeTextAttributes] : nil);
+    OEButtonCell *cell = [self cell];
+    return ([cell isKindOfClass:[OEButtonCell class]] ? [cell themeTextAttributes] : nil);
 }
 
 - (void)setCell:(NSCell *)aCell
@@ -174,4 +174,3 @@
 }
 
 @end
-

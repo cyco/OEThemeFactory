@@ -13,11 +13,10 @@
 		EF1027E7150403A8003BC6C0 /* open_weblink_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */; };
 		EF33D80C150B5A3E00B93D87 /* dark_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */; };
 		EF33D80E150B5FAF00B93D87 /* gloss_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */; };
-		EF33D817150B6F6E00B93D87 /* OEThemeButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = EF33D816150B6F6E00B93D87 /* OEThemeButtonCell.m */; };
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
 		EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImage.m */; };
 		EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradient.m */; };
-		EF910A6215025CA00071A0A8 /* OEThemeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A6115025CA00071A0A8 /* OEThemeButton.m */; };
+		EF910A6215025CA00071A0A8 /* OEButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A6115025CA00071A0A8 /* OEButton.m */; };
 		EF910A68150266C90071A0A8 /* toolbar_view_buttons.png in Resources */ = {isa = PBXBuildFile; fileRef = EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */; };
 		EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */; };
 		EFD9BE2014FA3DB500397397 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EFD9BE1F14FA3DB500397397 /* Cocoa.framework */; };
@@ -40,8 +39,8 @@
 		EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = open_weblink_arrow.png; sourceTree = "<group>"; };
 		EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_checkbox.png; sourceTree = "<group>"; };
 		EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_checkbox.png; sourceTree = "<group>"; };
-		EF33D815150B6F6E00B93D87 /* OEThemeButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeButtonCell.h; sourceTree = "<group>"; };
-		EF33D816150B6F6E00B93D87 /* OEThemeButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeButtonCell.m; sourceTree = "<group>"; };
+		EF33D815150B6F6E00B93D87 /* OEButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEButtonCell.h; sourceTree = "<group>"; };
+		EF33D816150B6F6E00B93D87 /* OEButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEButtonCell.m; sourceTree = "<group>"; };
 		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSColor+OEAdditions.h"; path = "../NSColor+OEAdditions.h"; sourceTree = "<group>"; };
 		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSColor+OEAdditions.m"; path = "../NSColor+OEAdditions.m"; sourceTree = "<group>"; };
 		EF37DA3D14FC3E850098A077 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -51,8 +50,8 @@
 		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSImage+OEDrawingAdditions.m"; path = "../NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
 		EF910A25150240580071A0A8 /* OEThemeGradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeGradient.h; sourceTree = "<group>"; };
 		EF910A26150240580071A0A8 /* OEThemeGradient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeGradient.m; sourceTree = "<group>"; };
-		EF910A6015025CA00071A0A8 /* OEThemeButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeButton.h; sourceTree = "<group>"; };
-		EF910A6115025CA00071A0A8 /* OEThemeButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeButton.m; sourceTree = "<group>"; };
+		EF910A6015025CA00071A0A8 /* OEButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEButton.h; sourceTree = "<group>"; };
+		EF910A6115025CA00071A0A8 /* OEButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEButton.m; sourceTree = "<group>"; };
 		EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toolbar_view_buttons.png; sourceTree = "<group>"; };
 		EFD9BE1B14FA3DB500397397 /* OEThemeFactory.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OEThemeFactory.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFD9BE1F14FA3DB500397397 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -91,6 +90,59 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		EF33D812150B6F3900B93D87 /* Buttons */ = {
+			isa = PBXGroup;
+			children = (
+				EF910A6015025CA00071A0A8 /* OEButton.h */,
+				EF910A6115025CA00071A0A8 /* OEButton.m */,
+			);
+			name = Buttons;
+			sourceTree = "<group>";
+		};
+		EF33D813150B6F4900B93D87 /* Button Cells */ = {
+			isa = PBXGroup;
+			children = (
+				EF33D815150B6F6E00B93D87 /* OEButtonCell.h */,
+				EF33D816150B6F6E00B93D87 /* OEButtonCell.m */,
+			);
+			name = "Button Cells";
+			sourceTree = "<group>";
+		};
+		EF33D814150B6F5A00B93D87 /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				EF33D812150B6F3900B93D87 /* Buttons */,
+				EF33D813150B6F4900B93D87 /* Button Cells */,
+			);
+			name = Controls;
+			sourceTree = "<group>";
+		};
+		EFA53825150BC852003D07A1 /* Buttons */ = {
+			isa = PBXGroup;
+			children = (
+				EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */,
+				EF1027E11503B708003BC6C0 /* gloss_button.png */,
+			);
+			name = Buttons;
+			sourceTree = "<group>";
+		};
+		EFA53826150BC85E003D07A1 /* Checkbox */ = {
+			isa = PBXGroup;
+			children = (
+				EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */,
+				EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */,
+			);
+			name = Checkbox;
+			sourceTree = "<group>";
+		};
+		EFA53827150BC864003D07A1 /* Miscellaneous */ = {
+			isa = PBXGroup;
+			children = (
+				EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */,
+			);
+			name = Miscellaneous;
+			sourceTree = "<group>";
+		};
 		EFD9BE1014FA3DB500397397 = {
 			isa = PBXGroup;
 			children = (
@@ -141,11 +193,9 @@
 				EFD9BE3114FA3DB500397397 /* OEAppDelegate.h */,
 				EFD9BE3214FA3DB500397397 /* OEAppDelegate.m */,
 				EFD9BE3414FA3DB500397397 /* MainMenu.xib */,
-				EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */,
-				EF1027E11503B708003BC6C0 /* gloss_button.png */,
-				EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */,
-				EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */,
-				EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */,
+				EFA53825150BC852003D07A1 /* Buttons */,
+				EFA53826150BC85E003D07A1 /* Checkbox */,
+				EFA53827150BC864003D07A1 /* Miscellaneous */,
 				EFD9BE2614FA3DB500397397 /* Supporting Files */,
 			);
 			path = OEThemeFactory;
@@ -179,8 +229,7 @@
 				EF37DA4014FC3F110098A077 /* OEThemeImage.m */,
 				EF910A25150240580071A0A8 /* OEThemeGradient.h */,
 				EF910A26150240580071A0A8 /* OEThemeGradient.m */,
-				EF910A6015025CA00071A0A8 /* OEThemeButton.h */,
-				EF910A6115025CA00071A0A8 /* OEThemeButton.m */,
+				EF33D814150B6F5A00B93D87 /* Controls */,
 			);
 			name = Theme;
 			sourceTree = "<group>";
@@ -263,10 +312,11 @@
 				EFD9BE5214FA823800397397 /* OEThemeTextAttributes.m in Sources */,
 				EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */,
 				EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */,
-				EF910A6215025CA00071A0A8 /* OEThemeButton.m in Sources */,
+				EF910A6215025CA00071A0A8 /* OEButton.m in Sources */,
 				EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */,
 				EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */,
 				EF1027E51503FC78003BC6C0 /* OEGradientView.m in Sources */,
+				EF33D817150B6F6E00B93D87 /* OEButtonCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

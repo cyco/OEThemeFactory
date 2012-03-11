@@ -7,9 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "OEThemeButtonCell.h"
+#import "OEButtonCell.h"
 
-@interface OEThemeButton : NSButton
+@interface OEButton : NSButton
 {
 @private
     NSTrackingArea *_mouseTrackingArea;
