@@ -327,6 +327,23 @@ static inline id OENilForNSNull(id x)
     {
         _parts = [imageParts copy];
         _vertical = vertical;
+
+        NSSize start  = [OENilForNSNull([_parts objectAtIndex:0]) size];
+        NSSize center = [OENilForNSNull([_parts objectAtIndex:1]) size];
+        NSSize end    = [OENilForNSNull([_parts objectAtIndex:2]) size];
+
+        NSSize size;
+        if(vertical)
+        {
+            size.width = MAX(MAX(start.width, center.width), end.width);
+            size.height = start.height + center.height + end.height;
+        }
+        else
+        {
+            size.width  = start.width + center.width + end.width;
+            size.height = MAX(MAX(start.height, center.height), end.height);
+        }
+        [self setSize:size];
     }
 
     return self;
@@ -357,6 +374,26 @@ static inline id OENilForNSNull(id x)
     if((self = [super init]))
     {
         _parts = [imageParts copy];
+
+        NSSize topLeft      = [OENilForNSNull([_parts objectAtIndex:0]) size];
+        NSSize topCenter    = [OENilForNSNull([_parts objectAtIndex:1]) size];
+        NSSize topRight     = [OENilForNSNull([_parts objectAtIndex:2]) size];
+        NSSize leftEdge     = [OENilForNSNull([_parts objectAtIndex:3]) size];
+        NSSize centerFill   = [OENilForNSNull([_parts objectAtIndex:4]) size];
+        NSSize rightEdge    = [OENilForNSNull([_parts objectAtIndex:5]) size];
+        NSSize bottomLeft   = [OENilForNSNull([_parts objectAtIndex:6]) size];
+        NSSize bottomCenter = [OENilForNSNull([_parts objectAtIndex:7]) size];
+        NSSize bottomRight  = [OENilForNSNull([_parts objectAtIndex:8]) size];
+
+        CGFloat width1      = topLeft.width + topCenter.width + topRight.width;
+        CGFloat width2      = leftEdge.width + centerFill.width + rightEdge.width;
+        CGFloat width3      = bottomLeft.width + bottomCenter.width + bottomRight.width;
+
+        CGFloat height1     = topLeft.height + leftEdge.height + bottomLeft.height;
+        CGFloat height2     = topCenter.height + centerFill.height + bottomCenter.height;
+        CGFloat height3     = topRight.height + rightEdge.height + bottomRight.height;
+
+        [self setSize:NSMakeSize(MAX(MAX(width1, width2), width3), MAX(MAX(height1, height2), height3))];
     }
 
     return self;
