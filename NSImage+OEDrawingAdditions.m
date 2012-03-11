@@ -252,8 +252,8 @@ static inline id OENilForNSNull(id x)
 {
     NSImage *newImage = [[NSImage alloc] initWithSize:rect.size];
 
-    [newImage lockFocusFlipped:YES];
-    [self drawInRect:NSMakeRect(0, 0, rect.size.width, rect.size.height) fromRect:rect operation:NSCompositeCopy fraction:1.0];
+    [newImage lockFocusFlipped:[self isFlipped]];
+    [self drawInRect:NSMakeRect(0, 0, rect.size.width, rect.size.height) fromRect:rect operation:NSCompositeCopy fraction:1.0 respectFlipped:YES hints:nil];
     [newImage unlockFocus];
 
     return newImage;
