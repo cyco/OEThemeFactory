@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		EF1027E21503B708003BC6C0 /* gloss_button.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E11503B708003BC6C0 /* gloss_button.png */; };
-		EF1027E51503FC78003BC6C0 /* OEGradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF1027E41503FC78003BC6C0 /* OEGradientView.m */; };
 		EF1027E7150403A8003BC6C0 /* open_weblink_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */; };
 		EF33D80C150B5A3E00B93D87 /* dark_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */; };
 		EF33D80E150B5FAF00B93D87 /* gloss_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */; };
@@ -34,8 +33,6 @@
 
 /* Begin PBXFileReference section */
 		EF1027E11503B708003BC6C0 /* gloss_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_button.png; sourceTree = "<group>"; };
-		EF1027E31503FC78003BC6C0 /* OEGradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEGradientView.h; sourceTree = "<group>"; };
-		EF1027E41503FC78003BC6C0 /* OEGradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEGradientView.m; sourceTree = "<group>"; };
 		EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = open_weblink_arrow.png; sourceTree = "<group>"; };
 		EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_checkbox.png; sourceTree = "<group>"; };
 		EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_checkbox.png; sourceTree = "<group>"; };
@@ -188,8 +185,6 @@
 				EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */,
 				EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */,
 				EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */,
-				EF1027E31503FC78003BC6C0 /* OEGradientView.h */,
-				EF1027E41503FC78003BC6C0 /* OEGradientView.m */,
 				EFD9BE3114FA3DB500397397 /* OEAppDelegate.h */,
 				EFD9BE3214FA3DB500397397 /* OEAppDelegate.m */,
 				EFD9BE3414FA3DB500397397 /* MainMenu.xib */,
@@ -315,7 +310,6 @@
 				EF910A6215025CA00071A0A8 /* OEButton.m in Sources */,
 				EF910A6A150268610071A0A8 /* NSImage+OEDrawingAdditions.m in Sources */,
 				EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */,
-				EF1027E51503FC78003BC6C0 /* OEGradientView.m in Sources */,
 				EF33D817150B6F6E00B93D87 /* OEButtonCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
