@@ -26,6 +26,11 @@
 
 #import "NSImage+OEDrawingAdditions.h"
 
+static inline id OENilForNSNull(id x)
+{
+    return (x == [NSNull null] ? nil : x);
+}
+
 @interface OENSThreePartImage : NSImage
 
 - (id)initWithImageParts:(NSArray *)imageParts vertical:(BOOL)vertical;
@@ -334,9 +339,9 @@
 
 - (void)drawInRect:(NSRect)dstSpacePortionRect fromRect:(NSRect)srcSpacePortionRect operation:(NSCompositingOperation)op fraction:(CGFloat)requestedAlpha respectFlipped:(BOOL)respectContextIsFlipped hints:(NSDictionary *)hints
 {
-    NSImage *startCap   = ([_parts objectAtIndex:0] == [NSNull null] ? nil : [_parts objectAtIndex:0]);
-    NSImage *centerFill = ([_parts objectAtIndex:1] == [NSNull null] ? nil : [_parts objectAtIndex:1]);
-    NSImage *endCap     = ([_parts objectAtIndex:2] == [NSNull null] ? nil : [_parts objectAtIndex:2]);
+    NSImage *startCap   = OENilForNSNull([_parts objectAtIndex:0]);
+    NSImage *centerFill = OENilForNSNull([_parts objectAtIndex:1]);
+    NSImage *endCap     = OENilForNSNull([_parts objectAtIndex:2]);
 
     NSDrawThreePartImage(dstSpacePortionRect, startCap, centerFill, endCap, _vertical, op, requestedAlpha, respectContextIsFlipped);
 }
@@ -365,15 +370,15 @@
 
 - (void)drawInRect:(NSRect)dstSpacePortionRect fromRect:(NSRect)srcSpacePortionRect operation:(NSCompositingOperation)op fraction:(CGFloat)requestedAlpha respectFlipped:(BOOL)respectContextIsFlipped hints:(NSDictionary *)hints
 {
-    NSImage *topLeftCorner     = ([_parts objectAtIndex:0] == [NSNull null] ? nil : [_parts objectAtIndex:0]);
-    NSImage *topEdgeFill       = ([_parts objectAtIndex:1] == [NSNull null] ? nil : [_parts objectAtIndex:1]);
-    NSImage *topRightCorner    = ([_parts objectAtIndex:2] == [NSNull null] ? nil : [_parts objectAtIndex:2]);
-    NSImage *leftEdgeFill      = ([_parts objectAtIndex:3] == [NSNull null] ? nil : [_parts objectAtIndex:3]);
-    NSImage *centerFill        = ([_parts objectAtIndex:4] == [NSNull null] ? nil : [_parts objectAtIndex:4]);
-    NSImage *rightEdgeFill     = ([_parts objectAtIndex:5] == [NSNull null] ? nil : [_parts objectAtIndex:5]);
-    NSImage *bottomLeftCorner  = ([_parts objectAtIndex:6] == [NSNull null] ? nil : [_parts objectAtIndex:6]);
-    NSImage *bottomEdgeFill    = ([_parts objectAtIndex:7] == [NSNull null] ? nil : [_parts objectAtIndex:7]);
-    NSImage *bottomRightCorner = ([_parts objectAtIndex:8] == [NSNull null] ? nil : [_parts objectAtIndex:8]);
+    NSImage *topLeftCorner     = OENilForNSNull([_parts objectAtIndex:0]);
+    NSImage *topEdgeFill       = OENilForNSNull([_parts objectAtIndex:1]);
+    NSImage *topRightCorner    = OENilForNSNull([_parts objectAtIndex:2]);
+    NSImage *leftEdgeFill      = OENilForNSNull([_parts objectAtIndex:3]);
+    NSImage *centerFill        = OENilForNSNull([_parts objectAtIndex:4]);
+    NSImage *rightEdgeFill     = OENilForNSNull([_parts objectAtIndex:5]);
+    NSImage *bottomLeftCorner  = OENilForNSNull([_parts objectAtIndex:6]);
+    NSImage *bottomEdgeFill    = OENilForNSNull([_parts objectAtIndex:7]);
+    NSImage *bottomRightCorner = OENilForNSNull([_parts objectAtIndex:8]);
 
     NSDrawNinePartImage(dstSpacePortionRect, topLeftCorner, topEdgeFill, topRightCorner, leftEdgeFill, centerFill, rightEdgeFill, bottomLeftCorner, bottomEdgeFill, bottomRightCorner, op, requestedAlpha, respectContextIsFlipped);
 }
