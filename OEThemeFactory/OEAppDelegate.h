@@ -7,13 +7,17 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "OEThemeButton.h"
-#import "OEGradientView.h"
+#import "OEButton.h"
+#import "OEPopUpButton.h"
+#import "OEMenuView.h"
 
-@interface OEAppDelegate : NSObject <NSApplicationDelegate>
+@interface OEAppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate>
 
-@property (assign) IBOutlet NSWindow *window;
-@property (assign) IBOutlet OEThemeButton *darkCheckBox;
-@property (assign) IBOutlet OEThemeButton *glossCheckBox;
+@property(assign) IBOutlet NSWindow *window;
+@property(assign) IBOutlet OEButton *darkCheckBox;
+@property(assign) IBOutlet OEButton *glossCheckBox;
+@property(assign) IBOutlet OEPopUpButton *popupButton;
+@property(assign) IBOutlet OEMenuView *menuView;
+@property(assign) IBOutlet NSMenu *menu;
 
 @end

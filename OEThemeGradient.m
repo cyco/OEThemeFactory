@@ -11,14 +11,32 @@
 
 static NSString * const OEThemeGradientLocationsAttributeName = @"Locations";
 static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
+static NSString * const OEThemeGradientAngleAttributeName     = @"Angle";
+
+@interface OENSGradient : NSGradient
+
+@property(nonatomic, assign) CGFloat angle;
+
+@end
 
 @implementation OEThemeGradient
 
 + (id)parseWithDefinition:(NSDictionary *)definition
 {
-    NSArray *rawLocations    = [definition valueForKey:OEThemeGradientLocationsAttributeName];
-    NSArray *rawColorStrings = [definition valueForKey:OEThemeGradientColorsAttributeName];
+    id rawLocations    = [definition objectForKey:OEThemeGradientLocationsAttributeName];
+    id rawColorStrings = [definition objectForKey:OEThemeGradientColorsAttributeName];
+    id angle           = [definition objectForKey:OEThemeGradientAngleAttributeName];
 
+    // Make sure that the gradient definition is well-formed (we should report errors)
+    if([rawLocations isKindOfClass:[NSString class]] || [rawLocations isKindOfClass:[NSNumber class]]) rawLocations = [NSArray arrayWithObject:rawLocations];
+    else if(![rawLocations isKindOfClass:[NSArray class]])                                             return nil;
+
+    if([rawColorStrings isKindOfClass:[NSString class]] || [rawColorStrings isKindOfClass:[NSNumber class]]) rawColorStrings = [NSArray arrayWithObject:rawColorStrings];
+    else if(![rawColorStrings isKindOfClass:[NSArray class]])                                                return nil;
+
+    if(![angle isKindOfClass:[NSString class]] && ![angle isKindOfClass:[NSNumber class]]) angle = nil;
+
+    // Make sure that there are color stops and colors to be represented as an NSGradient
     if([rawLocations count] == 0 || [rawColorStrings count] == 0 || [rawLocations count] != [rawColorStrings count]) return nil;
 
     // Translate color strings to NSColor
@@ -43,7 +61,8 @@ static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
                  locations[idx] = [obj floatValue];
              }];
 
-            result = [[NSGradient alloc] initWithColors:colors atLocations:locations colorSpace:[NSColorSpace genericRGBColorSpace]];
+            result = [[OENSGradient alloc] initWithColors:colors atLocations:locations colorSpace:[NSColorSpace genericRGBColorSpace]];
+            [result setAngle:[angle floatValue]];
         }
     }
     @finally
@@ -57,6 +76,36 @@ static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
 - (NSGradient *)gradientForState:(OEThemeState)state
 {
     return (NSGradient *)[self objectForState:state];
+}
+
+@end
+
+@implementation NSGradient (OEThemeGradientAdditions)
+
+- (void)drawInRect:(NSRect)rect
+{
+    [self drawInRect:rect angle:0.0];
+}
+
+- (void)drawInBezierPath:(NSBezierPath *)path
+{
+    [self drawInBezierPath:path angle:0.0];
+}
+
+@end
+
+@implementation OENSGradient
+
+@synthesize angle = _angle;
+
+- (void)drawInRect:(NSRect)rect
+{
+    [self drawInRect:rect angle:_angle];
+}
+
+- (void)drawInBezierPath:(NSBezierPath *)path
+{
+    [self drawInBezierPath:path angle:_angle];
 }
 
 @end

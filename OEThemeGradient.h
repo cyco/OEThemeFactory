@@ -8,6 +8,13 @@
 
 #import "OEThemeObject.h"
 
+@interface NSGradient (OEThemeGradientAdditions)
+
+- (void)drawInRect:(NSRect)rect;
+- (void)drawInBezierPath:(NSBezierPath *)path;
+
+@end
+
 @interface OEThemeGradient : OEThemeObject
 
 - (NSGradient *)gradientForState:(OEThemeState)state;

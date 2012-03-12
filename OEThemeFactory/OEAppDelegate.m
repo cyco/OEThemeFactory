@@ -8,13 +8,14 @@
 
 #import "OEAppDelegate.h"
 #import "OETheme.h"
-#import "OEThemeObject.h"
 
 @implementation OEAppDelegate
-
+@synthesize menu = _menu;
 @synthesize window = _window;
 @synthesize darkCheckBox = _darkCheckBox;
 @synthesize glossCheckBox = _glossCheckBox;
+@synthesize popupButton = _popupButton;
+@synthesize menuView = _menuView;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
@@ -23,6 +24,12 @@
 
     [_glossCheckBox setThemeImageKey:@"gloss_checkbox"];
     [_glossCheckBox setThemeTextAttributesKey:@"gloss_checkbox"];
+
+    [_popupButton setBackgroundThemeImageKey:@"dark_popupbutton"];
+    [_popupButton setThemeTextAttributesKey:@"dark_popupbutton"];
+
+    [_menuView setEdge:OEMaxXEdge];
+    [_menuView setMenu:[self menu]];
 }
 
 @end
