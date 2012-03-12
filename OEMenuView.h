@@ -31,14 +31,19 @@ typedef enum _OERectEdge
     NSMenuItem   *_highlightedItem;
     OEMenuStyle   _style;
     OERectEdge    _edge;
-    NSEdgeInsets  _edgeInsets;
     NSBezierPath *_borderPath;
+
+    NSEdgeInsets _backgroundEdgeInsets;
 
     NSParagraphStyle *_paragraphStyle;
     NSTrackingArea   *_trackingArea;
+
+    BOOL _needsLayout;
+    BOOL _containsImage;
 }
 
 - (void)highlightItemAtPoint:(NSPoint)point;
+- (NSMenuItem *)itemAtPoint:(NSPoint)point;
 
 @property(nonatomic, assign) NSMenuItem  *highlightedItem;
 @property(nonatomic, retain) NSMenu      *menu;
