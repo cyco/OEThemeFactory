@@ -73,6 +73,16 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
     return self;
 }
 
+- (void)dealloc
+{
+    // Make sure that there are no associations
+    NSArray *items = [_menu itemArray];
+    [items enumerateObjectsUsingBlock:
+     ^ (NSMenuItem *item, NSUInteger idx, BOOL *stop) {
+         objc_setAssociatedObject(item, &OEMenuItemRectKey, nil, OBJC_ASSOCIATION_ASSIGN);
+     }];
+}
+
 - (void)updateTrackingAreas
 {
     if(_trackingArea) [self removeTrackingArea:_trackingArea];
