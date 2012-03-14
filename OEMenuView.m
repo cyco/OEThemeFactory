@@ -166,19 +166,19 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
     if(!themeTextAttributes) return nil;
 
     // This is a convenience method for creating the attributes for an NSAttributedString
-    if(!_paragraphStyle)
+    static NSParagraphStyle *paragraphStyle = nil;
+    if(!paragraphStyle)
     {
         NSMutableParagraphStyle *ps = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         [ps setLineBreakMode:NSLineBreakByTruncatingTail];
-
-        _paragraphStyle = [ps copy];
+        paragraphStyle = [ps copy];
     }
 
     NSDictionary *attributes = [themeTextAttributes textAttributesForState:state];
     if(![attributes objectForKey:NSParagraphStyleAttributeName])
     {
         NSMutableDictionary *newAttributes = [attributes mutableCopy];
-        [newAttributes setValue:_paragraphStyle forKey:NSParagraphStyleAttributeName];
+        [newAttributes setValue:paragraphStyle forKey:NSParagraphStyleAttributeName];
         attributes = [newAttributes copy];
     }
 

@@ -35,7 +35,6 @@ typedef enum _OERectEdge
 
     NSEdgeInsets _backgroundEdgeInsets;
 
-    NSParagraphStyle *_paragraphStyle;
     NSTrackingArea   *_trackingArea;
 
     BOOL _needsLayout;
