@@ -8,17 +8,21 @@
 
 #import "OEMenuView.h"
 #import "NSImage+OEDrawingAdditions.h"
-#import <objc/runtime.h>
+#import "OEMenuItemExtraData.h"
+#import <Carbon/Carbon.h>
 
-#pragma mark Item Spaces
+#pragma mark -
+#pragma mark Menu Item Spacing
 const static CGFloat OEMenuItemTickMarkWidth      = 19.0;
 const static CGFloat OEMenuItemImageWidth         = 22.0;
 const static CGFloat OEMenuItemSubmenuArrowWidth  = 10.0;
-
 const static CGFloat OEMenuItemHeightWithImage    = 20.0;
 const static CGFloat OEMenuItemHeightWithoutImage = 17.0;
 const static CGFloat OEMenuItemSeparatorHeight    =  7.0;
 const static CGFloat OEMenuItemSeparatorOffset    =  3.0;
+
+#pragma mark -
+#pragma mark Background Image Insets
 
 const static NSEdgeInsets OEMenuContentEdgeInsets        = {7.0, 5.0, 7.0, 5.0};
 const static NSEdgeInsets OEMenuBackgroundNoEdgeInsets   = { 4.0,  4.0,  4.0,  4.0};
@@ -28,27 +32,40 @@ const static NSEdgeInsets OEMenuBackgroundMinYEdgeInsets = { 5.0,  5.0, 14.0,  5
 const static NSEdgeInsets OEMenuBackgroundMaxYEdgeInsets = {14.0,  5.0,  5.0,  5.0};
 
 #pragma mark -
-#pragma mark Edge Sizes
+#pragma mark Edge Arrow Sizes
+
 const static NSSize OEMinXEdgeArrowSize = (NSSize){10.0, 15.0};
 const static NSSize OEMaxXEdgeArrowSize = (NSSize){10.0, 15.0};
 const static NSSize OEMinYEdgeArrowSize = (NSSize){15.0, 10.0};
 const static NSSize OEMaxYEdgeArrowSize = (NSSize){15.0, 10.0};
 
-const static char OEMenuItemRectKey;
+#pragma mark -
+#pragma mark Menu Item Default Mask
+
 static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeStateAnyWindowActivity & ~OEThemeStateAnyMouse;
 
-static inline NSString *NSStringFromOEMenuStyle(OEMenuStyle style, NSString *component)
+#pragma mark -
+#pragma mark Convenience Functions
+
+// Returns an NSString key that represents the specified menu style and component
+static inline NSString *OENSStringFromOEMenuStyle(OEMenuStyle style, NSString *component)
 {
     return [(style == OEMenuStyleDark ? @"dark_menu_" : @"light_menu_") stringByAppendingString:component];
 }
 
-static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
+// Returns an NSRect inset using the specified edge insets
+static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
 {
     return NSMakeRect(NSMinX(rect) + inset.left, NSMinY(rect) + inset.bottom, NSWidth(rect) - inset.left - inset.right, NSHeight(rect) - inset.bottom - inset.top);
 }
 
+#pragma mark -
+#pragma mark Implementation
+
 @interface OEMenuView ()
 
+- (void)OE_commonInit;
+- (void)OE_setupCachedThemeItems;
 - (void)OE_setNeedsLayout;
 - (void)OE_layoutIfNeeded;
 
@@ -60,7 +77,7 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
 {
     if((self = [super initWithCoder:aDecoder]))
     {
-        [self OE_setNeedsLayout];
+        [self OE_commonInit];
     }
     return self;
 }
@@ -69,7 +86,7 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
 {
     if((self = [super initWithFrame:frameRect]))
     {
-        [self OE_setNeedsLayout];
+        [self OE_commonInit];
     }
     return self;
 }
@@ -77,24 +94,57 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
 - (void)dealloc
 {
     // Make sure that there are no associations
-    NSArray *items = [_menu itemArray];
-    [items enumerateObjectsUsingBlock:
-     ^ (NSMenuItem *item, NSUInteger idx, BOOL *stop) {
-         objc_setAssociatedObject(item, &OEMenuItemRectKey, nil, OBJC_ASSOCIATION_ASSIGN);
-     }];
+    [[_menu itemArray] makeObjectsPerformSelector:@selector(setExtraData:) withObject:nil];
+}
+
+- (void)OE_commonInit
+{
+    [self OE_setupCachedThemeItems];
+    [self OE_setNeedsLayout];
+}
+
+- (void)OE_setupCachedThemeItems
+{
+    NSString *styleKeyFormat = OENSStringFromOEMenuStyle(_style, @"%@");
+    _menuItemSeparatorImage  = [[OETheme sharedTheme] imageForKey:[NSString stringWithFormat:styleKeyFormat, @"separator_item"] forState:OEThemeStateDefault];
+    _backgroundImage         = [[OETheme sharedTheme] imageForKey:[NSString stringWithFormat:styleKeyFormat, @"background"] forState:OEThemeStateDefault];
+    _backgroundColor         = [[OETheme sharedTheme] colorForKey:[NSString stringWithFormat:styleKeyFormat, @"background"] forState:OEThemeStateDefault];
+    _backgroundGradient      = [[OETheme sharedTheme] gradientForKey:[NSString stringWithFormat:styleKeyFormat, @"background"] forState:OEThemeStateDefault];
+
+    if(_edge == OENoEdge) return;
+
+    NSString *edgeComponent = nil;
+    if(_edge == OEMaxXEdge)      edgeComponent = @"maxx_arrow_body";
+    else if(_edge == OEMinXEdge) edgeComponent = @"minx_arrow_body";
+    else if(_edge == OEMaxYEdge) edgeComponent = @"maxy_arrow_body";
+    else if(_edge == OEMinYEdge) edgeComponent = @"miny_arrow_body";
+
+    _arrowImage = [[OETheme sharedTheme] imageForKey:[NSString stringWithFormat:styleKeyFormat, edgeComponent] forState:OEThemeStateDefault];
+}
+
+- (BOOL)acceptsFirstResponder
+{
+    return YES;
 }
 
 - (void)updateTrackingAreas
 {
     if(_trackingArea) [self removeTrackingArea:_trackingArea];
 
-    _trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingMouseMoved | NSTrackingMouseEnteredAndExited | NSTrackingActiveInActiveApp owner:self userInfo:nil];
+    const NSRect bounds = OENSInsetRectWithEdgeInsets([self bounds], _backgroundEdgeInsets);
+    _trackingArea = [[NSTrackingArea alloc] initWithRect:bounds options:NSTrackingMouseMoved | NSTrackingMouseEnteredAndExited | NSTrackingActiveInActiveApp owner:self userInfo:nil];
     [self addTrackingArea:_trackingArea];
 }
 
 - (void)mouseEntered:(NSEvent *)theEvent
 {
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
+}
+
+- (void)mouseUp:(NSEvent *)theEvent
+{
+    // TODO: When mouse is released we should check which item it was released over, flash the item, and close the menu
+    NSLog(@"Flash the item");
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
@@ -112,48 +162,110 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
     [self setHighlightedItem:nil];
 }
 
+- (void)flagsChanged:(NSEvent *)theEvent
+{
+    // Figure out if any of the modifier flags that we are interested have changed
+    NSUInteger modiferFlags = [theEvent modifierFlags] & _keyModifierMask;
+    if(_lasKeyModifierMask != modiferFlags)
+    {
+        // A redraw will change the menu items, we should probably just redraw the items that need to be redrawn -- but this may be more expensive operation than what it is worth
+        _lasKeyModifierMask = modiferFlags;
+
+        [self highlightItemAtPoint:[self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil]];
+        [self setNeedsDisplay:YES];
+    }
+}
+
+- (void)moveUp:(id)sender
+{
+    // There is nothing to do if there are no items
+    const NSInteger count = [[_menu itemArray] count];
+    if(count == 0) return;
+
+    // On Mac OS X, the up key does not roll over the highlighted item to the bottom -- if we are at the top, then we are done
+    NSMenuItem *item  = [self highlightedItem];
+    NSInteger   index = [[_menu itemArray] indexOfObject:item];
+    if(index == 0) return;
+
+    // If no item is highlighted then we begin from the bottom of the list, if an item is highlighted we go to the next preceeding valid item (not seperator, not disabled, and not hidden)
+    for(NSInteger i = (item == nil ? count : index) - 1; i >= 0; i--)
+    {
+        NSMenuItem *obj = [[[[_menu itemArray] objectAtIndex:i] extraData] itemWithModifierMask:_lasKeyModifierMask];
+        if(![obj isHidden] && ![obj isSeparatorItem] && [obj isEnabled] && ![obj isAlternate])
+        {
+            item = obj;
+            break;
+        }
+    }
+
+    [self setHighlightedItem:item];
+}
+
+- (void)moveDown:(id)sender
+{
+    // There is nothing to do if there are no items
+    const NSInteger count = [[_menu itemArray] count];
+    if(count == 0) return;
+
+    // On Mac OS X, the up key does not roll over the highlighted item to the top -- if we are at the bottom, then we are done
+    NSMenuItem *item  = [self highlightedItem];
+    NSInteger   index = [[_menu itemArray] indexOfObject:item];
+    if(index == count - 1) return;
+
+    // If no item is highlighted then we begin from the top of the list, if an item is highlighted we go to the next proceeding valid item (not seperator, not disabled, and not hidden)
+    for(NSInteger i = (item == nil ? -1 : index) + 1; i < count; i++)
+    {
+        NSMenuItem *obj = [[[[_menu itemArray] objectAtIndex:i] extraData] itemWithModifierMask:_lasKeyModifierMask];
+        if(![obj isHidden] && ![obj isSeparatorItem] && [obj isEnabled] && ![obj isAlternate])
+        {
+            item = obj;
+            break;
+        }
+    }
+
+    [self setHighlightedItem:item];
+}
+
+- (BOOL)performKeyEquivalent:(NSEvent *)theEvent
+{
+    // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
+    if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
+    {
+        // TODO: We should run the selector for the highlighted item, flash the item, and close the menu
+        NSLog(@"Flash the item");
+        return YES;
+    }
+
+    return NO;
+}
+
+- (void)moveLeft:(id)sender
+{
+    // TODO: Collapse submenu
+}
+
+- (void)moveRight:(id)sender
+{
+    // TODO: Expand submenu
+}
+
+- (void)cancelOperation:(id)sender
+{
+    // TODO: Cancel / Close menu
+    NSLog(@"Escape pressed.");
+}
+
 - (void)setFrameSize:(NSSize)newSize
 {
+    // TODO: This is only for debugging purposes once OEMEnu is complete, this should be removed
     [self OE_setNeedsLayout];
     [super setFrameSize:newSize];
 }
 
 - (BOOL)OE_isSubmenu
 {
+    // Convenience function to determine if this menu is a submenu
     return [[self menu] supermenu] != nil;
-}
-
-- (NSImage *)OE_menuItemSeparator
-{
-    return [[OETheme sharedTheme] imageForKey:NSStringFromOEMenuStyle(_style, @"separator_item") forState:OEThemeStateDefault];
-}
-
-- (NSImage *)OE_backgroundImage
-{
-    return [[OETheme sharedTheme] imageForKey:NSStringFromOEMenuStyle(_style, @"body") forState:OEThemeStateDefault];
-}
-
-- (NSColor *)OE_backgroundColor
-{
-    return [[OETheme sharedTheme] colorForKey:NSStringFromOEMenuStyle(_style, @"body") forState:OEThemeStateDefault];
-}
-
-- (NSGradient *)OE_backgroundGradient
-{
-    return [[OETheme sharedTheme] gradientForKey:NSStringFromOEMenuStyle(_style, @"body") forState:OEThemeStateDefault];
-}
-
-- (NSImage *)OE_arrowImageForEdge:(OERectEdge)edge
-{
-    if(edge == OENoEdge) return nil;
-
-    NSString *component = nil;
-    if(edge == OEMaxXEdge)      component = @"maxx_arrow_body";
-    else if(edge == OEMinXEdge) component = @"minx_arrow_body";
-    else if(edge == OEMaxYEdge) component = @"maxy_arrow_body";
-    else if(edge == OEMinYEdge) component = @"miny_arrow_body";
-
-    return [[OETheme sharedTheme] imageForKey:NSStringFromOEMenuStyle(_style, component) forState:OEThemeStateDefault];
 }
 
 - (OEThemeState)OE_currentStateFromMenuItem:(NSMenuItem *)item
@@ -174,6 +286,7 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
         paragraphStyle = [ps copy];
     }
 
+    // Implicitly set the paragraph style if it's not explicitly set
     NSDictionary *attributes = [themeTextAttributes textAttributesForState:state];
     if(![attributes objectForKey:NSParagraphStyleAttributeName])
     {
@@ -202,8 +315,8 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
     else if(_edge == OEMinYEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMinYEdgeInsets;
     else if(_edge == OEMaxYEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMaxYEdgeInsets;
 
-    const NSRect bounds      = NSInsetRectWithEdgeInsets([self bounds], _backgroundEdgeInsets);
-    const NSRect contentRect = NSInsetRectWithEdgeInsets(bounds, OEMenuContentEdgeInsets);
+    const NSRect bounds      = OENSInsetRectWithEdgeInsets([self bounds], _backgroundEdgeInsets);
+    const NSRect contentRect = OENSInsetRectWithEdgeInsets(bounds, OEMenuContentEdgeInsets);
 
     // Recalculate border path
     const BOOL isSubmenu = [self OE_isSubmenu];
@@ -263,18 +376,29 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
              }
          }];
 
-        const CGFloat itemHeight = _containsImage ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
-        __block CGFloat y        = 0.0;
+        const CGFloat       itemHeight    = _containsImage ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
+        __block CGFloat     y             = 0.0;
+        __block NSMenuItem *lastValidItem = nil;
 
         [items enumerateObjectsUsingBlock:
          ^(NSMenuItem *item, NSUInteger idx, BOOL *stop)
          {
              if(![item isHidden])
              {
-                 const CGFloat height    = ([item isSeparatorItem] ? OEMenuItemSeparatorHeight : itemHeight);
-                 const NSRect  itemFrame = NSMakeRect(NSMinX(bounds), NSMaxY(contentRect) - y - height, NSWidth(bounds), height);
-                 objc_setAssociatedObject(item, &OEMenuItemRectKey, [NSValue valueWithRect:itemFrame], OBJC_ASSOCIATION_COPY_NONATOMIC);
-                 y += height;
+                 OEMenuItemExtraData *extraData = [item extraData];
+                 if([extraData primaryItem])
+                 {
+                     [extraData setFrame:[[[extraData primaryItem] extraData] frame]];
+                 }
+                 else
+                 {
+                     const CGFloat height    = ([item isSeparatorItem] ? OEMenuItemSeparatorHeight : itemHeight);
+                     const NSRect  itemFrame = NSMakeRect(NSMinX(bounds), NSMaxY(contentRect) - y - height, NSWidth(bounds), height);
+                     [extraData setFrame:itemFrame];
+                     y += height;
+
+                     lastValidItem = item;
+                 }
              }
          }];
     }
@@ -284,27 +408,22 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
 {
     [self OE_layoutIfNeeded];
 
-    // Draw background
-    NSColor    *backgroundColor    = [self OE_backgroundColor];
-    NSGradient *backgroundGradient = [self OE_backgroundGradient];
-
     // Draw Background
-    if(backgroundColor != nil && backgroundColor != [NSColor clearColor])
+    if(_backgroundColor != nil && _backgroundColor != [NSColor clearColor])
     {
-        [backgroundColor setFill];
+        [_backgroundColor setFill];
         [_borderPath fill];
     }
-    [backgroundGradient drawInBezierPath:_borderPath angle:90];
+    [_backgroundGradient drawInBezierPath:_borderPath angle:90];
 
     if([self OE_isSubmenu] || _edge == OENoEdge)
     {
-        [[self OE_backgroundImage] drawInRect:[self bounds] fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [_backgroundImage drawInRect:[self bounds] fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     }
     else
     {
-        NSImage *arrow     = [self OE_arrowImageForEdge:_edge];
-        NSRect  arrowRect  = {.size = [arrow size]};
-        NSRect  borderRect = [self bounds];
+        NSRect arrowRect  = {.size = [_arrowImage size]};
+        NSRect borderRect = [self bounds];
 
         switch(_edge)
         {
@@ -333,7 +452,7 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
         }
 
         arrowRect = NSIntegralRect(arrowRect);
-        [arrow drawInRect:arrowRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0 respectFlipped:YES hints:nil];
+        [_arrowImage drawInRect:arrowRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0 respectFlipped:YES hints:nil];
 
         [NSGraphicsContext saveGraphicsState];
         NSBezierPath *clipPath = [NSBezierPath bezierPathWithRect:borderRect];
@@ -341,95 +460,104 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
         [clipPath setWindingRule:NSEvenOddWindingRule];
         [clipPath addClip];
 
-        [[self OE_backgroundImage] drawInRect:borderRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [_backgroundImage drawInRect:borderRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [NSGraphicsContext restoreGraphicsState];
     }
 
     // Draw Items
-    NSArray *items = [[self menu] itemArray];
-    if([items count] > 0)
+    NSArray *items         = [[self menu] itemArray];
+    const NSUInteger count = [items count];
+    if(count > 0)
     {
+        // Retrieve themed items
         OEThemeGradient       *menuItemGradient   = [[OETheme sharedTheme] themeGradientForKey:@"dark_menu_item_background"];
         OEThemeImage          *menuItemTick       = [[OETheme sharedTheme] themeImageForKey:@"dark_menu_item_tick"];
         OEThemeTextAttributes *menuItemAttributes = [[OETheme sharedTheme] themeTextAttributesForKey:@"dark_menu_item"];
         OEThemeImage          *submenuArrow       = [[OETheme sharedTheme] themeImageForKey:@"dark_menu_submenu_arrow"];
 
-        NSImage *separatorImage = [self OE_menuItemSeparator];
-        NSSize   separatorSize  = [separatorImage size];
+        NSSize separatorSize  = [_menuItemSeparatorImage size];
 
-        [items enumerateObjectsUsingBlock:
-         ^ (NSMenuItem *item, NSUInteger idx, BOOL *stop)
-         {
-             if(![item isHidden])
-             {
-                 NSRect menuItemFrame = [objc_getAssociatedObject(item, &OEMenuItemRectKey) rectValue];
-                 if([item isSeparatorItem])
-                 {
-                     menuItemFrame.origin.y    = NSMaxY(menuItemFrame) - OEMenuItemSeparatorOffset;
-                     menuItemFrame.size.height = separatorSize.height;
-                     [separatorImage drawInRect:menuItemFrame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                 }
-                 else
-                 {
-                     NSRect tickMarkFrame = menuItemFrame;
-                     NSRect imageFrame;
-                     NSRect textFrame;
-                     NSRect submenuArrowFrame;
+        for(NSUInteger i = 0; i < count; i++)
+        {
+            NSMenuItem *item = [items objectAtIndex:i];
+            if(![item isHidden])
+            {
+                // Figure out if an alternate item should be rendered
+                OEMenuItemExtraData *extraData = [item extraData];
+                item = [extraData itemWithModifierMask:_lasKeyModifierMask];
+                i   += [[extraData alternateItems] count];
 
-                     NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                     NSMinXEdge);
-                     NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  (_containsImage ? OEMenuItemImageWidth : 0), NSMinXEdge);
-                     NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                 NSMaxXEdge);
+                NSRect menuItemFrame = [extraData frame];
+                if([item isSeparatorItem])
+                {
+                    menuItemFrame.origin.y    = NSMaxY(menuItemFrame) - OEMenuItemSeparatorOffset;
+                    menuItemFrame.size.height = separatorSize.height;
+                    [_menuItemSeparatorImage drawInRect:menuItemFrame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                }
+                else
+                {
+                    // Set up positioning frames
+                    NSRect tickMarkFrame = menuItemFrame;
+                    NSRect imageFrame;
+                    NSRect textFrame;
+                    NSRect submenuArrowFrame;
 
-                     OEThemeState menuItemState   = [self OE_currentStateFromMenuItem:item];
-                     NSImage *tickMarkImage       = [menuItemTick imageForState:menuItemState];
-                     NSImage *submenuArrowImage   = [submenuArrow imageForState:menuItemState];
-                     NSDictionary *textAttributes = [self OE_textAttributes:menuItemAttributes forState:menuItemState];
+                    NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                     NSMinXEdge);
+                    NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  (_containsImage ? OEMenuItemImageWidth : 0), NSMinXEdge);
+                    NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                 NSMaxXEdge);
 
-                     NSImage  *menuItemImage;
-                     NSString *title = [item title];;
+                    // Retrieve UI objects from the themed items
+                    OEThemeState  menuItemState     = [self OE_currentStateFromMenuItem:item];
+                    NSImage      *tickMarkImage     = [menuItemTick imageForState:menuItemState];
+                    NSImage      *submenuArrowImage = [submenuArrow imageForState:menuItemState];
+                    NSDictionary *textAttributes    = [self OE_textAttributes:menuItemAttributes forState:menuItemState];
 
-                     // Draw the item's background
-                     [[menuItemGradient gradientForState:menuItemState] drawInRect:menuItemFrame];
+                    // Retrieve the item's image and title
+                    NSImage  *menuItemImage = [item image];
+                    NSString *title         = [item title];
 
-                     // Draw the item's tick mark
-                     if(tickMarkImage)
-                     {
-                         NSRect tickMarkRect   = { .size = [tickMarkImage size] };
-                         tickMarkRect.origin.x = tickMarkFrame.origin.x + (NSWidth(tickMarkFrame) - NSWidth(tickMarkRect)) / 2.0;
-                         tickMarkRect.origin.y = menuItemFrame.origin.y + (NSHeight(tickMarkFrame) - NSHeight(tickMarkRect)) / 2.0;
+                    // Draw the item's background
+                    [[menuItemGradient gradientForState:menuItemState] drawInRect:menuItemFrame];
 
-                         [tickMarkImage drawInRect:NSIntegralRect(tickMarkRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                     }
+                    // Draw the item's tick mark
+                    if(tickMarkImage)
+                    {
+                        NSRect tickMarkRect   = { .size = [tickMarkImage size] };
+                        tickMarkRect.origin.x = tickMarkFrame.origin.x + (NSWidth(tickMarkFrame) - NSWidth(tickMarkRect)) / 2.0;
+                        tickMarkRect.origin.y = menuItemFrame.origin.y + (NSHeight(tickMarkFrame) - NSHeight(tickMarkRect)) / 2.0;
 
-                     // Draw the item's image (if it has one)
-                     if(_containsImage && (menuItemImage = [item image]))
-                     {
-                         NSRect imageRect   = { .size = [menuItemImage size] };
-                         imageRect.origin.x = imageFrame.origin.x + 2.0;
-                         imageRect.origin.y = menuItemFrame.origin.y + (NSHeight(imageFrame) - NSHeight(imageRect)) / 2.0;
+                        [tickMarkImage drawInRect:NSIntegralRect(tickMarkRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                    }
 
-                         [menuItemImage drawInRect:NSIntegralRect(imageRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                     }
+                    // Draw the item's image (if it has one)
+                    if(menuItemImage)
+                    {
+                        NSRect imageRect   = { .size = [menuItemImage size] };
+                        imageRect.origin.x = imageFrame.origin.x + 2.0;
+                        imageRect.origin.y = menuItemFrame.origin.y + (NSHeight(imageFrame) - NSHeight(imageRect)) / 2.0;
 
-                     // Draw submenu arrow
-                     if([item hasSubmenu] && submenuArrowImage)
-                     {
-                         NSRect arrowRect   = { .size = [submenuArrowImage size] };
-                         arrowRect.origin.x = submenuArrowFrame.origin.x;
-                         arrowRect.origin.y = menuItemFrame.origin.y + (NSHeight(submenuArrowFrame) - NSHeight(arrowRect)) / 2.0;
+                        [menuItemImage drawInRect:NSIntegralRect(imageRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                    }
 
-                         [submenuArrowImage drawInRect:NSIntegralRect(arrowRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                     }
+                    // Draw submenu arrow if the item has a submenu
+                    if([item hasSubmenu] && submenuArrowImage)
+                    {
+                        NSRect arrowRect   = { .size = [submenuArrowImage size] };
+                        arrowRect.origin.x = submenuArrowFrame.origin.x;
+                        arrowRect.origin.y = menuItemFrame.origin.y + (NSHeight(submenuArrowFrame) - NSHeight(arrowRect)) / 2.0;
 
-                     // Draw Item Title
-                     NSRect textRect = { .size = [title sizeWithAttributes:textAttributes] };
-                     textRect.origin.x = textFrame.origin.x;
-                     textRect.origin.y = menuItemFrame.origin.y + (NSHeight(textFrame) - NSHeight(textRect)) / 2.0;
+                        [submenuArrowImage drawInRect:NSIntegralRect(arrowRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                    }
 
-                     [title drawInRect:textRect withAttributes:textAttributes];
-                 }
-             }
-         }];
+                    // Draw Item Title
+                    NSRect textRect   = { .size = [title sizeWithAttributes:textAttributes] };
+                    textRect.origin.x = textFrame.origin.x;
+                    textRect.origin.y = menuItemFrame.origin.y + (NSHeight(textFrame) - NSHeight(textRect)) / 2.0;
+
+                    [title drawInRect:textRect withAttributes:textAttributes];
+                }
+            }
+        }
     }
 }
 
@@ -443,7 +571,7 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
     NSArray *items = [_menu itemArray];
     for(NSMenuItem *item in items)
     {
-        if(NSPointInRect(point, [objc_getAssociatedObject(item, &OEMenuItemRectKey) rectValue])) return item;
+        if(NSPointInRect(point, [[item  extraData] frame])) return item;
     }
 
     return nil;
@@ -451,17 +579,18 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
 
 - (void)setHighlightedItem:(NSMenuItem *)highlightedItem
 {
-    NSMenuItem *newHighlightedItem = (![highlightedItem isEnabled] || [highlightedItem isSeparatorItem]) ? nil : highlightedItem;
-    if(_highlightedItem != newHighlightedItem)
+    NSMenuItem *realHighlightedItem = [[highlightedItem extraData] primaryItem] ?: highlightedItem;
+    if(_highlightedItem != realHighlightedItem)
     {
-        _highlightedItem = newHighlightedItem;
+        _highlightedItem = realHighlightedItem;
         [self setNeedsDisplay:YES];
     }
 }
 
 - (NSMenuItem *)highlightedItem
 {
-    return _highlightedItem;
+    NSMenuItem *realHighlightedItem = [[_highlightedItem extraData] itemWithModifierMask:_lasKeyModifierMask];
+    return ([realHighlightedItem isEnabled] && ![realHighlightedItem isSeparatorItem] ? realHighlightedItem : nil);
 }
 
 - (void)setMenu:(NSMenu *)menu
@@ -470,6 +599,27 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
     {
         _menu = menu;
         [self OE_setNeedsLayout];
+
+        NSArray            *items         = [_menu itemArray];
+        __block NSMenuItem *lastValidItem = nil;
+
+        _keyModifierMask = 0;
+        [items enumerateObjectsUsingBlock:
+         ^ (NSMenuItem *item, NSUInteger idx, BOOL *stop)
+         {
+             if(![item isHidden])
+             {
+                 _keyModifierMask |= [item keyEquivalentModifierMask];
+                 if([item isAlternate] && [[lastValidItem keyEquivalent] isEqualToString:[item keyEquivalent]])
+                 {
+                     [[lastValidItem extraData] addAlternateItem:item];
+                 }
+                 else
+                 {
+                     lastValidItem = item;
+                 }
+             }
+         }];
     }
 }
 
@@ -483,6 +633,7 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
     if(_style != style)
     {
         _style = style;
+        [self OE_setupCachedThemeItems];
         [self setNeedsDisplay:YES];
     }
 }
@@ -497,6 +648,7 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
     if(_edge != edge)
     {
         _edge = edge;
+        [self OE_setupCachedThemeItems];
         [self OE_setNeedsLayout];
     }
 }
