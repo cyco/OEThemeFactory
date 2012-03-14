@@ -61,13 +61,13 @@
 		EF33D818150B73D100B93D87 /* OEPopUpButtonCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEPopUpButtonCell.h; sourceTree = "<group>"; };
 		EF33D819150B73D100B93D87 /* OEPopUpButtonCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEPopUpButtonCell.m; sourceTree = "<group>"; };
 		EF33D81B150B75ED00B93D87 /* dark_popup_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_popup_button.png; sourceTree = "<group>"; };
-		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSColor+OEAdditions.h"; path = "../NSColor+OEAdditions.h"; sourceTree = "<group>"; };
-		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSColor+OEAdditions.m"; path = "../NSColor+OEAdditions.m"; sourceTree = "<group>"; };
+		EF37DA3B14FC3BB00098A077 /* NSColor+OEAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSColor+OEAdditions.h"; sourceTree = "<group>"; };
+		EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSColor+OEAdditions.m"; sourceTree = "<group>"; };
 		EF37DA3D14FC3E850098A077 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		EF37DA3F14FC3F110098A077 /* OEThemeImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeImage.h; sourceTree = "<group>"; };
 		EF37DA4014FC3F110098A077 /* OEThemeImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeImage.m; sourceTree = "<group>"; };
-		EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "NSImage+OEDrawingAdditions.h"; path = "../NSImage+OEDrawingAdditions.h"; sourceTree = "<group>"; };
-		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "NSImage+OEDrawingAdditions.m"; path = "../NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
+		EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSImage+OEDrawingAdditions.h"; sourceTree = "<group>"; };
+		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
 		EF910A25150240580071A0A8 /* OEThemeGradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeGradient.h; sourceTree = "<group>"; };
 		EF910A26150240580071A0A8 /* OEThemeGradient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeGradient.m; sourceTree = "<group>"; };
 		EF910A6015025CA00071A0A8 /* OEButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEButton.h; sourceTree = "<group>"; };
@@ -152,11 +152,12 @@
 		EF33D814150B6F5A00B93D87 /* Controls */ = {
 			isa = PBXGroup;
 			children = (
+				EFD9BE3D14FA3DCB00397397 /* Theme.plist */,
 				EF33D81D150BA65F00B93D87 /* Menu */,
 				EF33D812150B6F3900B93D87 /* Buttons */,
 				EF33D813150B6F4900B93D87 /* Button Cells */,
 			);
-			name = Controls;
+			path = Controls;
 			sourceTree = "<group>";
 		};
 		EF33D81D150BA65F00B93D87 /* Menu */ = {
@@ -305,7 +306,6 @@
 		EFD9BE3C14FA3DBD00397397 /* Theme */ = {
 			isa = PBXGroup;
 			children = (
-				EFD9BE3D14FA3DCB00397397 /* Theme.plist */,
 				EFD9BE3F14FA442900397397 /* OETheme.h */,
 				EFD9BE4014FA442900397397 /* OETheme.m */,
 				EFD9BE4214FA49E700397397 /* OEThemeObject.h */,
@@ -321,6 +321,7 @@
 				EF33D814150B6F5A00B93D87 /* Controls */,
 			);
 			name = Theme;
+			path = OETheme;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
