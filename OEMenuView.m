@@ -35,6 +35,7 @@ const static NSSize OEMinYEdgeArrowSize = (NSSize){15.0, 10.0};
 const static NSSize OEMaxYEdgeArrowSize = (NSSize){15.0, 10.0};
 
 const static char OEMenuItemRectKey;
+static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeStateAnyWindowActivity & ~OEThemeStateAnyMouse;
 
 static inline NSString *NSStringFromOEMenuStyle(OEMenuStyle style, NSString *component)
 {
@@ -157,7 +158,6 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
 
 - (OEThemeState)OE_currentStateFromMenuItem:(NSMenuItem *)item
 {
-    static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeStateAnyWindowActivity & ~OEThemeStateAnyMouse;
     return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:(_highlightedItem == item) enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
 }
 
