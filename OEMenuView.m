@@ -158,7 +158,7 @@ static inline NSRect NSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
 
 - (OEThemeState)OE_currentStateFromMenuItem:(NSMenuItem *)item
 {
-    return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:(_highlightedItem == item) enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
+    return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:[self highlightedItem] == item enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
 }
 
 - (NSDictionary *)OE_textAttributes:(OEThemeTextAttributes *)themeTextAttributes forState:(OEThemeState)state
