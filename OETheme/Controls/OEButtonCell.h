@@ -14,6 +14,8 @@
 @private
     NSMutableParagraphStyle *_style;
 
+    BOOL _themed;
+
     OEThemeImage          *_backgroundThemeImage;
     OEThemeImage          *_themeImage;
     OEThemeTextAttributes *_themeTextAttributes;
