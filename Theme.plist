@@ -4,9 +4,9 @@
 <dict>
 	<key>Colors</key>
 	<dict>
-		<key>dark_menu_body</key>
+		<key>dark_menu_background</key>
 		<string>rgba(0,0,0,0.8)</string>
-		<key>light_menu_body</key>
+		<key>light_menu_background</key>
 		<string>clear</string>
 	</dict>
 	<key>Fonts</key>
@@ -181,7 +181,7 @@
 				<string>{{0,8},{7,8}}</string>
 			</dict>
 		</dict>
-		<key>dark_menu_body</key>
+		<key>dark_menu_background</key>
 		<dict>
 			<key>Resource</key>
 			<string>dark_menu_body</string>
@@ -270,7 +270,7 @@
 	</dict>
 	<key>Gradients</key>
 	<dict>
-		<key>dark_menu_body</key>
+		<key>dark_menu_background</key>
 		<dict>
 			<key>Colors</key>
 			<array>
@@ -283,7 +283,7 @@
 				<integer>1</integer>
 			</array>
 		</dict>
-		<key>light_menu_body</key>
+		<key>light_menu_background</key>
 		<dict>
 			<key>Colors</key>
 			<array>

@@ -45,6 +45,8 @@
 		EFD9BE5214FA823800397397 /* OEThemeTextAttributes.m in Sources */ = {isa = PBXBuildFile; fileRef = EFD9BE5114FA823800397397 /* OEThemeTextAttributes.m */; };
 		EFE98C52150D0458006010F4 /* menu_item_tick_mark.png in Resources */ = {isa = PBXBuildFile; fileRef = EFE98C51150D0458006010F4 /* menu_item_tick_mark.png */; };
 		EFE98C55150D0491006010F4 /* menu_item_mixed_state.png in Resources */ = {isa = PBXBuildFile; fileRef = EFE98C54150D0491006010F4 /* menu_item_mixed_state.png */; };
+		EFEBDB6D151079C2004DDC8C /* OEMenuItemExtraData.m in Sources */ = {isa = PBXBuildFile; fileRef = EFEBDB6C151079C2004DDC8C /* OEMenuItemExtraData.m */; };
+		EFEBDB71151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EFEBDB70151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -106,6 +108,10 @@
 		EFD9BE5114FA823800397397 /* OEThemeTextAttributes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeTextAttributes.m; sourceTree = "<group>"; };
 		EFE98C51150D0458006010F4 /* menu_item_tick_mark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = menu_item_tick_mark.png; sourceTree = "<group>"; };
 		EFE98C54150D0491006010F4 /* menu_item_mixed_state.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = menu_item_mixed_state.png; sourceTree = "<group>"; };
+		EFEBDB6B151079C2004DDC8C /* OEMenuItemExtraData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenuItemExtraData.h; sourceTree = "<group>"; };
+		EFEBDB6C151079C2004DDC8C /* OEMenuItemExtraData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuItemExtraData.m; sourceTree = "<group>"; };
+		EFEBDB6F151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMenuItem+OEMenuItemExtraDataAdditions.h"; sourceTree = "<group>"; };
+		EFEBDB70151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMenuItem+OEMenuItemExtraDataAdditions.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,6 +164,10 @@
 			children = (
 				EFA53811150BC76E003D07A1 /* OEMenuView.h */,
 				EFA53812150BC76E003D07A1 /* OEMenuView.m */,
+				EFEBDB6B151079C2004DDC8C /* OEMenuItemExtraData.h */,
+				EFEBDB6C151079C2004DDC8C /* OEMenuItemExtraData.m */,
+				EFEBDB6F151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.h */,
+				EFEBDB70151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m */,
 			);
 			name = Menu;
 			sourceTree = "<group>";
@@ -410,6 +420,8 @@
 				EF33D817150B6F6E00B93D87 /* OEButtonCell.m in Sources */,
 				EF33D81A150B73D100B93D87 /* OEPopUpButtonCell.m in Sources */,
 				EFA53813150BC76E003D07A1 /* OEMenuView.m in Sources */,
+				EFEBDB6D151079C2004DDC8C /* OEMenuItemExtraData.m in Sources */,
+				EFEBDB71151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
