@@ -24,8 +24,8 @@ const static CGFloat OEMenuItemSeparatorOffset    =  3.0;
 #pragma mark -
 #pragma mark Background Image Insets
 
-const static NSEdgeInsets OEMenuContentEdgeInsets        = {7.0, 5.0, 7.0, 5.0};
-const static NSEdgeInsets OEMenuBackgroundNoEdgeInsets   = { 4.0,  4.0,  4.0,  4.0};
+const static NSEdgeInsets OEMenuContentEdgeInsets        = { 7.0,  5.0,  7.0,  5.0};
+const static NSEdgeInsets OEMenuBackgroundNoEdgeInsets   = { 5.0,  5.0,  5.0,  5.0};
 const static NSEdgeInsets OEMenuBackgroundMinXEdgeInsets = { 5.0, 14.0,  5.0,  5.0};
 const static NSEdgeInsets OEMenuBackgroundMaxXEdgeInsets = { 5.0,  5.0,  5.0, 14.0};
 const static NSEdgeInsets OEMenuBackgroundMinYEdgeInsets = { 5.0,  5.0, 14.0,  5.0};
