@@ -9,6 +9,7 @@
 #import "OEAppDelegate.h"
 #import "OETheme.h"
 #import "NSColor+OEAdditions.h"
+#import "OEMenu.h"
 
 @implementation OEAppDelegate
 @synthesize menu = _menu;
@@ -17,6 +18,7 @@
 @synthesize glossCheckBox = _glossCheckBox;
 @synthesize popupButton = _popupButton;
 @synthesize menuView = _menuView;
+@synthesize menuWindow = _menuWindow;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
@@ -34,6 +36,8 @@
 
     [_menuView setEdge:OEMinXEdge];
     [_menuView setMenu:[self menu]];
+
+    _menuWindow = [OEMenu openMenuForPopUpButton:_popupButton];
 }
 
 @end

@@ -47,6 +47,7 @@
 		EFE98C55150D0491006010F4 /* menu_item_mixed_state.png in Resources */ = {isa = PBXBuildFile; fileRef = EFE98C54150D0491006010F4 /* menu_item_mixed_state.png */; };
 		EFEBDB6D151079C2004DDC8C /* OEMenuItemExtraData.m in Sources */ = {isa = PBXBuildFile; fileRef = EFEBDB6C151079C2004DDC8C /* OEMenuItemExtraData.m */; };
 		EFEBDB71151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EFEBDB70151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m */; };
+		EFEBDB741511566A004DDC8C /* OEMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = EFEBDB731511566A004DDC8C /* OEMenu.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -112,6 +113,8 @@
 		EFEBDB6C151079C2004DDC8C /* OEMenuItemExtraData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuItemExtraData.m; sourceTree = "<group>"; };
 		EFEBDB6F151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMenuItem+OEMenuItemExtraDataAdditions.h"; sourceTree = "<group>"; };
 		EFEBDB70151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMenuItem+OEMenuItemExtraDataAdditions.m"; sourceTree = "<group>"; };
+		EFEBDB7215115669004DDC8C /* OEMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenu.h; sourceTree = "<group>"; };
+		EFEBDB731511566A004DDC8C /* OEMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenu.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +166,8 @@
 		EF33D81D150BA65F00B93D87 /* Menu */ = {
 			isa = PBXGroup;
 			children = (
+				EFEBDB7215115669004DDC8C /* OEMenu.h */,
+				EFEBDB731511566A004DDC8C /* OEMenu.m */,
 				EFA53811150BC76E003D07A1 /* OEMenuView.h */,
 				EFA53812150BC76E003D07A1 /* OEMenuView.m */,
 				EFEBDB6B151079C2004DDC8C /* OEMenuItemExtraData.h */,
@@ -423,6 +428,7 @@
 				EFA53813150BC76E003D07A1 /* OEMenuView.m in Sources */,
 				EFEBDB6D151079C2004DDC8C /* OEMenuItemExtraData.m in Sources */,
 				EFEBDB71151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m in Sources */,
+				EFEBDB741511566A004DDC8C /* OEMenu.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

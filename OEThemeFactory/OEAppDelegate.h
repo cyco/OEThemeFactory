@@ -10,6 +10,7 @@
 #import "OEButton.h"
 #import "OEPopUpButton.h"
 #import "OEMenuView.h"
+#import "OEMenu.h"
 
 @interface OEAppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate>
 
@@ -19,5 +20,6 @@
 @property(assign) IBOutlet OEPopUpButton *popupButton;
 @property(assign) IBOutlet OEMenuView *menuView;
 @property(assign) IBOutlet NSMenu *menu;
+@property(retain) OEMenu *menuWindow;
 
 @end
