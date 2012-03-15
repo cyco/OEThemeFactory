@@ -604,11 +604,12 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
          }
      }];
 
-    const CGFloat minimumWidth  = _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right + OEMenuItemTickMarkWidth + (_containsImage ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + 25;
-    const CGFloat minimumHeight = _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom;
+    const CGFloat minimumWidthPadding  = _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right;
+    const CGFloat minimumHeightPadding = _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom;
+    const CGFloat minimumWidth         = OEMenuItemTickMarkWidth + (_containsImage ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + 25;
 
-    width  = ceil(MAX(MAX(width + minimumWidth, frame.size.width), [_menu minimumWidth]));
-    height = ceil(height + minimumHeight);
+    width  = ceil(MAX(MAX(width + minimumWidth, frame.size.width), [_menu minimumWidth]) + minimumWidthPadding);
+    height = ceil(height + minimumHeightPadding);
 
     return NSMakeSize(width, height);
 }

@@ -19,6 +19,4 @@
 + (OEMenu *)openMenuForPopUpButton:(OEPopUpButton *)button;
 + (OEMenu *)openMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge withRect:(NSRect)rect;
 
-@property(nonatomic, assign) NSMenu *menu;
-
 @end

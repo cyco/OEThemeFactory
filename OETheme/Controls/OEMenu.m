@@ -18,25 +18,22 @@
     [result setBackgroundColor:[NSColor clearColor]];
     [result setMenu:menu];
     [result setLevel:NSPopUpMenuWindowLevel];
+    [result setContentSize:[result->_view sizeThatFits:rect]];
     return result;
 }
 
 + (OEMenu *)openMenuForPopUpButton:(OEPopUpButton *)button
 {
-    NSRect  buttonFrame  = [[button window] convertRectToScreen:[button frame]];
+    const NSRect  buttonFrame  = [[button window] convertRectToScreen:[button frame]];
     OEMenu *result = [self menuWithMenu:[button menu] withRect:buttonFrame];
     [result->_view setEdge:OENoEdge];
     [result->_view setHighlightedItem:[button selectedItem]];
 
-    NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
-    NSRect titleRectInWindow = [button convertRect:titleRectInButton toView:nil];
-    NSRect titleRectInScreen = [[button window] convertRectToScreen:titleRectInWindow];
+    const NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
+    const NSRect titleRectInWindow = [button convertRect:titleRectInButton toView:nil];
+    const NSRect titleRectInScreen = [[button window] convertRectToScreen:titleRectInWindow];
 
     [result setFrameTopLeftPoint:[result->_view topLeftPointWithSelectedItemRect:titleRectInScreen]];
-    NSRect frame = [result frame];
-    frame = [result frame];
-    frame.size.width += NSMaxX(buttonFrame) - NSMaxX(frame);
-    [result setFrame:frame display:NO];
     [result orderFrontRegardless];
 
     return result;
@@ -62,24 +59,10 @@
     return self;
 }
 
-- (void)OE_resizeToFit
-{
-    [self setContentSize:[_view sizeThatFits:[self frame]]];
-}
-
 - (void)setMenu:(NSMenu *)menu
 {
-    if([_view menu]) NSLog(@"Menu already set, you must create a new instatiation.");
-    else
-    {
-        [_view setMenu:menu];
-        [self OE_resizeToFit];
-    }
     [super setMenu:menu];
+    [_view setMenu:menu];
 }
 
-- (NSMenu *)menu
-{
-    return [_view menu];
-}
 @end
