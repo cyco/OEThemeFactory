@@ -268,9 +268,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)setFrameSize:(NSSize)newSize
 {
-    // TODO: This is only for debugging purposes once OEMEnu is complete, this should be removed
-    [self OE_setNeedsLayout];
     [super setFrameSize:newSize];
+    [self OE_setNeedsLayout];
 }
 
 - (BOOL)OE_isSubmenu
@@ -580,6 +579,43 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     }
 
     return nil;
+}
+
+- (NSSize)sizeThatFits:(NSRect)frame
+{
+    NSArray *items = [_menu itemArray];
+    if([items count] == 0) return NSZeroSize;
+
+    [self OE_layoutIfNeeded];
+
+    NSDictionary *attributes = [self OE_textAttributes:[[OETheme sharedTheme] themeTextAttributesForKey:@"dark_menu_item"] forState:OEThemeStateDefault];
+
+    const CGFloat   itemHeight = _containsImage ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
+    __block CGFloat height     = 0.0;
+    __block CGFloat width      = 0.0;
+
+    [items enumerateObjectsUsingBlock:
+     ^ (NSMenuItem *item, NSUInteger idx, BOOL *stop)
+     {
+         if(![item isHidden] && ![[item extraData] primaryItem])
+         {
+             height += ([item isSeparatorItem] ? OEMenuItemSeparatorHeight : itemHeight);
+             width   = MAX(width, [[item title] sizeWithAttributes:attributes].width);
+         }
+     }];
+
+    const CGFloat minimumWidth  = _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right + OEMenuItemTickMarkWidth + (_containsImage ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + 25;
+    const CGFloat minimumHeight = _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom;
+
+    width  = ceil(MAX(MAX(width + minimumWidth, frame.size.width), [_menu minimumWidth]));
+    height = ceil(height + minimumHeight);
+
+    return NSMakeSize(width, height);
+}
+
+- (NSPoint)topLeftPointWithSelectedItemRect:(NSRect)titleRectInScreen
+{
+    return NSMakePoint(NSMinX(titleRectInScreen) - OEMenuItemTickMarkWidth - _backgroundEdgeInsets.left, NSMaxY(titleRectInScreen) + _backgroundEdgeInsets.top + OEMenuContentEdgeInsets.top);
 }
 
 - (void)setHighlightedItem:(NSMenuItem *)highlightedItem

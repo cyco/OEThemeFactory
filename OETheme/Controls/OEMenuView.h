@@ -55,6 +55,9 @@ typedef enum _OERectEdge
 
 // Retrieves item at the specified point
 - (NSMenuItem *)itemAtPoint:(NSPoint)point;
+- (NSSize)sizeThatFits:(NSRect)frame;
+
+- (NSPoint)topLeftPointWithSelectedItemRect:(NSRect)titleRectInScreen;
 
 @property(nonatomic, assign) NSMenuItem  *highlightedItem;
 @property(nonatomic, retain) NSMenu      *menu;
