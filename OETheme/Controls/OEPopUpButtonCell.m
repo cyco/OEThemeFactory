@@ -65,37 +65,59 @@
 
 - (void)drawBorderAndBackgroundWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    if(_backgroundThemeImage == nil) return;
-    [[_backgroundThemeImage imageForState:[self OE_currentState]] drawInRect:cellFrame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    if(_themed)
+    {
+        if(_backgroundThemeImage == nil) return;
+        [[_backgroundThemeImage imageForState:[self OE_currentState]] drawInRect:cellFrame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    }
+    else
+    {
+        [super drawBorderAndBackgroundWithFrame:cellFrame inView:controlView];
+    }
 }
 
 - (void)drawImage:(NSImage *)image withFrame:(NSRect)frame inView:(NSView *)controlView
 {
-    [image drawInRect:frame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0 respectFlipped:YES hints:nil];
+    if(_themed)
+    {
+        [image drawInRect:frame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0 respectFlipped:YES hints:nil];
+    }
+    else
+    {
+        [super drawImage:image withFrame:frame inView:controlView];
+    }
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-    NSRect textRect  = [self titleRectForBounds:cellFrame];
-    NSRect imageRect = [self imageRectForBounds:cellFrame];
+    if(_themed)
+    {
+        NSRect textRect  = [self titleRectForBounds:cellFrame];
+        NSRect imageRect = [self imageRectForBounds:cellFrame];
 
-    if(!NSIsEmptyRect(textRect))  [self drawTitle:[self attributedTitle] withFrame:textRect inView:controlView];
-    if(!NSIsEmptyRect(imageRect)) [self drawImage:[self image] withFrame:imageRect inView:controlView];
+        if(!NSIsEmptyRect(textRect))  [self drawTitle:[self attributedTitle] withFrame:textRect inView:controlView];
+        if(!NSIsEmptyRect(imageRect)) [self drawImage:[self image] withFrame:imageRect inView:controlView];
+    }
+    else
+    {
+        [super drawInteriorWithFrame:cellFrame inView:controlView];
+    }
 }
 
 - (NSImage *)image
 {
-    return (_themeImage == nil ? [super image] : [_themeImage imageForState:[self OE_currentState]]);
+    return (!_themed || _themeImage == nil ? [super image] : [_themeImage imageForState:[self OE_currentState]]);
 }
 
 - (NSAttributedString *)attributedTitle
 {
-    NSDictionary *attributes = [self OE_attributesForState:[self OE_currentState]];
+    NSDictionary *attributes = (_themed ? [self OE_attributesForState:[self OE_currentState]] : nil);
     return (!attributes ? [super attributedTitle] : [[NSAttributedString alloc] initWithString:[self title] attributes:attributes]);
 }
 
 - (void)OE_recomputeStateMask
 {
+    _themed    = (_backgroundThemeImage != nil || _themeImage != nil || _themeTextAttributes != nil);
     _stateMask = [_backgroundThemeImage stateMask] | [_themeImage stateMask] | [_themeTextAttributes stateMask];
 }
 

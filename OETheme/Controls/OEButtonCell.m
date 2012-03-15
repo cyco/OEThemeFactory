@@ -116,7 +116,7 @@
 
 - (NSImage *)image
 {
-    return (_themeImage == nil ? [super image] : [_themeImage imageForState:[self OE_currentState]]);
+    return (!_themed || _themeImage == nil ? [super image] : [_themeImage imageForState:[self OE_currentState]]);
 }
 
 - (NSAttributedString *)attributedTitle
