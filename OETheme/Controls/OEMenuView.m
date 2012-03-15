@@ -68,6 +68,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)OE_setupCachedThemeItems;
 - (void)OE_setNeedsLayout;
 - (void)OE_layoutIfNeeded;
+- (void)OE_updateInsets;
 
 @end
 
@@ -100,6 +101,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)OE_commonInit
 {
     [self OE_setupCachedThemeItems];
+    [self OE_updateInsets];
     [self OE_setNeedsLayout];
 }
 
@@ -120,6 +122,15 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     else if(_edge == OEMinYEdge) edgeComponent = @"miny_arrow_body";
 
     _arrowImage = [[OETheme sharedTheme] imageForKey:[NSString stringWithFormat:styleKeyFormat, edgeComponent] forState:OEThemeStateDefault];
+}
+
+- (void)OE_updateInsets
+{
+    if([self OE_isSubmenu] || _edge == OENoEdge) _backgroundEdgeInsets = OEMenuBackgroundNoEdgeInsets;
+    else if(_edge == OEMinXEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMinXEdgeInsets;
+    else if(_edge == OEMaxXEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMaxXEdgeInsets;
+    else if(_edge == OEMinYEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMinYEdgeInsets;
+    else if(_edge == OEMaxYEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMaxYEdgeInsets;
 }
 
 - (BOOL)acceptsFirstResponder
@@ -308,12 +319,6 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 {
     if(!_needsLayout) return;
     _needsLayout = NO;
-
-    if([self OE_isSubmenu] || _edge == OENoEdge) _backgroundEdgeInsets = OEMenuBackgroundNoEdgeInsets;
-    else if(_edge == OEMinXEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMinXEdgeInsets;
-    else if(_edge == OEMaxXEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMaxXEdgeInsets;
-    else if(_edge == OEMinYEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMinYEdgeInsets;
-    else if(_edge == OEMaxYEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMaxYEdgeInsets;
 
     const NSRect bounds      = OENSInsetRectWithEdgeInsets([self bounds], _backgroundEdgeInsets);
     const NSRect contentRect = OENSInsetRectWithEdgeInsets(bounds, OEMenuContentEdgeInsets);
@@ -649,6 +654,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     {
         _edge = edge;
         [self OE_setupCachedThemeItems];
+        [self OE_updateInsets];
         [self OE_setNeedsLayout];
     }
 }
