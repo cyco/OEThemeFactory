@@ -7,6 +7,7 @@
 //
 
 #import "OEPopUpButton.h"
+#import "OEMenu.h"
 
 @interface OEPopUpButton ()
 
@@ -62,6 +63,11 @@
 {
     // Mouse has exited / mouse off, we want to redisplay the button with the new state...this is only fired when the mouse tracking is installed
     [self setNeedsDisplay];
+}
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+    [OEMenu popUpContextMenuForPopUpButton:self];
 }
 
 - (void)OE_windowKeyChanged:(NSNotification *)notification
