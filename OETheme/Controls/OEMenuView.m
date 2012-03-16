@@ -683,14 +683,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
              if(![item isHidden])
              {
                  _keyModifierMask |= [item keyEquivalentModifierMask];
-                 if([item isAlternate] && [[lastValidItem keyEquivalent] isEqualToString:[item keyEquivalent]])
-                 {
-                     [[lastValidItem extraData] addAlternateItem:item];
-                 }
-                 else
-                 {
-                     lastValidItem = item;
-                 }
+                 if([item isAlternate] && [[lastValidItem keyEquivalent] isEqualToString:[item keyEquivalent]]) [[lastValidItem extraData] addAlternateItem:item];
+                 else                                                                                           lastValidItem = item;
              }
          }];
     }
