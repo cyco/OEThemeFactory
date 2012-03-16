@@ -19,7 +19,7 @@
 
 + (OEMenu *)popUpContextMenuWithMenu:(NSMenu *)menu withRect:(NSRect)rect
 {
-    OEMenu *result = [[self alloc] initWithContentRect:rect styleMask:NSBorderlessWindowMask | NSNonactivatingPanelMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
+    OEMenu *result = [[self alloc] initWithContentRect:rect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
     [result setMenu:menu];
     [result setContentSize:[result->_view sizeThatFits:rect]];
 
