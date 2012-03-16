@@ -14,9 +14,12 @@
 {
 @private
     OEMenuView *_view;
+    BOOL _cancelTracking;
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button;
 + (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge withRect:(NSRect)rect forView:(NSView *)view;
+
+- (oneway void)cancelTracking;
 
 @end

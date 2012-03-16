@@ -73,6 +73,28 @@
     [_view setMenu:menu];
 }
 
+- (void)resignKeyWindow
+{
+    [self cancelTracking];
+}
+
+- (oneway void)cancelTracking
+{
+    if(_cancelTracking) return;
+    _cancelTracking = YES;
+
+    [NSAnimationContext runAnimationGroup:
+     ^ (NSAnimationContext *context)
+     {
+         [[self animator] setAlphaValue:0.0];
+     }
+                        completionHandler:
+     ^{
+         [[self parentWindow] removeChildWindow:self];
+         [self orderOut:nil];
+     }];
+}
+
 - (void)OE_showWindowForView:(NSView *)view
 {
     [self OE_createEventMonitor];
