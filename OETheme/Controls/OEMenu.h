@@ -16,7 +16,7 @@
     OEMenuView *_view;
 }
 
-+ (OEMenu *)openMenuForPopUpButton:(OEPopUpButton *)button;
-+ (OEMenu *)openMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge withRect:(NSRect)rect;
++ (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button;
++ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge withRect:(NSRect)rect forView:(NSView *)view;
 
 @end

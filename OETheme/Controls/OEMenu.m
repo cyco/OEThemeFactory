@@ -9,23 +9,27 @@
 #import "OEMenu.h"
 #import "OEPopUpButton.h"
 
+@interface OEMenu ()
+
+- (void)OE_showWindowForView:(NSView *)view;
+
+@end
+
 @implementation OEMenu
 
-+ (OEMenu *)menuWithMenu:(NSMenu *)menu withRect:(NSRect)rect
++ (OEMenu *)popUpContextMenuWithMenu:(NSMenu *)menu withRect:(NSRect)rect
 {
-    OEMenu *result = [[self alloc] initWithContentRect:rect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
-    [result setOpaque:NO];
-    [result setBackgroundColor:[NSColor clearColor]];
+    OEMenu *result = [[self alloc] initWithContentRect:rect styleMask:NSBorderlessWindowMask | NSNonactivatingPanelMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
     [result setMenu:menu];
-    [result setLevel:NSPopUpMenuWindowLevel];
     [result setContentSize:[result->_view sizeThatFits:rect]];
+
     return result;
 }
 
-+ (OEMenu *)openMenuForPopUpButton:(OEPopUpButton *)button
++ (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button
 {
-    const NSRect  buttonFrame  = [[button window] convertRectToScreen:[button frame]];
-    OEMenu *result = [self menuWithMenu:[button menu] withRect:buttonFrame];
+    const NSRect buttonFrame  = [[button window] convertRectToScreen:[button frame]];
+    OEMenu *result = [self popUpContextMenuWithMenu:[button menu] withRect:buttonFrame];
     [result->_view setEdge:OENoEdge];
     [result->_view setHighlightedItem:[button selectedItem]];
 
@@ -34,18 +38,16 @@
     const NSRect titleRectInScreen = [[button window] convertRectToScreen:titleRectInWindow];
 
     [result setFrameTopLeftPoint:[result->_view topLeftPointWithSelectedItemRect:titleRectInScreen]];
-    [result orderFrontRegardless];
 
-    return result;
+    [result OE_showWindowForView:button];
 }
 
-+ (OEMenu *)openMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge withRect:(NSRect)rect
++ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge withRect:(NSRect)rect forView:(NSView *)view
 {
-    OEMenu *result = [self menuWithMenu:menu withRect:rect];
+    OEMenu *result = [self popUpContextMenuWithMenu:menu withRect:rect];
     [result->_view setEdge:edge];
-    [result orderFrontRegardless];
 
-    return result;
+    [result OE_showWindowForView:view];
 }
 
 - (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)aStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag screen:(NSScreen *)screen
@@ -55,6 +57,12 @@
         _view = [[OEMenuView alloc] initWithFrame:[[self contentView] bounds]];
         [_view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
         [[self contentView] addSubview:_view];
+        [self makeFirstResponder:_view];
+
+        [self setOpaque:NO];
+        [self setBackgroundColor:[NSColor clearColor]];
+        [self setLevel:NSTornOffMenuWindowLevel];
+        [self setReleasedWhenClosed:YES];
     }
     return self;
 }
@@ -63,6 +71,13 @@
 {
     [super setMenu:menu];
     [_view setMenu:menu];
+}
+
+- (void)OE_showWindowForView:(NSView *)view
+{
+    [self OE_createEventMonitor];
+    [[view window] addChildWindow:self ordered:NSWindowAbove];
+    [self orderFrontRegardless];
 }
 
 @end
