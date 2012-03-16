@@ -647,7 +647,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (NSPoint)topLeftPointWithSelectedItemRect:(NSRect)titleRectInScreen
 {
-    return NSMakePoint(NSMinX(titleRectInScreen) - OEMenuItemTickMarkWidth - _backgroundEdgeInsets.left + 1.0, NSMaxY(titleRectInScreen) + _backgroundEdgeInsets.top + OEMenuContentEdgeInsets.top + 1.0);
+    [self OE_layoutIfNeeded];
+    return NSMakePoint(NSMinX(titleRectInScreen) - OEMenuItemTickMarkWidth - _backgroundEdgeInsets.left + 1.0, NSMaxY(titleRectInScreen) + NSHeight([self bounds]) - NSMaxY([[_highlightedItem extraData] frame]) + 1.0);
 }
 
 - (void)setHighlightedItem:(NSMenuItem *)highlightedItem
