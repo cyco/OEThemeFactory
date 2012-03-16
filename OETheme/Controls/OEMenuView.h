@@ -50,6 +50,7 @@ typedef enum _OERectEdge
     NSGradient *_backgroundGradient;
 
     NSTimer *_flashTimer;
+    BOOL     _closing;
 }
 
 // Highlights item at specified point
@@ -59,7 +60,7 @@ typedef enum _OERectEdge
 - (NSMenuItem *)itemAtPoint:(NSPoint)point;
 - (NSSize)sizeThatFits:(NSRect)frame;
 
-- (NSPoint)topLeftPointWithSelectedItemRect:(NSRect)titleRectInScreen;
+- (NSPoint)topLeftPointWithRect:(NSRect)titleRectInScreen;
 
 @property(nonatomic, assign) NSMenuItem  *highlightedItem;
 @property(nonatomic, retain) NSMenu      *menu;

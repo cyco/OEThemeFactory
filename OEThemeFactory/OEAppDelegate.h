@@ -9,17 +9,15 @@
 #import <Cocoa/Cocoa.h>
 #import "OEButton.h"
 #import "OEPopUpButton.h"
-#import "OEMenuView.h"
-#import "OEMenu.h"
 
 @interface OEAppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate>
 
 @property(assign) IBOutlet NSWindow *window;
 @property(assign) IBOutlet OEButton *darkCheckBox;
 @property(assign) IBOutlet OEButton *glossCheckBox;
+@property(assign) IBOutlet OEButton *redHudButton;
 @property(assign) IBOutlet OEPopUpButton *popupButton;
-@property(assign) IBOutlet OEMenuView *menuView;
-@property(assign) IBOutlet NSMenu *menu;
-@property(retain) OEMenu *menuWindow;
+
+- (IBAction)showMenu:(id)sender;
 
 @end

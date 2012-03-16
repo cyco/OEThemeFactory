@@ -14,13 +14,15 @@
 {
 @private
     OEMenuView *_view;
-    BOOL _cancelTracking;
-    id _localMonitor;
+    BOOL        _cancelTracking;
+    BOOL        _closing;
+    id          _localMonitor;
 }
 
-+ (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button;
-+ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge withRect:(NSRect)rect forView:(NSView *)view;
++ (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event;
++ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge forView:(NSView *)view withEvent:(NSEvent *)event;
 
-- (oneway void)cancelTracking;
+- (void)cancelTracking;
+- (void)cancelTrackingWithoutAnimation;
 
 @end

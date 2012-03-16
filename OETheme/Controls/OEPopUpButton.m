@@ -67,7 +67,7 @@
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-    [OEMenu popUpContextMenuForPopUpButton:self];
+    [OEMenu popUpContextMenuForPopUpButton:self withEvent:theEvent];
 }
 
 - (void)OE_windowKeyChanged:(NSNotification *)notification

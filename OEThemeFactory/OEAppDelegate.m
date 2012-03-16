@@ -12,13 +12,11 @@
 #import "OEMenu.h"
 
 @implementation OEAppDelegate
-@synthesize menu = _menu;
 @synthesize window = _window;
 @synthesize darkCheckBox = _darkCheckBox;
 @synthesize glossCheckBox = _glossCheckBox;
+@synthesize redHudButton = _redHudButton;
 @synthesize popupButton = _popupButton;
-@synthesize menuView = _menuView;
-@synthesize menuWindow = _menuWindow;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
@@ -34,8 +32,21 @@
     [_popupButton setBackgroundThemeImageKey:@"dark_popupbutton"];
     [_popupButton setThemeTextAttributesKey:@"dark_popupbutton"];
 
-    [_menuView setEdge:OEMinXEdge];
-    [_menuView setMenu:[self menu]];
+    [_redHudButton setBackgroundThemeImageKey:@"red_hud_button"];
+}
+
+- (IBAction)showMenu:(id)sender
+{
+    NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Test"];
+    [menu addItemWithTitle:@"Test 1" action:nil keyEquivalent:@""];
+    [menu addItemWithTitle:@"Test 2" action:nil keyEquivalent:@""];
+    [menu addItemWithTitle:@"Test 3" action:nil keyEquivalent:@""];
+    [menu addItem:[NSMenuItem separatorItem]];
+    [menu addItemWithTitle:@"Test 4" action:nil keyEquivalent:@""];
+    [menu addItemWithTitle:@"Test 5" action:nil keyEquivalent:@""];
+    [menu addItemWithTitle:@"Test 6" action:nil keyEquivalent:@""];
+
+    [OEMenu popUpContextMenu:menu arrowOnEdge:OEMinYEdge forView:sender withEvent:nil];
 }
 
 @end

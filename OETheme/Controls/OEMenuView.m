@@ -48,7 +48,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 #pragma mark -
 #pragma mark Animation Timing
 
-static const CGFloat OEMenuItemFlashDelay = 0.05;
+static const CGFloat OEMenuItemFlashDelay = 0.075;
 
 #pragma mark -
 #pragma mark Convenience Functions
@@ -76,6 +76,12 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)OE_layoutIfNeeded;
 - (void)OE_updateInsets;
 - (void)OE_performAction;
+
+@end
+
+@interface OEMenu (OEMenuViewAdditions)
+
+- (void)OE_setClosing:(BOOL)closing;
 
 @end
 
@@ -158,31 +164,38 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)mouseEntered:(NSEvent *)theEvent
 {
+    if(_closing) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
+    if(_closing) return;
     [self OE_performAction];
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
+    if(_closing) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
+    if(_closing) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseExited:(NSEvent *)theEvent
 {
+    if(_closing) return;
     [self setHighlightedItem:nil];
 }
 
 - (void)flagsChanged:(NSEvent *)theEvent
 {
+    if(_closing) return;
+
     // Figure out if any of the modifier flags that we are interested have changed
     NSUInteger modiferFlags = [theEvent modifierFlags] & _keyModifierMask;
     if(_lasKeyModifierMask != modiferFlags)
@@ -197,6 +210,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveUp:(id)sender
 {
+    if(_closing) return;
+
     // There is nothing to do if there are no items
     const NSInteger count = [[_menu itemArray] count];
     if(count == 0) return;
@@ -222,6 +237,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveDown:(id)sender
 {
+    if(_closing) return;
+
     // There is nothing to do if there are no items
     const NSInteger count = [[_menu itemArray] count];
     if(count == 0) return;
@@ -253,28 +270,41 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     [_flashTimer invalidate];
     _flashTimer = nil;
 
-    if(item == nil) [(OEMenu *)[self window] cancelTracking];
-    else            _flashTimer = [NSTimer scheduledTimerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:nil repeats:NO];
+    if(item != nil)
+    {
+        _flashTimer = [NSTimer timerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:nil repeats:NO];
+        [[NSRunLoop currentRunLoop] addTimer:_flashTimer forMode:NSDefaultRunLoopMode];
+    }
+    else
+    {
+        [(OEMenu *)[self window] cancelTracking];
+    }
 }
 
 - (void)OE_performAction
 {
+    _closing = YES;
+    [(OEMenu *)[self window] OE_setClosing:YES];
+
     if(_highlightedItem != nil && ![_highlightedItem isSeparatorItem])
     {
         OEPopUpButtonCell *cell = [_highlightedItem target];
         if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:_highlightedItem];
         [NSApp sendAction:[_highlightedItem action] to:[_highlightedItem target] from:_highlightedItem];
-        _flashTimer = [NSTimer scheduledTimerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:_highlightedItem repeats:NO];
+
+        _flashTimer = [NSTimer timerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:_highlightedItem repeats:NO];
+        [[NSRunLoop currentRunLoop] addTimer:_flashTimer forMode:NSDefaultRunLoopMode];
         [self setHighlightedItem:nil];
     }
 }
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent
 {
+    if(_closing) return YES;
+
     // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
     if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
     {
-        // TODO: We should run the selector for the highlighted item, flash the item, and close the menu
         [self OE_performAction];
         return YES;
     }
@@ -284,16 +314,19 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveLeft:(id)sender
 {
+    if(_closing) return;
     // TODO: Collapse submenu
 }
 
 - (void)moveRight:(id)sender
 {
+    if(_closing) return;
     // TODO: Expand submenu
 }
 
 - (void)cancelOperation:(id)sender
 {
+    if(_closing) return;
     [(OEMenu *)[self window] cancelTracking];
 }
 
@@ -645,10 +678,34 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     return NSMakeSize(width, height);
 }
 
-- (NSPoint)topLeftPointWithSelectedItemRect:(NSRect)titleRectInScreen
+- (NSPoint)topLeftPointWithRect:(NSRect)rect
 {
     [self OE_layoutIfNeeded];
-    return NSMakePoint(NSMinX(titleRectInScreen) - OEMenuItemTickMarkWidth - _backgroundEdgeInsets.left + 1.0, NSMaxY(titleRectInScreen) + NSHeight([self bounds]) - NSMaxY([[_highlightedItem extraData] frame]) + 1.0);
+
+    const NSRect bounds = [[self window] convertRectToScreen:[self convertRect:[self bounds] toView:nil]];
+    NSPoint result = NSMakePoint(NSMinX(rect), NSMaxY(rect));
+    switch(_edge)
+    {
+        case OENoEdge:
+            if(_highlightedItem) result = NSMakePoint(NSMinX(rect) - OEMenuItemTickMarkWidth - _backgroundEdgeInsets.left + 1.0, NSMaxY(rect) + NSHeight([self bounds]) - NSMaxY([[_highlightedItem extraData] frame]) + 1.0);
+            else                 result = NSMakePoint(NSMinX(rect) - _backgroundEdgeInsets.left + 1.0, NSMinY(rect));
+            break;
+        case OEMinXEdge:
+            result = NSMakePoint(NSMaxX(rect) - _backgroundEdgeInsets.left, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
+            break;
+        case OEMaxXEdge:
+            result = NSMakePoint(NSMinX(rect) - NSWidth(bounds) + _backgroundEdgeInsets.right, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
+            break;
+        case OEMinYEdge:
+            result = NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMaxY(rect) + NSHeight(bounds) - _backgroundEdgeInsets.bottom);
+            break;
+        case OEMaxYEdge:
+            result = NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMinY(rect) - _backgroundEdgeInsets.top);
+            break;
+        default:
+            break;
+    }
+    return result;
 }
 
 - (void)setHighlightedItem:(NSMenuItem *)highlightedItem
@@ -725,6 +782,16 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (OERectEdge)edge
 {
     return _edge;
+}
+
+@end
+
+
+@implementation OEMenu (OEMenuViewAdditions)
+
+- (void)OE_setClosing:(BOOL)closing
+{
+    _closing = YES;
 }
 
 @end

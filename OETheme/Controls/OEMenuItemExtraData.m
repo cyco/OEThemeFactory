@@ -27,8 +27,6 @@
 
 - (void)addAlternateItem:(NSMenuItem *)item
 {
-    NSAssert(!_primaryItem, @"This item should have a parent.");
-
     if(!_alternateItems) _alternateItems = [NSMutableDictionary dictionaryWithObject:item forKey:[NSNumber numberWithUnsignedInteger:[item keyEquivalentModifierMask]]];
     else                [_alternateItems setObject:item forKey:[NSNumber numberWithUnsignedInteger:[item keyEquivalentModifierMask]]];
 
