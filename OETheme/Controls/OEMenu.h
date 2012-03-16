@@ -15,6 +15,7 @@
 @private
     OEMenuView *_view;
     BOOL _cancelTracking;
+    id _localMonitor;
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button;

@@ -78,10 +78,65 @@
     [self cancelTracking];
 }
 
+
+- (void)OE_createEventMonitor
+{
+    _localMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSLeftMouseDownMask | NSRightMouseDownMask | NSOtherMouseDownMask | NSKeyUpMask | NSKeyDownMask | NSFlagsChangedMask | NSScrollWheelMask
+                                                          handler:
+                     ^ NSEvent *(NSEvent *incomingEvent)
+                     {
+                         if([incomingEvent type] == NSScrollWheel)
+                         {
+                             // TODO: If we are in a scrollable part of the meu then we should react to this
+                             return nil;
+                         }
+
+                         if([incomingEvent type] == NSFlagsChanged)
+                         {
+                             [_view flagsChanged:incomingEvent];
+                             return nil;
+                         }
+
+                         if([incomingEvent type] == NSKeyDown)
+                         {
+                             [_view keyDown:incomingEvent];
+                             return nil;
+                         }
+
+                         if([incomingEvent type] == NSKeyUp)
+                         {
+                             [_view keyUp:incomingEvent];
+                             return nil;
+                         }
+
+                         if([[incomingEvent window] isKindOfClass:[self class]])// mouse down in window, will be handle by content view
+                         {
+                             return incomingEvent;
+                         }
+                         else
+                         {
+                             // event is outside of window, close menu without changes and remove event
+                             [self cancelTracking];
+                         }
+
+                         return nil;
+                     }];
+}
+
+- (void)OE_removeEventMonitor
+{
+    if(_localMonitor != nil)
+    {
+        [NSEvent removeMonitor:_localMonitor];
+        _localMonitor = nil;
+    }
+}
+
 - (oneway void)cancelTracking
 {
     if(_cancelTracking) return;
     _cancelTracking = YES;
+    [self OE_removeEventMonitor];
 
     [NSAnimationContext runAnimationGroup:
      ^ (NSAnimationContext *context)
