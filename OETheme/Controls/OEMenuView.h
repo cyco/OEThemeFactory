@@ -48,6 +48,8 @@ typedef enum _OERectEdge
     NSImage    *_backgroundImage;
     NSColor    *_backgroundColor;
     NSGradient *_backgroundGradient;
+
+    NSTimer *_flashTimer;
 }
 
 // Highlights item at specified point

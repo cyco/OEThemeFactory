@@ -7,6 +7,7 @@
 //
 
 #import "OEMenuView.h"
+#import "OEMenu.h"
 #import "NSImage+OEDrawingAdditions.h"
 #import "OEMenuItemExtraData.h"
 #import <Carbon/Carbon.h>
@@ -45,6 +46,11 @@ const static NSSize OEMaxYEdgeArrowSize = (NSSize){15.0, 10.0};
 static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeStateAnyWindowActivity & ~OEThemeStateAnyMouse;
 
 #pragma mark -
+#pragma mark Animation Timing
+
+static const CGFloat OEMenuItemFlashDelay = 0.05;
+
+#pragma mark -
 #pragma mark Convenience Functions
 
 // Returns an NSString key that represents the specified menu style and component
@@ -69,6 +75,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)OE_setNeedsLayout;
 - (void)OE_layoutIfNeeded;
 - (void)OE_updateInsets;
+- (void)OE_performAction;
 
 @end
 
@@ -96,6 +103,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 {
     // Make sure that there are no associations
     [[_menu itemArray] makeObjectsPerformSelector:@selector(setExtraData:) withObject:nil];
+    [_flashTimer invalidate];
+    _flashTimer = nil;
 }
 
 - (void)OE_commonInit
@@ -154,8 +163,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    // TODO: When mouse is released we should check which item it was released over, flash the item, and close the menu
-    NSLog(@"Flash the item");
+    [self OE_performAction];
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
@@ -237,13 +245,37 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     [self setHighlightedItem:item];
 }
 
+- (void)OE_flashItem:(NSTimer *)sender
+{
+    NSMenuItem *item = [sender userInfo];
+    [self setHighlightedItem:item];
+
+    [_flashTimer invalidate];
+    _flashTimer = nil;
+
+    if(item == nil) [(OEMenu *)[self window] cancelTracking];
+    else            _flashTimer = [NSTimer scheduledTimerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:nil repeats:NO];
+}
+
+- (void)OE_performAction
+{
+    if(_highlightedItem != nil && ![_highlightedItem isSeparatorItem])
+    {
+        OEPopUpButtonCell *cell = [_highlightedItem target];
+        if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:_highlightedItem];
+        [NSApp sendAction:[_highlightedItem action] to:[_highlightedItem target] from:_highlightedItem];
+        _flashTimer = [NSTimer scheduledTimerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:_highlightedItem repeats:NO];
+        [self setHighlightedItem:nil];
+    }
+}
+
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent
 {
     // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
     if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
     {
         // TODO: We should run the selector for the highlighted item, flash the item, and close the menu
-        NSLog(@"Flash the item");
+        [self OE_performAction];
         return YES;
     }
 
@@ -262,8 +294,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)cancelOperation:(id)sender
 {
-    // TODO: Cancel / Close menu
-    NSLog(@"Escape pressed.");
+    [(OEMenu *)[self window] cancelTracking];
 }
 
 - (void)setFrameSize:(NSSize)newSize
