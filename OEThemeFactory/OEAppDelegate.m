@@ -36,8 +36,6 @@
 
     [_menuView setEdge:OEMinXEdge];
     [_menuView setMenu:[self menu]];
-
-    _menuWindow = [OEMenu openMenuForPopUpButton:_popupButton];
 }
 
 @end
