@@ -9,6 +9,9 @@
 #import "OEMenu.h"
 #import "OEPopUpButton.h"
 
+// Animation duration to fade the menu out
+static const CGFloat OEMenuFadeOutDuration = 0.075;
+
 @interface OEMenu ()
 
 - (void)OE_applicationNotification:(NSNotification *)notification;
@@ -210,29 +213,35 @@
     }
 }
 
-- (void)cancelTracking
+- (void)OE_cancelTrackingWithFadeDuration:(CGFloat)duration
 {
     if(_cancelTracking) return;
     _cancelTracking = YES;
     [self OE_removeEventMonitor];
 
-    [NSAnimationContext runAnimationGroup:
-     ^ (NSAnimationContext *context)
-     {
-         [[self animator] setAlphaValue:0.0];
-     }
-                        completionHandler:
-     ^{
-         [[self parentWindow] removeChildWindow:self];
-     }];
+    void (^changes)(NSAnimationContext *context) =
+    ^ (NSAnimationContext *context)
+    {
+        [context setDuration:duration];
+        [[self animator] setAlphaValue:0.0];
+    };
+
+    void (^completionHandler)(void) =
+    ^{
+        [[self parentWindow] removeChildWindow:self];
+    };
+
+    [NSAnimationContext runAnimationGroup:changes completionHandler:completionHandler];
+}
+
+- (void)cancelTracking
+{
+    [self OE_cancelTrackingWithFadeDuration:OEMenuFadeOutDuration];
 }
 
 - (void)cancelTrackingWithoutAnimation
 {
-    if(_cancelTracking) return;
-    _cancelTracking = YES;
-    [self OE_removeEventMonitor];
-    [[self parentWindow] removeChildWindow:self];
+    [self OE_cancelTrackingWithFadeDuration:0.0];
 }
 
 - (NSEvent *)OE_convertEvent:(NSEvent *)event
