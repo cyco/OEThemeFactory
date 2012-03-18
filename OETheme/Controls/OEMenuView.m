@@ -8,8 +8,9 @@
 
 #import "OEMenuView.h"
 #import "OEMenu.h"
+#import "OEMenu+OEMenuViewAdditions.h"
 #import "NSImage+OEDrawingAdditions.h"
-#import "OEMenuItemExtraData.h"
+#import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 #import <Carbon/Carbon.h>
 
 #pragma mark -
@@ -76,12 +77,6 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)OE_layoutIfNeeded;
 - (void)OE_updateInsets;
 - (void)OE_performAction;
-
-@end
-
-@interface OEMenu (OEMenuViewAdditions)
-
-- (void)OE_setClosing:(BOOL)closing;
 
 @end
 
@@ -189,7 +184,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)mouseExited:(NSEvent *)theEvent
 {
     if(_closing) return;
-    [self setHighlightedItem:nil];
+    [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)flagsChanged:(NSEvent *)theEvent
@@ -262,6 +257,11 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     [self setHighlightedItem:item];
 }
 
+- (void)OE_cancelTracking
+{
+    [(OEMenu *)[self window] cancelTracking];
+}
+
 - (void)OE_flashItem:(NSTimer *)sender
 {
     NSMenuItem *item = [sender userInfo];
@@ -277,24 +277,30 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     }
     else
     {
-        [(OEMenu *)[self window] cancelTracking];
+        [self OE_cancelTracking];
     }
 }
 
 - (void)OE_performAction
 {
+    if([[self highlightedItem] hasSubmenu]) return;
+
     _closing = YES;
     [(OEMenu *)[self window] OE_setClosing:YES];
 
-    if(_highlightedItem != nil && ![_highlightedItem isSeparatorItem])
+    if([self highlightedItem] != nil && ![[self highlightedItem] isSeparatorItem])
     {
-        OEPopUpButtonCell *cell = [_highlightedItem target];
-        if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:_highlightedItem];
-        [NSApp sendAction:[_highlightedItem action] to:[_highlightedItem target] from:_highlightedItem];
+        OEPopUpButtonCell *cell = [[self highlightedItem] target];
+        if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:[self highlightedItem]];
+        [NSApp sendAction:[[self highlightedItem] action] to:[[self highlightedItem] target] from:[self highlightedItem]];
 
-        _flashTimer = [NSTimer timerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:_highlightedItem repeats:NO];
+        _flashTimer = [NSTimer timerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:[self highlightedItem] repeats:NO];
         [[NSRunLoop currentRunLoop] addTimer:_flashTimer forMode:NSDefaultRunLoopMode];
         [self setHighlightedItem:nil];
+    }
+    else
+    {
+        [self OE_cancelTracking];
     }
 }
 
@@ -327,7 +333,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)cancelOperation:(id)sender
 {
     if(_closing) return;
-    [(OEMenu *)[self window] cancelTracking];
+    [self OE_cancelTracking];
 }
 
 - (void)setFrameSize:(NSSize)newSize
@@ -678,50 +684,53 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     return NSMakeSize(width, height);
 }
 
-- (NSPoint)topLeftPointWithRect:(NSRect)rect
+- (NSPoint)calculateTopLeftPointWithRect:(NSRect)rect
 {
     [self OE_layoutIfNeeded];
 
-    const NSRect bounds = [[self window] convertRectToScreen:[self convertRect:[self bounds] toView:nil]];
-    NSPoint result = NSMakePoint(NSMinX(rect), NSMaxY(rect));
-    switch(_edge)
+    NSPoint result = rect.origin;
+    if(_edge == OENoEdge)
     {
-        case OENoEdge:
-            if(_highlightedItem) result = NSMakePoint(NSMinX(rect) - OEMenuItemTickMarkWidth - _backgroundEdgeInsets.left + 1.0, NSMaxY(rect) + NSHeight([self bounds]) - NSMaxY([[_highlightedItem extraData] frame]) + 1.0);
-            else                 result = NSMakePoint(NSMinX(rect) - _backgroundEdgeInsets.left + 1.0, NSMinY(rect));
-            break;
-        case OEMinXEdge:
-            result = NSMakePoint(NSMaxX(rect) - _backgroundEdgeInsets.left, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
-            break;
-        case OEMaxXEdge:
-            result = NSMakePoint(NSMinX(rect) - NSWidth(bounds) + _backgroundEdgeInsets.right, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
-            break;
-        case OEMinYEdge:
-            result = NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMaxY(rect) + NSHeight(bounds) - _backgroundEdgeInsets.bottom);
-            break;
-        case OEMaxYEdge:
-            result = NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMinY(rect) - _backgroundEdgeInsets.top);
-            break;
-        default:
-            break;
+        result = NSMakePoint(NSMinX(rect) - _backgroundEdgeInsets.left + 1.0, NSMinY(rect));
+    }
+    else
+    {
+        const NSRect bounds = [[self window] convertRectToScreen:[self convertRect:[self bounds] toView:nil]];
+        switch(_edge)
+        {
+            case OEMinXEdge:
+                result = NSMakePoint(NSMaxX(rect) - _backgroundEdgeInsets.left, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
+                break;
+            case OEMaxXEdge:
+                result = NSMakePoint(NSMinX(rect) - NSWidth(bounds) + _backgroundEdgeInsets.right, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
+                break;
+            case OEMinYEdge:
+                result = NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMaxY(rect) + NSHeight(bounds) - _backgroundEdgeInsets.bottom);
+                break;
+            case OEMaxYEdge:
+                result = NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMinY(rect) - _backgroundEdgeInsets.top);
+                break;
+            default:
+                break;
+        }
     }
     return result;
 }
 
-- (void)setHighlightedItem:(NSMenuItem *)highlightedItem
+- (NSPoint)calculateTopLeftPointForPopButtonWithRect:(NSRect)rect
 {
-    NSMenuItem *realHighlightedItem = [[highlightedItem extraData] primaryItem] ?: highlightedItem;
-    if(_highlightedItem != realHighlightedItem)
-    {
-        _highlightedItem = realHighlightedItem;
-        [self setNeedsDisplay:YES];
-    }
+    if(_edge != OENoEdge) return [self calculateTopLeftPointWithRect:rect];
+
+    [self OE_layoutIfNeeded];
+    return NSMakePoint(NSMinX(rect) - OEMenuItemTickMarkWidth - _backgroundEdgeInsets.left + 1.0, NSMaxY(rect) + NSHeight([self bounds]) - NSMaxY([[[self highlightedItem] extraData] frame]) + 1.0);
 }
 
-- (NSMenuItem *)highlightedItem
+- (NSPoint)calculateTopLeftPointForSubMenuWithRect:(NSRect)rect
 {
-    NSMenuItem *realHighlightedItem = [[_highlightedItem extraData] itemWithModifierMask:_lasKeyModifierMask];
-    return ([realHighlightedItem isEnabled] && ![realHighlightedItem isSeparatorItem] ? realHighlightedItem : nil);
+    if(_edge != OENoEdge) return [self calculateTopLeftPointWithRect:rect];
+
+    [self OE_layoutIfNeeded];
+    return NSMakePoint(NSMaxX(rect) - _backgroundEdgeInsets.right - OEMenuContentEdgeInsets.left, NSMaxY(rect) + _backgroundEdgeInsets.top + OEMenuContentEdgeInsets.top);
 }
 
 - (void)setMenu:(NSMenu *)menu
@@ -784,14 +793,14 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     return _edge;
 }
 
-@end
-
-
-@implementation OEMenu (OEMenuViewAdditions)
-
-- (void)OE_setClosing:(BOOL)closing
+- (void)setHighlightedItem:(NSMenuItem *)highlightedItem
 {
-    _closing = YES;
+    [(OEMenu *)[self window] OE_setHighlightedItem:highlightedItem];
+}
+
+- (NSMenuItem *)highlightedItem
+{
+    return [(OEMenu *)[self window] OE_highlightedItem];
 }
 
 @end

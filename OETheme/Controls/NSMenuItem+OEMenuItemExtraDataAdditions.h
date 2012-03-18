@@ -7,8 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
-@class OEMenuItemExtraData;
+#import "OEMenuItemExtraData.h"
 
 @interface NSMenuItem (OEMenuItemExtraDataAdditions)
 

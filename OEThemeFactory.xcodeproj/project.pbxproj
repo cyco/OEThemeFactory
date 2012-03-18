@@ -53,6 +53,7 @@
 
 /* Begin PBXFileReference section */
 		EF0D7E4015131B9500070DBE /* hud_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hud_button.png; sourceTree = "<group>"; };
+		EF0D7E4815164A9900070DBE /* OEMenu+OEMenuViewAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OEMenu+OEMenuViewAdditions.h"; sourceTree = "<group>"; };
 		EF1027E11503B708003BC6C0 /* gloss_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_button.png; sourceTree = "<group>"; };
 		EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = open_weblink_arrow.png; sourceTree = "<group>"; };
 		EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_checkbox.png; sourceTree = "<group>"; };
@@ -176,6 +177,7 @@
 				EFEBDB6C151079C2004DDC8C /* OEMenuItemExtraData.m */,
 				EFEBDB6F151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.h */,
 				EFEBDB70151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m */,
+				EF0D7E4815164A9900070DBE /* OEMenu+OEMenuViewAdditions.h */,
 			);
 			name = Menu;
 			sourceTree = "<group>";

@@ -17,6 +17,12 @@
     BOOL        _cancelTracking;
     BOOL        _closing;
     id          _localMonitor;
+
+    NSMenuItem *_highlightedItem;
+    NSTimer    *_showSubmenuTimer;
+
+    __unsafe_unretained OEMenu *_supermenu;
+    OEMenu                     *_submenu;
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event;

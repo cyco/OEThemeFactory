@@ -7,6 +7,7 @@
 //
 
 #import "OEMenuItemExtraData.h"
+#import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 
 @implementation OEMenuItemExtraData
 @synthesize ownerItem = _ownerItem;

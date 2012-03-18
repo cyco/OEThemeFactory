@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 
 @interface OEMenuItemExtraData : NSObject
 

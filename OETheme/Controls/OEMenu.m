@@ -7,7 +7,9 @@
 //
 
 #import "OEMenu.h"
+#import "OEMenu+OEMenuViewAdditions.h"
 #import "OEPopUpButton.h"
+#import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 
 // Animation duration to fade the menu out
 static const CGFloat OEMenuFadeOutDuration = 0.075;
@@ -15,7 +17,9 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 @interface OEMenu ()
 
 - (void)OE_applicationNotification:(NSNotification *)notification;
+- (void)OE_menuWillShow:(NSNotification *)notification;
 - (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent;
+- (void)OE_hideWindowWithFadeDuration:(CGFloat)duration;
 - (OEMenuView *)OE_view;
 
 @end
@@ -43,9 +47,9 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     {
         // Make sure result is not nil we don't want to dereference a null pointer
         [result->_view setEdge:OENoEdge];
+        [result OE_setHighlightedItem:[button selectedItem]];
         [result setContentSize:[result->_view sizeThatFits:buttonFrame]];
-        [result->_view setHighlightedItem:[button selectedItem]];
-        [result setFrameTopLeftPoint:[result->_view topLeftPointWithRect:titleRectInScreen]];
+        [result setFrameTopLeftPoint:[result->_view calculateTopLeftPointForPopButtonWithRect:titleRectInScreen]];
         [result OE_showWindowForView:button withEvent:event];
     }
 }
@@ -56,11 +60,11 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     const NSRect rectInScreen = [[view window] convertRectToScreen:rectInWindow];
 
     OEMenu *result = [self popUpContextMenuWithMenu:menu withRect:rectInScreen];
-    if(result)
+    if(result != nil)
     {
         [result->_view setEdge:edge];
         [result setContentSize:[result->_view sizeThatFits:NSZeroRect]];
-        [result setFrameTopLeftPoint:[result->_view topLeftPointWithRect:rectInScreen]];
+        [result setFrameTopLeftPoint:[result->_view calculateTopLeftPointWithRect:rectInScreen]];
         [result OE_showWindowForView:view withEvent:event];
     }
 }
@@ -83,6 +87,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationNotification:) name:NSApplicationDidResignActiveNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationNotification:) name:NSApplicationDidHideNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuWillShow:) name:NSMenuDidBeginTrackingNotification object:nil];
     }
     return self;
 }
@@ -90,13 +95,23 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self OE_removeEventMonitor];
 }
 
 - (void)setMenu:(NSMenu *)menu
 {
     [super setMenu:menu];
     [_view setMenu:menu];
+}
+
+- (void)orderWindow:(NSWindowOrderingMode)place relativeTo:(NSInteger)otherWin
+{
+    [super orderWindow:place relativeTo:otherWin];
+    if(_submenu)
+    {
+        const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[_highlightedItem extraData] frame] toView:nil]];
+        [_submenu setFrameTopLeftPoint:[_submenu->_view calculateTopLeftPointForSubMenuWithRect:rectInScreen]];
+        [_submenu orderFrontRegardless];
+    }
 }
 
 - (void)resignKeyWindow
@@ -109,116 +124,87 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     [self cancelTrackingWithoutAnimation];
 }
 
-- (void)OE_createEventMonitorWithInitialEvent:(NSEvent *)initialEvent
+- (void)OE_menuWillShow:(NSNotification *)notification
 {
-    __block NSInteger mouseDragging = NSMixedState; // Determines if the mouse is being dragged or just clicked
-
-    // Set up block used to dispatch events that we would like to forward to the OEMenuView
-    NSEvent *(^dispatchEvent)(NSEvent *) =
-    ^ NSEvent *(NSEvent *incomingEvent)
-    {
-        switch([incomingEvent type])
-        {
-            case NSAppKitDefined:
-                // When an application gains and looses focus an event with NSAppKitDefined is received -- go ahead and forward that event to NSApp to follow the right responder chain
-                return incomingEvent;
-            case NSFlagsChanged:
-                [_view flagsChanged:incomingEvent];
-                break;
-            case NSScrollWheel:
-                // TODO: If we are in a scrollable part of the meu then we should react to this
-                break;
-            case NSMouseMoved:
-                [_view mouseMoved:incomingEvent];
-                break;
-            case NSKeyDown:
-                [_view keyDown:incomingEvent];
-                break;
-            case NSKeyUp:
-                [_view keyUp:incomingEvent];
-                break;
-            case NSRightMouseDragged:
-            case NSLeftMouseDragged:
-            case NSOtherMouseDragged:
-                mouseDragging = NSOnState;
-                [_view mouseDragged:incomingEvent];
-                break;
-            case NSRightMouseUp:
-            case NSLeftMouseUp:
-            case NSOtherMouseUp:
-                if(initialEvent != nil && mouseDragging == NSMixedState) mouseDragging = ([incomingEvent timestamp] - [initialEvent timestamp] > 1.0 ? NSOnState : NSOffState);
-            default:
-                if([[incomingEvent window] isKindOfClass:[self class]]) return incomingEvent;
-                else                                                    [self cancelTracking];
-                break;
-        }
-        return nil;
-    };
-
-    // Figure out what events we should monitor based on the initial event (if it is provided)
-    NSUInteger        mouseButtonMask = NSMouseMovedMask | NSScrollWheelMask | NSFlagsChangedMask;
-    const NSEventType type            = [initialEvent type];
-    switch(type)
-    {
-        case NSRightMouseDown:
-            mouseButtonMask |= NSRightMouseDraggedMask | NSRightMouseDownMask | NSRightMouseUpMask;
-            break;
-        case NSOtherMouseDown:
-            mouseButtonMask |= NSOtherMouseDraggedMask | NSOtherMouseDownMask | NSOtherMouseUpMask;
-            break;
-        default:
-        case NSLeftMouseDown:
-            mouseButtonMask |= NSLeftMouseDraggedMask | NSLeftMouseDownMask | NSLeftMouseUpMask;
-            break;
-            break;
-    }
-
-    // If there was an initial event lets track the mouse until it is released
-    if(initialEvent != nil)
-    {
-        [_view mouseDown:[self OE_convertEvent:initialEvent]];
-
-        NSEvent *event = nil;
-        while(!_cancelTracking && !_closing && (event = [self nextEventMatchingMask:mouseButtonMask | NSAppKitDefinedMask untilDate:[NSDate distantFuture] inMode:NSEventTrackingRunLoopMode dequeue:YES]))
-        {
-            if((event = dispatchEvent([self OE_convertEvent:event])))
-            {
-                NSEventType type = [event type];
-                if(type == NSLeftMouseUp || type == NSRightMouseUp || type == NSOtherMouseUp)
-                {
-                    // Only forward the mouse up to the view if we are dragging the mouse around...if we are not dragging the mouse, then we are recoverring from a mouse click (momentary press)
-                    if(initialEvent == nil || mouseDragging == NSOnState) [_view mouseUp:event];
-                    break;
-                }
-                [NSApp sendEvent:event];
-            }
-        }
-        [self discardEventsMatchingMask:NSAnyEventMask beforeEvent:event];
-    }
-
-    if(!_cancelTracking && !_closing)
-    {
-        // If we just finished recovering from a mouse click, lets install a local monitor to capture events that should be forwarded to the OEMenuView
-        mouseDragging = NSOnState;
-        _localMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:mouseButtonMask | NSKeyUpMask | NSKeyDownMask handler:dispatchEvent];
-    }
-}
-
-- (void)OE_removeEventMonitor
-{
-    if(_localMonitor != nil)
-    {
-        [NSEvent removeMonitor:_localMonitor];
-        _localMonitor = nil;
-    }
+    [self cancelTracking];
 }
 
 - (void)OE_cancelTrackingWithFadeDuration:(CGFloat)duration
 {
     if(_cancelTracking) return;
     _cancelTracking = YES;
-    [self OE_removeEventMonitor];
 
+    [_submenu OE_cancelTrackingWithFadeDuration:duration];
+    [_supermenu OE_cancelTrackingWithFadeDuration:duration];
+    [self OE_hideWindowWithFadeDuration:duration];
+}
+
+- (void)cancelTracking
+{
+    [self OE_cancelTrackingWithFadeDuration:OEMenuFadeOutDuration];
+}
+
+- (void)cancelTrackingWithoutAnimation
+{
+    [self OE_cancelTrackingWithFadeDuration:0.0];
+}
+
+- (void)OE_showWindowForView:(NSView *)view
+{
+    NSWindow *parentWindow = [view window];
+    [parentWindow addChildWindow:self ordered:NSWindowAbove];
+    if(![parentWindow isKindOfClass:[OEMenu class]] || [parentWindow isVisible]) [self orderFrontRegardless];
+}
+
+- (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent
+{
+    id<NSMenuDelegate> delegate = [[_view menu] delegate];
+    if([delegate respondsToSelector:@selector(menuWillOpen:)]) [delegate menuWillOpen:[_view menu]];
+
+    [self OE_showWindowForView:view];
+
+    const NSEventType type              = [initialEvent type];
+    NSEventType       oppositeEventType = 0;
+    switch(type)
+    {
+        case NSLeftMouseDown:
+            oppositeEventType = NSLeftMouseUp;
+            break;
+        case NSRightMouseDown:
+            oppositeEventType = NSRightMouseDown;
+            break;
+        case NSOtherMouseDown:
+            oppositeEventType = NSOtherMouseDown;
+            break;
+        default:
+            break;
+    }
+
+    NSLog(@"Menu opened");
+    NSEvent *event;
+    while(!_closing && !_cancelTracking && (event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES]))
+    {
+        const NSEventType type = [event type];
+        if(type == oppositeEventType && [event timestamp] - [initialEvent timestamp] > 1.0)
+        {
+            const NSPoint locationInWindow = [event locationInWindow];
+            const NSPoint location = [self convertScreenToBase:[event window] == nil ? locationInWindow : [[event window] convertBaseToScreen:locationInWindow]];
+            NSEvent *mockEvent = [NSEvent mouseEventWithType:[event type] location:location modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[self windowNumber] context:[event context] eventNumber:[event eventNumber] clickCount:[event clickCount] pressure:[event pressure]];
+            [_view mouseUp:mockEvent];
+        }
+        else if((type == NSLeftMouseDown || type == NSRightMouseDown || type == NSOtherMouseDown) && ![[event window] isKindOfClass:isa])
+        {
+            [self cancelTracking];
+        }
+        [NSApp sendEvent:event];
+    }
+    [NSApp discardEventsMatchingMask:NSAnyEventMask beforeEvent:event];
+    if([delegate respondsToSelector:@selector(menuDidClose:)]) [delegate menuDidClose:[_view menu]];
+    NSLog(@"Menu did close...");
+}
+
+- (void)OE_hideWindowWithFadeDuration:(CGFloat)duration
+{
     void (^changes)(NSAnimationContext *context) =
     ^ (NSAnimationContext *context)
     {
@@ -234,37 +220,58 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     [NSAnimationContext runAnimationGroup:changes completionHandler:completionHandler];
 }
 
-- (void)cancelTracking
-{
-    [self OE_cancelTrackingWithFadeDuration:OEMenuFadeOutDuration];
-}
-
-- (void)cancelTrackingWithoutAnimation
-{
-    [self OE_cancelTrackingWithFadeDuration:0.0];
-}
-
-- (NSEvent *)OE_convertEvent:(NSEvent *)event
-{
-    NSEventType type = [event type];
-    if([event window] != self && (type == NSLeftMouseDown || type == NSLeftMouseUp || type == NSLeftMouseDragged || type == NSRightMouseDown || type == NSRightMouseUp || type == NSRightMouseDragged || type == NSOtherMouseDown || type == NSOtherMouseUp || type == NSOtherMouseDragged))
-    {
-        const NSPoint location = [self convertScreenToBase:[[event window] convertBaseToScreen:[event locationInWindow]]];
-        return [NSEvent mouseEventWithType:[event type] location:location modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[self windowNumber] context:[event context] eventNumber:[event eventNumber] clickCount:[event clickCount] pressure:[event pressure]];
-    }
-    return event;
-}
-
-- (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent
-{
-    [[view window] addChildWindow:self ordered:NSWindowAbove];
-    [self orderFrontRegardless];
-    [self OE_createEventMonitorWithInitialEvent:initialEvent];
-}
 
 - (OEMenuView *)OE_view
 {
     return _view;
+}
+
+@end
+
+@implementation OEMenu (OEMenuViewAdditions)
+
+- (void)OE_setClosing:(BOOL)closing
+{
+    _closing = YES;
+}
+
+- (void)OE_setSubmenu:(NSMenu *)submenu
+{
+    if([_submenu menu] == submenu) return;
+    if(submenu == nil)
+    {
+        [_submenu OE_hideWindowWithFadeDuration:OEMenuFadeOutDuration];
+        _submenu = nil;
+        return;
+    }
+
+    const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[_highlightedItem extraData] frame] toView:nil]];
+    _submenu = [isa popUpContextMenuWithMenu:submenu withRect:rectInScreen];
+    if(_submenu != nil)
+    {
+        _submenu->_supermenu = self;
+        [_submenu->_view setEdge:OENoEdge];
+        [_submenu setContentSize:[_submenu->_view sizeThatFits:NSZeroRect]];
+        [_submenu setFrameTopLeftPoint:[_submenu->_view calculateTopLeftPointForSubMenuWithRect:rectInScreen]];
+        [_submenu OE_showWindowForView:_view];
+    }
+}
+
+- (void)OE_setHighlightedItem:(NSMenuItem *)highlightedItem
+{
+    NSMenuItem *realHighlightedItem = [highlightedItem isSeparatorItem] ? nil : [[highlightedItem extraData] primaryItem] ?: highlightedItem;
+    if(_highlightedItem != realHighlightedItem)
+    {
+        _highlightedItem = realHighlightedItem;
+        [self OE_setSubmenu:[_highlightedItem submenu]];
+        [_view setNeedsDisplay:YES];
+    }
+}
+
+- (NSMenuItem *)OE_highlightedItem
+{
+    NSMenuItem *realHighlightedItem = [[_highlightedItem extraData] itemWithModifierMask:[[NSApp currentEvent] modifierFlags]];
+    return ([realHighlightedItem isEnabled] && ![realHighlightedItem isSeparatorItem] ? realHighlightedItem : nil);
 }
 
 @end

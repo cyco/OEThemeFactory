@@ -28,7 +28,6 @@ typedef enum _OERectEdge
 {
 @private
     NSMenu       *_menu;                // Original menu to display
-    NSMenuItem   *_highlightedItem;     // Item currently highlighted
     OEMenuStyle   _style;               // Menu style to use
     OERectEdge    _edge;                // The arrow's edge
     NSBezierPath *_borderPath;          // The path of the background image (to include the arrow)
@@ -60,7 +59,9 @@ typedef enum _OERectEdge
 - (NSMenuItem *)itemAtPoint:(NSPoint)point;
 - (NSSize)sizeThatFits:(NSRect)frame;
 
-- (NSPoint)topLeftPointWithRect:(NSRect)titleRectInScreen;
+- (NSPoint)calculateTopLeftPointWithRect:(NSRect)rect;
+- (NSPoint)calculateTopLeftPointForPopButtonWithRect:(NSRect)rect;
+- (NSPoint)calculateTopLeftPointForSubMenuWithRect:(NSRect)rect;
 
 @property(nonatomic, assign) NSMenuItem  *highlightedItem;
 @property(nonatomic, retain) NSMenu      *menu;
