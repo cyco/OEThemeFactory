@@ -197,10 +197,23 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     {
         // A redraw will change the menu items, we should probably just redraw the items that need to be redrawn -- but this may be more expensive operation than what it is worth
         _lasKeyModifierMask = modiferFlags;
-
-        [self highlightItemAtPoint:[self convertPoint:[[self window] mouseLocationOutsideOfEventStream] fromView:nil]];
         [self setNeedsDisplay:YES];
     }
+}
+
+- (BOOL)performKeyEquivalent:(NSEvent *)theEvent
+{
+    if(_closing) return YES;
+
+    // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
+    if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
+    {
+        if([_highlightedItem hasSubmenu]) [self moveRight:nil];
+        else                              [self OE_performAction];
+        return YES;
+    }
+
+    return NO;
 }
 
 - (void)moveUp:(id)sender
@@ -227,7 +240,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
         }
     }
 
-    [self setHighlightedItem:item];
+    [self setHighlightedItemWithoutExpandingSubmenu:item];
 }
 
 - (void)moveDown:(id)sender
@@ -254,7 +267,32 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
         }
     }
 
-    [self setHighlightedItem:item];
+    [self setHighlightedItemWithoutExpandingSubmenu:item];
+}
+
+- (void)moveLeft:(id)sender
+{
+    if(_closing) return;
+    if([self OE_isSubmenu]) [(OEMenu *)[self window] OE_hideWindowWithoutAnimation];
+}
+
+- (void)moveRight:(id)sender
+{
+    if(_closing) return;
+
+    OEMenu *submenu = [(OEMenu *)[self window] OE_submenu];
+    if([_highlightedItem hasSubmenu] && [submenu menu] != [_highlightedItem submenu])
+    {
+        [self setHighlightedItem:_highlightedItem];
+        if((submenu = [(OEMenu *)[self window] OE_submenu]))
+            [[submenu OE_view] moveDown:sender];
+    }
+}
+
+- (void)cancelOperation:(id)sender
+{
+    if(_closing) return;
+    [self OE_cancelTracking];
 }
 
 - (void)OE_cancelTracking
@@ -302,38 +340,6 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     {
         [self OE_cancelTracking];
     }
-}
-
-- (BOOL)performKeyEquivalent:(NSEvent *)theEvent
-{
-    if(_closing) return YES;
-
-    // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
-    if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
-    {
-        [self OE_performAction];
-        return YES;
-    }
-
-    return NO;
-}
-
-- (void)moveLeft:(id)sender
-{
-    if(_closing) return;
-    // TODO: Collapse submenu
-}
-
-- (void)moveRight:(id)sender
-{
-    if(_closing) return;
-    // TODO: Expand submenu
-}
-
-- (void)cancelOperation:(id)sender
-{
-    if(_closing) return;
-    [self OE_cancelTracking];
 }
 
 - (void)setFrameSize:(NSSize)newSize
@@ -793,14 +799,28 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     return _edge;
 }
 
+- (void)setHighlightedItemWithoutExpandingSubmenu:(NSMenuItem *)highlightedItem
+{
+    NSMenuItem *realHighlightedItem = [highlightedItem isSeparatorItem] ? nil : [[highlightedItem extraData] primaryItem] ?: highlightedItem;
+    if(_highlightedItem != realHighlightedItem)
+    {
+        _highlightedItem = realHighlightedItem;
+        [self setNeedsDisplay:YES];
+    }
+}
+
 - (void)setHighlightedItem:(NSMenuItem *)highlightedItem
 {
-    [(OEMenu *)[self window] OE_setHighlightedItem:highlightedItem];
+    [self setHighlightedItemWithoutExpandingSubmenu:highlightedItem];
+
+    OEMenu *menu = (OEMenu *)[self window];
+    [menu OE_setSubmenu:[_highlightedItem submenu]];
 }
 
 - (NSMenuItem *)highlightedItem
 {
-    return [(OEMenu *)[self window] OE_highlightedItem];
+    NSMenuItem *realHighlightedItem = [[_highlightedItem extraData] itemWithModifierMask:_lasKeyModifierMask];
+    return ([realHighlightedItem isEnabled] && ![realHighlightedItem isSeparatorItem] ? realHighlightedItem : nil);
 }
 
 @end

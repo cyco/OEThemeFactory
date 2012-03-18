@@ -39,6 +39,11 @@
 {
     NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Test"];
     [menu addItemWithTitle:@"Test 1" action:nil keyEquivalent:@""];
+
+    NSMenuItem *item = [menu addItemWithTitle:@"Test X" action:nil keyEquivalent:@""];
+    [item setKeyEquivalentModifierMask:NSShiftKeyMask];
+    [item setAlternate:YES];
+
     [menu addItemWithTitle:@"Test 2" action:nil keyEquivalent:@""];
     [menu addItemWithTitle:@"Test 3" action:nil keyEquivalent:@""];
     [menu addItem:[NSMenuItem separatorItem]];

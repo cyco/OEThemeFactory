@@ -20,7 +20,6 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 - (void)OE_menuWillShow:(NSNotification *)notification;
 - (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent;
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration;
-- (OEMenuView *)OE_view;
 
 @end
 
@@ -47,7 +46,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     {
         // Make sure result is not nil we don't want to dereference a null pointer
         [result->_view setEdge:OENoEdge];
-        [result OE_setHighlightedItem:[button selectedItem]];
+        [result->_view setHighlightedItem:[button selectedItem]];
         [result setContentSize:[result->_view sizeThatFits:buttonFrame]];
         [result setFrameTopLeftPoint:[result->_view calculateTopLeftPointForPopButtonWithRect:titleRectInScreen]];
         [result OE_showWindowForView:button withEvent:event];
@@ -76,7 +75,6 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
         _view = [[OEMenuView alloc] initWithFrame:[[self contentView] bounds]];
         [_view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
         [[self contentView] addSubview:_view];
-        [self makeFirstResponder:_view];
 
         [self setOpaque:NO];
         [self setBackgroundColor:[NSColor clearColor]];
@@ -97,26 +95,27 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)setMenu:(NSMenu *)menu
-{
-    [super setMenu:menu];
-    [_view setMenu:menu];
-}
-
 - (void)orderWindow:(NSWindowOrderingMode)place relativeTo:(NSInteger)otherWin
 {
     [super orderWindow:place relativeTo:otherWin];
     if(_submenu)
     {
-        const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[_highlightedItem extraData] frame] toView:nil]];
+        const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[[_view highlightedItem] extraData] frame] toView:nil]];
         [_submenu setFrameTopLeftPoint:[_submenu->_view calculateTopLeftPointForSubMenuWithRect:rectInScreen]];
         [_submenu orderFrontRegardless];
     }
 }
 
-- (void)resignKeyWindow
+- (void)removeChildWindow:(NSWindow *)childWin
 {
-    [self cancelTracking];
+    if(childWin == _submenu) _submenu = nil;
+    [super removeChildWindow:childWin];
+}
+
+- (void)setMenu:(NSMenu *)menu
+{
+    [super setMenu:menu];
+    [_view setMenu:menu];
 }
 
 - (void)OE_applicationNotification:(NSNotification *)notification
@@ -163,29 +162,28 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 
     [self OE_showWindowForView:view];
 
-    const NSEventType type              = [initialEvent type];
-    NSEventType       oppositeEventType = 0;
+    const NSEventType type               = [initialEvent type];
+    NSEventType       oppositeMouseEvent = 0;
     switch(type)
     {
         case NSLeftMouseDown:
-            oppositeEventType = NSLeftMouseUp;
+            oppositeMouseEvent = NSLeftMouseUp;
             break;
         case NSRightMouseDown:
-            oppositeEventType = NSRightMouseDown;
+            oppositeMouseEvent = NSRightMouseDown;
             break;
         case NSOtherMouseDown:
-            oppositeEventType = NSOtherMouseDown;
+            oppositeMouseEvent = NSOtherMouseDown;
             break;
         default:
             break;
     }
 
-    NSLog(@"Menu opened");
     NSEvent *event;
     while(!_closing && !_cancelTracking && (event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES]))
     {
         const NSEventType type = [event type];
-        if(type == oppositeEventType && [event timestamp] - [initialEvent timestamp] > 1.0)
+        if(type == oppositeMouseEvent && [event timestamp] - [initialEvent timestamp] > 1.0)
         {
             const NSPoint locationInWindow = [event locationInWindow];
             const NSPoint location = [self convertScreenToBase:[event window] == nil ? locationInWindow : [[event window] convertBaseToScreen:locationInWindow]];
@@ -196,11 +194,26 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
         {
             [self cancelTracking];
         }
+        else if((type == NSKeyDown) || (type == NSKeyUp))
+        {
+            OEMenu *submenu = self;
+            while(submenu->_submenu) submenu = submenu->_submenu;
+            [submenu sendEvent:event];
+            continue;
+        }
+        else if(type == NSFlagsChanged)
+        {
+            OEMenu *submenu = self;
+            while(submenu)
+            {
+                [submenu sendEvent:event];
+                submenu = submenu->_submenu;
+            }
+        }
         [NSApp sendEvent:event];
     }
     [NSApp discardEventsMatchingMask:NSAnyEventMask beforeEvent:event];
     if([delegate respondsToSelector:@selector(menuDidClose:)]) [delegate menuDidClose:[_view menu]];
-    NSLog(@"Menu did close...");
 }
 
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration
@@ -212,18 +225,11 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
         [[self animator] setAlphaValue:0.0];
     };
 
-    void (^completionHandler)(void) =
-    ^{
+    void (^completionHandler)(void) = ^{
         [[self parentWindow] removeChildWindow:self];
     };
 
     [NSAnimationContext runAnimationGroup:changes completionHandler:completionHandler];
-}
-
-
-- (OEMenuView *)OE_view
-{
-    return _view;
 }
 
 @end
@@ -245,7 +251,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
         return;
     }
 
-    const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[_highlightedItem extraData] frame] toView:nil]];
+    const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[[_view highlightedItem] extraData] frame] toView:nil]];
     _submenu = [isa popUpContextMenuWithMenu:submenu withRect:rectInScreen];
     if(_submenu != nil)
     {
@@ -257,21 +263,19 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     }
 }
 
-- (void)OE_setHighlightedItem:(NSMenuItem *)highlightedItem
+- (OEMenu *)OE_submenu
 {
-    NSMenuItem *realHighlightedItem = [highlightedItem isSeparatorItem] ? nil : [[highlightedItem extraData] primaryItem] ?: highlightedItem;
-    if(_highlightedItem != realHighlightedItem)
-    {
-        _highlightedItem = realHighlightedItem;
-        [self OE_setSubmenu:[_highlightedItem submenu]];
-        [_view setNeedsDisplay:YES];
-    }
+    return _submenu;
 }
 
-- (NSMenuItem *)OE_highlightedItem
+- (OEMenuView *)OE_view
 {
-    NSMenuItem *realHighlightedItem = [[_highlightedItem extraData] itemWithModifierMask:[[NSApp currentEvent] modifierFlags]];
-    return ([realHighlightedItem isEnabled] && ![realHighlightedItem isSeparatorItem] ? realHighlightedItem : nil);
+    return _view;
+}
+
+- (void)OE_hideWindowWithoutAnimation
+{
+    [self OE_hideWindowWithFadeDuration:0.0];
 }
 
 @end

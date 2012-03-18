@@ -18,11 +18,9 @@
     BOOL        _closing;
     id          _localMonitor;
 
-    NSMenuItem *_highlightedItem;
-    NSTimer    *_showSubmenuTimer;
-
     __unsafe_unretained OEMenu *_supermenu;
     OEMenu                     *_submenu;
+    NSTimer                    *_showSubmenuTimer;
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event;

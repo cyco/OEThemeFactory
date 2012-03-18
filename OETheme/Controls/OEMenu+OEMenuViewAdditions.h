@@ -11,7 +11,9 @@
 @interface OEMenu (OEMenuViewAdditions)
 
 - (void)OE_setClosing:(BOOL)closing;
-- (void)OE_setHighlightedItem:(NSMenuItem *)highlightedItem;
-- (NSMenuItem *)OE_highlightedItem;
+- (void)OE_setSubmenu:(NSMenu *)submenu;
+- (OEMenu *)OE_submenu;
+- (OEMenuView *)OE_view;
+- (void)OE_hideWindowWithoutAnimation;
 
 @end
