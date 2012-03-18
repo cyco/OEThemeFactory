@@ -10,6 +10,8 @@
 #import "OEMenuView.h"
 #import "OEPopUpButton.h"
 
+@class OEPopUpButton;
+
 @interface OEMenu : NSWindow
 {
 @private
@@ -24,7 +26,7 @@
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event;
-+ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge forView:(NSView *)view withEvent:(NSEvent *)event;
++ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge forView:(NSView *)view withStyle:(OEMenuStyle)style withEvent:(NSEvent *)event;
 
 - (void)cancelTracking;
 - (void)cancelTrackingWithoutAnimation;

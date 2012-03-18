@@ -117,21 +117,31 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)OE_setupCachedThemeItems
 {
-    NSString *styleKeyFormat = OENSStringFromOEMenuStyle(_style, @"%@");
-    _menuItemSeparatorImage  = [[OETheme sharedTheme] imageForKey:[NSString stringWithFormat:styleKeyFormat, @"separator_item"] forState:OEThemeStateDefault];
-    _backgroundImage         = [[OETheme sharedTheme] imageForKey:[NSString stringWithFormat:styleKeyFormat, @"background"] forState:OEThemeStateDefault];
-    _backgroundColor         = [[OETheme sharedTheme] colorForKey:[NSString stringWithFormat:styleKeyFormat, @"background"] forState:OEThemeStateDefault];
-    _backgroundGradient      = [[OETheme sharedTheme] gradientForKey:[NSString stringWithFormat:styleKeyFormat, @"background"] forState:OEThemeStateDefault];
+    NSString *styleKeyPrefix = OENSStringFromOEMenuStyle(_style, @"");
+    _menuItemSeparatorImage  = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"separator_item"] forState:OEThemeStateDefault];
+    _backgroundImage         = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];
+    _backgroundColor         = [[OETheme sharedTheme] colorForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];
+    _backgroundGradient      = [[OETheme sharedTheme] gradientForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];
 
-    if(_edge == OENoEdge) return;
+    _menuItemGradient   = [[OETheme sharedTheme] themeGradientForKey:[styleKeyPrefix stringByAppendingString:@"item_background"]];
+    _menuItemTick       = [[OETheme sharedTheme] themeImageForKey:[styleKeyPrefix stringByAppendingString:@"item_tick"]];
+    _menuItemAttributes = [[OETheme sharedTheme] themeTextAttributesForKey:[styleKeyPrefix stringByAppendingString:@"item"]];
+    _submenuArrow       = [[OETheme sharedTheme] themeImageForKey:[styleKeyPrefix stringByAppendingString:@"submenu_arrow"]];
 
-    NSString *edgeComponent = nil;
-    if(_edge == OEMaxXEdge)      edgeComponent = @"maxx_arrow_body";
-    else if(_edge == OEMinXEdge) edgeComponent = @"minx_arrow_body";
-    else if(_edge == OEMaxYEdge) edgeComponent = @"maxy_arrow_body";
-    else if(_edge == OEMinYEdge) edgeComponent = @"miny_arrow_body";
+    if(_edge == OENoEdge)
+    {
+        _arrowImage = nil;
+    }
+    else
+    {
+        NSString *edgeComponent = nil;
+        if(_edge == OEMaxXEdge)      edgeComponent = @"maxx_arrow_body";
+        else if(_edge == OEMinXEdge) edgeComponent = @"minx_arrow_body";
+        else if(_edge == OEMaxYEdge) edgeComponent = @"maxy_arrow_body";
+        else if(_edge == OEMinYEdge) edgeComponent = @"miny_arrow_body";
 
-    _arrowImage = [[OETheme sharedTheme] imageForKey:[NSString stringWithFormat:styleKeyFormat, edgeComponent] forState:OEThemeStateDefault];
+        _arrowImage = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:edgeComponent] forState:OEThemeStateDefault];
+    }
 }
 
 - (void)OE_updateInsets
@@ -549,12 +559,6 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     const NSUInteger count = [items count];
     if(count > 0)
     {
-        // Retrieve themed items
-        OEThemeGradient       *menuItemGradient   = [[OETheme sharedTheme] themeGradientForKey:@"dark_menu_item_background"];
-        OEThemeImage          *menuItemTick       = [[OETheme sharedTheme] themeImageForKey:@"dark_menu_item_tick"];
-        OEThemeTextAttributes *menuItemAttributes = [[OETheme sharedTheme] themeTextAttributesForKey:@"dark_menu_item"];
-        OEThemeImage          *submenuArrow       = [[OETheme sharedTheme] themeImageForKey:@"dark_menu_submenu_arrow"];
-
         NSSize separatorSize  = [_menuItemSeparatorImage size];
 
         for(NSUInteger i = 0; i < count; i++)
@@ -588,16 +592,16 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
                     // Retrieve UI objects from the themed items
                     OEThemeState  menuItemState     = [self OE_currentStateFromMenuItem:item];
-                    NSImage      *tickMarkImage     = [menuItemTick imageForState:menuItemState];
-                    NSImage      *submenuArrowImage = [submenuArrow imageForState:menuItemState];
-                    NSDictionary *textAttributes    = [self OE_textAttributes:menuItemAttributes forState:menuItemState];
+                    NSImage      *tickMarkImage     = [_menuItemTick imageForState:menuItemState];
+                    NSImage      *submenuArrowImage = [_submenuArrow imageForState:menuItemState];
+                    NSDictionary *textAttributes    = [self OE_textAttributes:_menuItemAttributes forState:menuItemState];
 
                     // Retrieve the item's image and title
                     NSImage  *menuItemImage = [item image];
                     NSString *title         = [item title];
 
                     // Draw the item's background
-                    [[menuItemGradient gradientForState:menuItemState] drawInRect:menuItemFrame];
+                    [[_menuItemGradient gradientForState:menuItemState] drawInRect:menuItemFrame];
 
                     // Draw the item's tick mark
                     if(tickMarkImage)

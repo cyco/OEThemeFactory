@@ -17,6 +17,7 @@
 @end
 
 @implementation OEPopUpButton
+@synthesize menuStyle = _menuStyle;
 
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow
 {

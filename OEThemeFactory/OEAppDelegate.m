@@ -31,6 +31,7 @@
 
     [_popupButton setBackgroundThemeImageKey:@"dark_popupbutton"];
     [_popupButton setThemeTextAttributesKey:@"dark_popupbutton"];
+    [_popupButton setMenuStyle:OEMenuStyleLight];
 
     [_redHudButton setBackgroundThemeImageKey:@"red_hud_button"];
 }
@@ -51,7 +52,7 @@
     [menu addItemWithTitle:@"Test 5" action:nil keyEquivalent:@""];
     [menu addItemWithTitle:@"Test 6" action:nil keyEquivalent:@""];
 
-    [OEMenu popUpContextMenu:menu arrowOnEdge:OEMinYEdge forView:sender withEvent:nil];
+    [OEMenu popUpContextMenu:menu arrowOnEdge:OEMinYEdge forView:sender withStyle:OEMenuStyleLight withEvent:nil];
 }
 
 @end

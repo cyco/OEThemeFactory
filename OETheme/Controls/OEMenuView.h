@@ -48,6 +48,11 @@ typedef enum _OERectEdge
     NSColor    *_backgroundColor;
     NSGradient *_backgroundGradient;
 
+    OEThemeGradient       *_menuItemGradient;
+    OEThemeImage          *_menuItemTick;
+    OEThemeTextAttributes *_menuItemAttributes;
+    OEThemeImage          *_submenuArrow;
+
     NSMenuItem *_highlightedItem;
     NSTimer    *_flashTimer;
     BOOL        _closing;

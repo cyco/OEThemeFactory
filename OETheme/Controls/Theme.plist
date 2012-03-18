@@ -107,6 +107,42 @@
 				</dict>
 			</dict>
 		</dict>
+		<key>light_menu_item</key>
+		<dict>
+			<key>Family</key>
+			<string>Lucida Grande</string>
+			<key>Size</key>
+			<integer>10</integer>
+			<key>Traits</key>
+			<string>Bold</string>
+			<key>Weight</key>
+			<integer>8</integer>
+			<key>Color</key>
+			<string>black</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict>
+					<key>Color</key>
+					<string>black</string>
+				</dict>
+				<key>Disabled</key>
+				<dict>
+					<key>Color</key>
+					<string>rgb(125,125,125)</string>
+				</dict>
+				<key>Pressed</key>
+				<dict>
+					<key>Color</key>
+					<string>white</string>
+				</dict>
+				<key>Pressed,Focused</key>
+				<dict>
+					<key>Color</key>
+					<string>white</string>
+				</dict>
+			</dict>
+		</dict>
 	</dict>
 	<key>Images</key>
 	<dict>
@@ -244,6 +280,104 @@
 						<string>{{9,12},{1,11}}</string>
 						<string>{{10,12},{21,11}}</string>
 					</array>
+				</dict>
+			</dict>
+		</dict>
+		<key>light_menu_submenu_arrow</key>
+		<dict>
+			<key>Resource</key>
+			<string>menu_submenu_arrow</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<string>{{0,8},{7,8}}</string>
+				<key>Pressed</key>
+				<string>{{0,0},{7,8}}</string>
+			</dict>
+		</dict>
+		<key>light_menu_background</key>
+		<dict>
+			<key>Resource</key>
+			<string>light_menu_body</string>
+			<key>Parts</key>
+			<array>
+				<string>{{0,0},{10,10}}</string>
+				<string>{{10,0},{16,10}}</string>
+				<string>{{26,0},{10,10}}</string>
+				<string>{{0,10},{10,18}}</string>
+				<string>{{10,10},{16,18}}</string>
+				<string>{{26,10},{10,18}}</string>
+				<string>{{0,29},{10,10}}</string>
+				<string>{{10,29},{16,10}}</string>
+				<string>{{26,29},{10,10}}</string>
+			</array>
+		</dict>
+		<key>light_menu_maxy_arrow_body</key>
+		<dict>
+			<key>Resource</key>
+			<string>light_menu_arrows_body</string>
+			<key>Parts</key>
+			<string>{{17,0},{20,17}}</string>
+		</dict>
+		<key>light_menu_miny_arrow_body</key>
+		<dict>
+			<key>Resource</key>
+			<string>light_menu_arrows_body</string>
+			<key>Parts</key>
+			<string>{{17,40},{20,17}}</string>
+		</dict>
+		<key>light_menu_minx_arrow_body</key>
+		<dict>
+			<key>Resource</key>
+			<string>light_menu_arrows_body</string>
+			<key>Parts</key>
+			<string>{{0,17},{17,23}}</string>
+		</dict>
+		<key>light_menu_maxx_arrow_body</key>
+		<dict>
+			<key>Resource</key>
+			<string>light_menu_arrows_body</string>
+			<key>Parts</key>
+			<string>{{37,17},{17,23}}</string>
+		</dict>
+		<key>light_menu_separator_item</key>
+		<dict>
+			<key>Resource</key>
+			<string>light_menu_separator_item</string>
+		</dict>
+		<key>light_menu_item_tick</key>
+		<dict>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<dict/>
+				<key>Toggle On</key>
+				<dict>
+					<key>Resource</key>
+					<string>menu_item_tick_mark</string>
+					<key>Parts</key>
+					<string>{{7,0},{7,12}}</string>
+				</dict>
+				<key>Toggle On,Pressed</key>
+				<dict>
+					<key>Resource</key>
+					<string>menu_item_tick_mark</string>
+					<key>Parts</key>
+					<string>{{0,0},{7,12}}</string>
+				</dict>
+				<key>Toggle Mixed</key>
+				<dict>
+					<key>Resource</key>
+					<string>menu_item_mixed_state</string>
+					<key>Parts</key>
+					<string>{{7,0},{7,12}}</string>
+				</dict>
+				<key>Toggle Mixed,Pressed</key>
+				<dict>
+					<key>Resource</key>
+					<string>menu_item_mixed_state</string>
+					<key>Parts</key>
+					<string>{{0,0},{7,12}}</string>
 				</dict>
 			</dict>
 		</dict>
@@ -391,6 +525,35 @@
 					<array>
 						<string>rgb(232,232,232)</string>
 						<string>rgb(122,122,122)</string>
+					</array>
+				</dict>
+				<key>Pressed,Focused</key>
+				<dict>
+					<key>Colors</key>
+					<array>
+						<string>rgb(181,18,36)</string>
+						<string>rgb(123,5,18)</string>
+					</array>
+				</dict>
+			</dict>
+		</dict>
+		<key>light_menu_item_background</key>
+		<dict>
+			<key>Angle</key>
+			<integer>270</integer>
+			<key>Locations</key>
+			<array>
+				<integer>0</integer>
+				<integer>1</integer>
+			</array>
+			<key>States</key>
+			<dict>
+				<key>Pressed</key>
+				<dict>
+					<key>Colors</key>
+					<array>
+						<string>rgb(49,49,49)</string>
+						<string>rgb(26,26,26)</string>
 					</array>
 				</dict>
 				<key>Pressed,Focused</key>

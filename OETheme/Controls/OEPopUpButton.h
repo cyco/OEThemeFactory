@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "OEPopUpButtonCell.h"
+#import "OEMenu.h"
 
 @interface OEPopUpButton : NSPopUpButton
 {
@@ -22,8 +23,9 @@
 - (void)setThemeImageKey:(NSString *)key;
 - (void)setThemeTextAttributesKey:(NSString *)key;
 
-@property (nonatomic, retain) OEThemeImage *backgroundThemeImage;
-@property (nonatomic, retain) OEThemeImage *themeImage;
-@property (nonatomic, retain) OEThemeTextAttributes *themeTextAttributes;
+@property(nonatomic, retain) OEThemeImage *backgroundThemeImage;
+@property(nonatomic, retain) OEThemeImage *themeImage;
+@property(nonatomic, retain) OEThemeTextAttributes *themeTextAttributes;
+@property(nonatomic, assign) OEMenuStyle menuStyle;
 
 @end

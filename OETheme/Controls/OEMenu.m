@@ -45,6 +45,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     if(result != nil)
     {
         // Make sure result is not nil we don't want to dereference a null pointer
+        [result->_view setStyle:[button menuStyle]];
         [result->_view setEdge:OENoEdge];
         [result->_view setHighlightedItem:[button selectedItem]];
         [result setContentSize:[result->_view sizeThatFits:buttonFrame]];
@@ -53,7 +54,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     }
 }
 
-+ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge forView:(NSView *)view withEvent:(NSEvent *)event
++ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge forView:(NSView *)view withStyle:(OEMenuStyle)style withEvent:(NSEvent *)event
 {
     const NSRect rectInWindow = [view convertRect:[view bounds] toView:nil];
     const NSRect rectInScreen = [[view window] convertRectToScreen:rectInWindow];
@@ -61,6 +62,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     OEMenu *result = [self popUpContextMenuWithMenu:menu withRect:rectInScreen];
     if(result != nil)
     {
+        [result->_view setStyle:style];
         [result->_view setEdge:edge];
         [result setContentSize:[result->_view sizeThatFits:NSZeroRect]];
         [result setFrameTopLeftPoint:[result->_view calculateTopLeftPointWithRect:rectInScreen]];
@@ -256,6 +258,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     if(_submenu != nil)
     {
         _submenu->_supermenu = self;
+        [_submenu->_view setStyle:[_view style]];
         [_submenu->_view setEdge:OENoEdge];
         [_submenu setContentSize:[_submenu->_view sizeThatFits:NSZeroRect]];
         [_submenu setFrameTopLeftPoint:[_submenu->_view calculateTopLeftPointForSubMenuWithRect:rectInScreen]];
