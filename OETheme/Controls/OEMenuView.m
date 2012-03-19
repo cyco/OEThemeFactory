@@ -15,31 +15,31 @@
 
 #pragma mark -
 #pragma mark Menu Item Spacing
-const static CGFloat OEMenuItemTickMarkWidth      = 19.0;
-const static CGFloat OEMenuItemImageWidth         = 22.0;
-const static CGFloat OEMenuItemSubmenuArrowWidth  = 10.0;
-const static CGFloat OEMenuItemHeightWithImage    = 20.0;
-const static CGFloat OEMenuItemHeightWithoutImage = 17.0;
-const static CGFloat OEMenuItemSeparatorHeight    =  7.0;
-const static CGFloat OEMenuItemSeparatorOffset    =  3.0;
+const        CGFloat OEMenuItemTickMarkWidth      = 19.0;
+const        CGFloat OEMenuItemImageWidth         = 22.0;
+const        CGFloat OEMenuItemSubmenuArrowWidth  = 10.0;
+static const CGFloat OEMenuItemHeightWithImage    = 20.0;
+static const CGFloat OEMenuItemHeightWithoutImage = 17.0;
+static const CGFloat OEMenuItemSeparatorHeight    =  7.0;
+static const CGFloat OEMenuItemSeparatorOffset    =  3.0;
 
 #pragma mark -
 #pragma mark Background Image Insets
 
-const static NSEdgeInsets OEMenuContentEdgeInsets        = { 7.0,  5.0,  7.0,  5.0};
-const static NSEdgeInsets OEMenuBackgroundNoEdgeInsets   = { 5.0,  5.0,  5.0,  5.0};
-const static NSEdgeInsets OEMenuBackgroundMinXEdgeInsets = { 5.0, 14.0,  5.0,  5.0};
-const static NSEdgeInsets OEMenuBackgroundMaxXEdgeInsets = { 5.0,  5.0,  5.0, 14.0};
-const static NSEdgeInsets OEMenuBackgroundMinYEdgeInsets = { 5.0,  5.0, 14.0,  5.0};
-const static NSEdgeInsets OEMenuBackgroundMaxYEdgeInsets = {14.0,  5.0,  5.0,  5.0};
+const NSEdgeInsets        OEMenuContentEdgeInsets        = { 7.0,  5.0,  7.0,  5.0};
+static const NSEdgeInsets OEMenuBackgroundNoEdgeInsets   = { 5.0,  5.0,  5.0,  5.0};
+static const NSEdgeInsets OEMenuBackgroundMinXEdgeInsets = { 5.0, 14.0,  5.0,  5.0};
+static const NSEdgeInsets OEMenuBackgroundMaxXEdgeInsets = { 5.0,  5.0,  5.0, 14.0};
+static const NSEdgeInsets OEMenuBackgroundMinYEdgeInsets = { 5.0,  5.0, 14.0,  5.0};
+static const NSEdgeInsets OEMenuBackgroundMaxYEdgeInsets = {14.0,  5.0,  5.0,  5.0};
 
 #pragma mark -
 #pragma mark Edge Arrow Sizes
 
-const static NSSize OEMinXEdgeArrowSize = (NSSize){10.0, 15.0};
-const static NSSize OEMaxXEdgeArrowSize = (NSSize){10.0, 15.0};
-const static NSSize OEMinYEdgeArrowSize = (NSSize){15.0, 10.0};
-const static NSSize OEMaxYEdgeArrowSize = (NSSize){15.0, 10.0};
+static const NSSize OEMinXEdgeArrowSize = (NSSize){10.0, 15.0};
+static const NSSize OEMaxXEdgeArrowSize = (NSSize){10.0, 15.0};
+static const NSSize OEMinYEdgeArrowSize = (NSSize){15.0, 10.0};
+static const NSSize OEMaxYEdgeArrowSize = (NSSize){15.0, 10.0};
 
 #pragma mark -
 #pragma mark Menu Item Default Mask
@@ -81,6 +81,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 @end
 
 @implementation OEMenuView
+@synthesize backgroundEdgeInsets = _backgroundEdgeInsets;
 
 - (id)initWithCoder:(NSCoder *)aDecoder
 {
@@ -494,6 +495,12 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     }
 }
 
+- (void)display
+{
+    [self OE_layoutIfNeeded];
+    [super display];
+}
+
 - (void)drawRect:(NSRect)dirtyRect
 {
     [self OE_layoutIfNeeded];
@@ -661,14 +668,10 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     return nil;
 }
 
-- (NSSize)sizeThatFits:(NSRect)frame
+- (NSSize)size
 {
-    NSArray *items = [_menu itemArray];
-    if([items count] == 0) return NSZeroSize;
-
-    [self OE_layoutIfNeeded];
-
-    NSDictionary *attributes = [self OE_textAttributes:[[OETheme sharedTheme] themeTextAttributesForKey:@"dark_menu_item"] forState:OEThemeStateDefault];
+    NSArray      *items      = [_menu itemArray];
+    NSDictionary *attributes = [_menuItemAttributes textAttributesForState:OEThemeStateDefault];
 
     const CGFloat   itemHeight = _containsImage ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
     __block CGFloat height     = 0.0;
@@ -686,61 +689,12 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
     const CGFloat minimumWidthPadding  = _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right;
     const CGFloat minimumHeightPadding = _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom;
-    const CGFloat minimumWidth         = OEMenuItemTickMarkWidth + (_containsImage ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + 25;
+    const CGFloat minimumWidth         = OEMenuItemTickMarkWidth + (_containsImage ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth;
 
-    width  = ceil(MAX(MAX(width + minimumWidth, frame.size.width), [_menu minimumWidth]) + minimumWidthPadding);
+    width  = ceil(MAX(width + minimumWidth, [_menu minimumWidth]) + minimumWidthPadding);
     height = ceil(height + minimumHeightPadding);
 
     return NSMakeSize(width, height);
-}
-
-- (NSPoint)calculateTopLeftPointWithRect:(NSRect)rect
-{
-    [self OE_layoutIfNeeded];
-
-    NSPoint result = rect.origin;
-    if(_edge == OENoEdge)
-    {
-        result = NSMakePoint(NSMinX(rect) - _backgroundEdgeInsets.left + 1.0, NSMinY(rect));
-    }
-    else
-    {
-        const NSRect bounds = [[self window] convertRectToScreen:[self convertRect:[self bounds] toView:nil]];
-        switch(_edge)
-        {
-            case OEMinXEdge:
-                result = NSMakePoint(NSMaxX(rect) - _backgroundEdgeInsets.left, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
-                break;
-            case OEMaxXEdge:
-                result = NSMakePoint(NSMinX(rect) - NSWidth(bounds) + _backgroundEdgeInsets.right, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
-                break;
-            case OEMinYEdge:
-                result = NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMaxY(rect) + NSHeight(bounds) - _backgroundEdgeInsets.bottom);
-                break;
-            case OEMaxYEdge:
-                result = NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMinY(rect) - _backgroundEdgeInsets.top);
-                break;
-            default:
-                break;
-        }
-    }
-    return result;
-}
-
-- (NSPoint)calculateTopLeftPointForPopButtonWithRect:(NSRect)rect
-{
-    if(_edge != OENoEdge) return [self calculateTopLeftPointWithRect:rect];
-
-    [self OE_layoutIfNeeded];
-    return NSMakePoint(NSMinX(rect) - OEMenuItemTickMarkWidth - _backgroundEdgeInsets.left + 1.0, NSMaxY(rect) + NSHeight([self bounds]) - NSMaxY([[[self highlightedItem] extraData] frame]) + 1.0);
-}
-
-- (NSPoint)calculateTopLeftPointForSubMenuWithRect:(NSRect)rect
-{
-    if(_edge != OENoEdge) return [self calculateTopLeftPointWithRect:rect];
-
-    [self OE_layoutIfNeeded];
-    return NSMakePoint(NSMaxX(rect) - _backgroundEdgeInsets.right - OEMenuContentEdgeInsets.left, NSMaxY(rect) + _backgroundEdgeInsets.top + OEMenuContentEdgeInsets.top);
 }
 
 - (void)setMenu:(NSMenu *)menu

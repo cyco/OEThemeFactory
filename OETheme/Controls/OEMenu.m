@@ -20,16 +20,18 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 - (void)OE_menuWillShow:(NSNotification *)notification;
 - (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent;
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration;
+- (void)OE_calculateSubmenuOrigin;
 
 @end
 
 @implementation OEMenu
 
-+ (OEMenu *)popUpContextMenuWithMenu:(NSMenu *)menu withRect:(NSRect)rect
++ (OEMenu *)popUpContextMenuWithMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge withRect:(NSRect)rect
 {
     OEMenu *result = [[self alloc] initWithContentRect:rect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
     [result setMenu:menu];
-
+    [result->_view setEdge:edge];
+    [result setContentSize:[result->_view size]];
     return result;
 }
 
@@ -37,19 +39,31 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 {
     NSWindow *window = [button window];
 
-    const NSRect buttonFrame       = [window convertRectToScreen:[button convertRect:[button frame] toView:nil]];
-    const NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
-    const NSRect titleRectInScreen = [window convertRectToScreen:[button convertRect:titleRectInButton toView:nil]];
-
-    OEMenu *result = [self popUpContextMenuWithMenu:[button menu] withRect:buttonFrame];
+    const NSRect buttonFrame = [window convertRectToScreen:[button convertRect:[button frame] toView:nil]];
+    OEMenu *result           = [self popUpContextMenuWithMenu:[button menu] arrowOnEdge:OENoEdge withRect:buttonFrame];
     if(result != nil)
     {
         // Make sure result is not nil we don't want to dereference a null pointer
-        [result->_view setStyle:[button menuStyle]];
-        [result->_view setEdge:OENoEdge];
-        [result->_view setHighlightedItem:[button selectedItem]];
-        [result setContentSize:[result->_view sizeThatFits:buttonFrame]];
-        [result setFrameTopLeftPoint:[result->_view calculateTopLeftPointForPopButtonWithRect:titleRectInScreen]];
+        OEMenuView *menuView = result->_view;
+        [menuView display];
+        [menuView setStyle:[button menuStyle]];
+        [menuView setHighlightedItem:[button selectedItem]];
+
+        // Calculate the frame for the popup menu so that the popup menu's selected item hovers exactly over the popup button's title
+        const NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
+        const NSRect titleRectInScreen = [window convertRectToScreen:[button convertRect:titleRectInButton toView:nil]];
+
+        const NSEdgeInsets edgeInsets = [menuView backgroundEdgeInsets];
+
+        NSPoint origin = titleRectInScreen.origin;
+        NSSize size    = [result frame].size;
+
+        // TODO: Adjust origin based on the button's and menu item's shadows
+        origin.x   -= edgeInsets.left + OEMenuItemTickMarkWidth - 1.0;              // Assumes 1px shadow + 1px border
+        origin.y   -= NSMinY([[[menuView highlightedItem] extraData] frame]) + 2.0; // Assumes a 1px shadow + 1px border
+        size.width  = buttonFrame.size.width + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right + edgeInsets.left + edgeInsets.right;
+
+        [result setFrame:(NSRect){ .origin = origin, .size = size } display:NO];
         [result OE_showWindowForView:button withEvent:event];
     }
 }
@@ -59,13 +73,44 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     const NSRect rectInWindow = [view convertRect:[view bounds] toView:nil];
     const NSRect rectInScreen = [[view window] convertRectToScreen:rectInWindow];
 
-    OEMenu *result = [self popUpContextMenuWithMenu:menu withRect:rectInScreen];
+    OEMenu *result = [self popUpContextMenuWithMenu:menu arrowOnEdge:edge withRect:rectInScreen];
     if(result != nil)
     {
-        [result->_view setStyle:style];
-        [result->_view setEdge:edge];
-        [result setContentSize:[result->_view sizeThatFits:NSZeroRect]];
-        [result setFrameTopLeftPoint:[result->_view calculateTopLeftPointWithRect:rectInScreen]];
+        OEMenuView *menuView = result->_view;
+        [menuView display];
+        [menuView setStyle:style];
+
+        // Calculate the top left point of the frame, this position is dependent on the edge that the arrow is visible on
+        const NSEdgeInsets edgeInsets = [menuView backgroundEdgeInsets];
+
+        NSPoint origin = rectInScreen.origin;
+        if(edge == OENoEdge)
+        {
+            origin = NSMakePoint(NSMinX(rectInScreen) - edgeInsets.left + 1.0, NSMinY(rectInScreen));
+        }
+        else
+        {
+            const NSRect bounds = [result convertRectToScreen:[menuView frame]];
+            switch(edge)
+            {
+                case OEMinXEdge:
+                    origin = NSMakePoint(NSMaxX(rectInScreen) - edgeInsets.left, NSMaxY(rectInScreen) - (NSMidY(rectInScreen) - NSMidY(bounds)));
+                    break;
+                case OEMaxXEdge:
+                    origin = NSMakePoint(NSMinX(rectInScreen) - NSWidth(bounds) + edgeInsets.right, NSMaxY(rectInScreen) - (NSMidY(rectInScreen) - NSMidY(bounds)));
+                    break;
+                case OEMinYEdge:
+                    origin = NSMakePoint(NSMinX(rectInScreen) + NSMidX(rectInScreen) - NSMidX(bounds), NSMaxY(rectInScreen) + NSHeight(bounds) - edgeInsets.bottom);
+                    break;
+                case OEMaxYEdge:
+                    origin = NSMakePoint(NSMinX(rectInScreen) + NSMidX(rectInScreen) - NSMidX(bounds), NSMinY(rectInScreen) - edgeInsets.top);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        [result setFrameTopLeftPoint:origin];
         [result OE_showWindowForView:view withEvent:event];
     }
 }
@@ -102,8 +147,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     [super orderWindow:place relativeTo:otherWin];
     if(_submenu)
     {
-        const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[[_view highlightedItem] extraData] frame] toView:nil]];
-        [_submenu setFrameTopLeftPoint:[_submenu->_view calculateTopLeftPointForSubMenuWithRect:rectInScreen]];
+        [self OE_calculateSubmenuOrigin];
         [_submenu orderFrontRegardless];
     }
 }
@@ -234,6 +278,13 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     [NSAnimationContext runAnimationGroup:changes completionHandler:completionHandler];
 }
 
+- (void)OE_calculateSubmenuOrigin
+{
+    const NSRect        rectInScreen = [self convertRectToScreen:[_view convertRect:[[[_view highlightedItem] extraData] frame] toView:nil]];
+    const NSEdgeInsets  edgeInsets   = [_view backgroundEdgeInsets];
+    [_submenu setFrameTopLeftPoint:NSMakePoint(NSMaxX(rectInScreen) - edgeInsets.right - OEMenuContentEdgeInsets.left, NSMaxY(rectInScreen) + edgeInsets.top + OEMenuContentEdgeInsets.top)];
+}
+
 @end
 
 @implementation OEMenu (OEMenuViewAdditions)
@@ -254,14 +305,12 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     }
 
     const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[[_view highlightedItem] extraData] frame] toView:nil]];
-    _submenu = [isa popUpContextMenuWithMenu:submenu withRect:rectInScreen];
+    _submenu = [isa popUpContextMenuWithMenu:submenu arrowOnEdge:OENoEdge withRect:rectInScreen];
     if(_submenu != nil)
     {
         _submenu->_supermenu = self;
         [_submenu->_view setStyle:[_view style]];
-        [_submenu->_view setEdge:OENoEdge];
-        [_submenu setContentSize:[_submenu->_view sizeThatFits:NSZeroRect]];
-        [_submenu setFrameTopLeftPoint:[_submenu->_view calculateTopLeftPointForSubMenuWithRect:rectInScreen]];
+        [self OE_calculateSubmenuOrigin];
         [_submenu OE_showWindowForView:_view];
     }
 }

@@ -32,8 +32,6 @@ typedef enum _OERectEdge
     OERectEdge    _edge;                // The arrow's edge
     NSBezierPath *_borderPath;          // The path of the background image (to include the arrow)
 
-    NSEdgeInsets _backgroundEdgeInsets; // Edge insets used to compensate for the arrow displayed
-
     NSTrackingArea   *_trackingArea;    // Tracking area
 
     BOOL _needsLayout;                  // Flag used to notify that the menu item's frames should be invalidated
@@ -63,15 +61,12 @@ typedef enum _OERectEdge
 
 // Retrieves item at the specified point
 - (NSMenuItem *)itemAtPoint:(NSPoint)point;
-- (NSSize)sizeThatFits:(NSRect)frame;
+- (NSSize)size;
 
-- (NSPoint)calculateTopLeftPointWithRect:(NSRect)rect;
-- (NSPoint)calculateTopLeftPointForPopButtonWithRect:(NSRect)rect;
-- (NSPoint)calculateTopLeftPointForSubMenuWithRect:(NSRect)rect;
-
-@property(nonatomic, assign) NSMenuItem  *highlightedItem;
-@property(nonatomic, retain) NSMenu      *menu;
-@property(nonatomic, assign) OEMenuStyle  style;
-@property(nonatomic, assign) OERectEdge   edge;
+@property(nonatomic, assign)   NSMenuItem   *highlightedItem;
+@property(nonatomic, retain)   NSMenu       *menu;
+@property(nonatomic, assign)   OEMenuStyle   style;
+@property(nonatomic, assign)   OERectEdge    edge;
+@property(nonatomic, readonly) NSEdgeInsets  backgroundEdgeInsets;
 
 @end
