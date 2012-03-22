@@ -7,6 +7,7 @@
 //
 
 #import "OEMenuView.h"
+#import "OEMenuView+OEMenuAdditions.h"
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
 #import "NSImage+OEDrawingAdditions.h"
@@ -147,11 +148,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)OE_updateInsets
 {
-    if([self OE_isSubmenu] || _edge == OENoEdge) _backgroundEdgeInsets = OEMenuBackgroundNoEdgeInsets;
-    else if(_edge == OEMinXEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMinXEdgeInsets;
-    else if(_edge == OEMaxXEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMaxXEdgeInsets;
-    else if(_edge == OEMinYEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMinYEdgeInsets;
-    else if(_edge == OEMaxYEdge)                 _backgroundEdgeInsets = OEMenuBackgroundMaxYEdgeInsets;
+    _backgroundEdgeInsets = [isa OE_backgroundEdgeInsetsForEdge:([self OE_isSubmenu] ? OENoEdge : _edge)];
 }
 
 - (BOOL)acceptsFirstResponder
@@ -779,6 +776,22 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 {
     NSMenuItem *realHighlightedItem = [[_highlightedItem extraData] itemWithModifierMask:_lasKeyModifierMask];
     return ([realHighlightedItem isEnabled] && ![realHighlightedItem isSeparatorItem] ? realHighlightedItem : nil);
+}
+
+@end
+
+@implementation OEMenuView (OEMenuAdditions)
+
++ (NSEdgeInsets)OE_backgroundEdgeInsetsForEdge:(OERectEdge)edge
+{
+    switch(edge) {
+        case OEMinXEdge: return OEMenuBackgroundMinXEdgeInsets;
+        case OEMaxXEdge: return OEMenuBackgroundMaxXEdgeInsets;
+        case OEMinYEdge: return OEMenuBackgroundMinYEdgeInsets;
+        case OEMaxYEdge: return OEMenuBackgroundMaxYEdgeInsets;
+        case OENoEdge:
+        default:         return OEMenuBackgroundNoEdgeInsets;
+    }
 }
 
 @end

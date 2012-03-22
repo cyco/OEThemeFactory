@@ -8,11 +8,12 @@
 
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
+#import "OEMenuView+OEMenuAdditions.h"
 #import "OEPopUpButton.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 
-// Animation duration to fade the menu out
-static const CGFloat OEMenuFadeOutDuration = 0.075;
+static const CGFloat OEMenuFadeOutDuration = 0.075; // Animation duration to fade the menu out
+static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before menu interprets a click to mean a drag operation
 
 @interface OEMenu ()
 
@@ -201,6 +202,30 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
     if(![parentWindow isKindOfClass:[OEMenu class]] || [parentWindow isVisible]) [self orderFrontRegardless];
 }
 
++ (NSPoint)OE_locationInScreenForEvent:(NSEvent *)event
+{
+    const NSPoint locationInWindow = [event locationInWindow];
+    NSWindow *window               = [event window];
+    return window == nil ? locationInWindow : [window convertBaseToScreen:locationInWindow];
+}
+
++ (NSWindow *)OE_windowAtPoint:(NSPoint)point
+{
+    for(NSWindow *window in [NSApp orderedWindows])
+    {
+        if(NSPointInRect(point, [window frame])) return window;
+    }
+    return nil;
+}
+
+- (NSEvent *)OE_mockMouseEvent:(NSEvent *)event
+{
+    if([event window] == self || [[event window] isKindOfClass:[OEMenu class]]) return event;
+
+    const NSPoint location = [self convertScreenToBase:[isa OE_locationInScreenForEvent:event]];
+    return [NSEvent mouseEventWithType:[event type] location:location modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[self windowNumber] context:[event context] eventNumber:[event eventNumber] clickCount:[event clickCount] pressure:[event pressure]];
+}
+
 - (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent
 {
     id<NSMenuDelegate> delegate = [[_view menu] delegate];
@@ -208,47 +233,89 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 
     [self OE_showWindowForView:view];
 
-    const NSEventType type               = [initialEvent type];
-    NSEventType       oppositeMouseEvent = 0;
+    const NSEventType type         = [initialEvent type];
+    NSEventType       mouseUpEvent = 0;
     switch(type)
     {
         case NSLeftMouseDown:
-            oppositeMouseEvent = NSLeftMouseUp;
+            mouseUpEvent = NSLeftMouseUp;
             break;
         case NSRightMouseDown:
-            oppositeMouseEvent = NSRightMouseDown;
+            mouseUpEvent = NSRightMouseDown;
             break;
         case NSOtherMouseDown:
-            oppositeMouseEvent = NSOtherMouseDown;
+            mouseUpEvent = NSOtherMouseDown;
             break;
         default:
             break;
     }
 
+    OEMenu *menuWithMouseFocus = self; // Tracks menu that is currently under the cursor
+    BOOL    dragged            = NO;   // Identifies if the mouse has seen a drag operation
+
     NSEvent *event;
     while(!_closing && !_cancelTracking && (event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES]))
     {
         const NSEventType type = [event type];
-        if(type == oppositeMouseEvent && [event timestamp] - [initialEvent timestamp] > 1.0)
+        if(type == mouseUpEvent && (dragged || [event timestamp] - [initialEvent timestamp] > OEMenuClickDelay))
         {
-            const NSPoint locationInWindow = [event locationInWindow];
-            const NSPoint location = [self convertScreenToBase:[event window] == nil ? locationInWindow : [[event window] convertBaseToScreen:locationInWindow]];
-            NSEvent *mockEvent = [NSEvent mouseEventWithType:[event type] location:location modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[self windowNumber] context:[event context] eventNumber:[event eventNumber] clickCount:[event clickCount] pressure:[event pressure]];
-            [_view mouseUp:mockEvent];
+            // Forward the mouse up message to the menu with the current focus
+            [menuWithMouseFocus->_view mouseUp:[self OE_mockMouseEvent:event]];
+            continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+        }
+        else if((type == NSLeftMouseDragged) || (type == NSRightMouseDragged) || (type == NSOtherMouseDragged))
+        {
+            // Notify mouse up event that we've seen a mouse drag event
+            dragged = YES;
+
+            // Lets to figure which window is under the cursor. You would expect that [event window] would contain this information, when a mouse down
+            // operation is encountered, the windowing system will send all the events to the window that initiated the mouse down event until a mouse
+            // up event is reached.  Mouse drag events are only sent in between a mouse down and mouse up operation, therefore, [event window] does
+            // not have the information we really need.  We need to know which menu (or submenu) has the current focus.
+            const NSPoint  locationInScreen = [isa OE_locationInScreenForEvent:event];
+            NSWindow      *newWindowFocus   = [isa OE_windowAtPoint:locationInScreen];
+            if(menuWithMouseFocus != newWindowFocus)
+            {
+                // If the menu with the focus has changed, let the old menu know that the mouse has exited it's view
+                if(menuWithMouseFocus) [menuWithMouseFocus->_view mouseExited:[menuWithMouseFocus OE_mockMouseEvent:event]];
+                if([newWindowFocus isKindOfClass:[OEMenu class]])
+                {
+                    // Let the new menu know that the mouse has enterd it's view
+                    menuWithMouseFocus = (OEMenu *)newWindowFocus;
+                    [menuWithMouseFocus->_view mouseEntered:[menuWithMouseFocus OE_mockMouseEvent:event]];
+                }
+            }
+            else
+            {
+                // If there has been no change, then let the current menu know that the mouse has been dragged
+                [menuWithMouseFocus->_view mouseDragged:[menuWithMouseFocus OE_mockMouseEvent:event]];
+            }
+            continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+        }
+        else if((type == NSMouseMoved) || (type == NSMouseEntered))
+        {
+            // Lets keep track of which menu has the current focus. After the windowing system receives a mouse up event,
+            // it will forward any mouse position changes as mouse moved, entered, and exited messages, now [event window]
+            // communicates the correct menu (or submenu) that is under that is under the cursor.
+            if([[event window] isKindOfClass:[OEMenu class]]) menuWithMouseFocus = (OEMenu *)[event window];
         }
         else if((type == NSLeftMouseDown || type == NSRightMouseDown || type == NSOtherMouseDown) && ![[event window] isKindOfClass:isa])
         {
+            // If we are tracking the mouse after a mouse up operation and we detect
             [self cancelTracking];
+            continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
         }
         else if((type == NSKeyDown) || (type == NSKeyUp))
         {
+            // Key down messages should be sent to the deepest submenu that is open
             OEMenu *submenu = self;
             while(submenu->_submenu) submenu = submenu->_submenu;
             [submenu sendEvent:event];
-            continue;
+            continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
         }
         else if(type == NSFlagsChanged)
         {
+            // Flags changes should be sent to all submenu's so that they can be updated appropriately
             OEMenu *submenu = self;
             while(submenu)
             {
@@ -256,6 +323,7 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
                 submenu = submenu->_submenu;
             }
         }
+        // If we've gotten this far, then we need to forward the event to NSApp for additional / further processing
         [NSApp sendEvent:event];
     }
     [NSApp discardEventsMatchingMask:NSAnyEventMask beforeEvent:event];
@@ -291,7 +359,9 @@ static const CGFloat OEMenuFadeOutDuration = 0.075;
 
 - (void)OE_setClosing:(BOOL)closing
 {
-    _closing = YES;
+    OEMenu *supermenu = self;
+    while(supermenu->_supermenu) supermenu = supermenu->_supermenu;
+    supermenu->_closing = closing;
 }
 
 - (void)OE_setSubmenu:(NSMenu *)submenu

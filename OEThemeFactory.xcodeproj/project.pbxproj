@@ -77,6 +77,7 @@
 		EF910A6015025CA00071A0A8 /* OEButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEButton.h; sourceTree = "<group>"; };
 		EF910A6115025CA00071A0A8 /* OEButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEButton.m; sourceTree = "<group>"; };
 		EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toolbar_view_buttons.png; sourceTree = "<group>"; };
+		EFA3321015193F9F00DF3226 /* OEMenuView+OEMenuAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OEMenuView+OEMenuAdditions.h"; sourceTree = "<group>"; };
 		EFA53811150BC76E003D07A1 /* OEMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenuView.h; sourceTree = "<group>"; };
 		EFA53812150BC76E003D07A1 /* OEMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuView.m; sourceTree = "<group>"; };
 		EFA53814150BC814003D07A1 /* dark_menu_arrows_body.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_menu_arrows_body.png; sourceTree = "<group>"; };
@@ -178,6 +179,7 @@
 				EFEBDB6F151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.h */,
 				EFEBDB70151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m */,
 				EF0D7E4815164A9900070DBE /* OEMenu+OEMenuViewAdditions.h */,
+				EFA3321015193F9F00DF3226 /* OEMenuView+OEMenuAdditions.h */,
 			);
 			name = Menu;
 			sourceTree = "<group>";
