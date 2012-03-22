@@ -17,10 +17,12 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
 @interface OEMenu ()
 
+- (void)OE_setEdge:(OERectEdge)edge;
 - (void)OE_applicationNotification:(NSNotification *)notification;
 - (void)OE_menuWillShow:(NSNotification *)notification;
 - (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent;
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration;
+- (void)OE_calculateOriginInRelationshipToRect:(NSRect)rect;
 - (void)OE_calculateSubmenuOrigin;
 
 @end
@@ -31,8 +33,8 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 {
     OEMenu *result = [[self alloc] initWithContentRect:rect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
     [result setMenu:menu];
-    [result->_view setEdge:edge];
-    [result setContentSize:[result->_view size]];
+    [result OE_setEdge:edge];
+
     return result;
 }
 
@@ -56,15 +58,18 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
         const NSEdgeInsets edgeInsets = [menuView backgroundEdgeInsets];
 
-        NSPoint origin = titleRectInScreen.origin;
-        NSSize size    = [result frame].size;
+        NSPoint origin     = titleRectInScreen.origin;
+        NSSize  size        = [result frame].size;
+//        NSRect  screenFrame = [[result screen] visibleFrame];
 
         // TODO: Adjust origin based on the button's and menu item's shadows
         origin.x   -= edgeInsets.left + OEMenuItemTickMarkWidth - 1.0;              // Assumes 1px shadow + 1px border
         origin.y   -= NSMinY([[[menuView highlightedItem] extraData] frame]) + 2.0; // Assumes a 1px shadow + 1px border
         size.width  = buttonFrame.size.width + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right + edgeInsets.left + edgeInsets.right;
 
-        [result setFrame:(NSRect){ .origin = origin, .size = size } display:NO];
+        NSRect frame = (NSRect){ .origin = origin, .size = size };
+        // TODO: Adjust the frame so that no portion is hidden by the screen's visible frame
+        [result setFrame:frame display:NO];
         [result OE_showWindowForView:button withEvent:event];
     }
 }
@@ -80,38 +85,7 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
         OEMenuView *menuView = result->_view;
         [menuView display];
         [menuView setStyle:style];
-
-        // Calculate the top left point of the frame, this position is dependent on the edge that the arrow is visible on
-        const NSEdgeInsets edgeInsets = [menuView backgroundEdgeInsets];
-
-        NSPoint origin = rectInScreen.origin;
-        if(edge == OENoEdge)
-        {
-            origin = NSMakePoint(NSMinX(rectInScreen) - edgeInsets.left + 1.0, NSMinY(rectInScreen));
-        }
-        else
-        {
-            const NSRect bounds = [result convertRectToScreen:[menuView frame]];
-            switch(edge)
-            {
-                case OEMinXEdge:
-                    origin = NSMakePoint(NSMaxX(rectInScreen) - edgeInsets.left, NSMaxY(rectInScreen) - (NSMidY(rectInScreen) - NSMidY(bounds)));
-                    break;
-                case OEMaxXEdge:
-                    origin = NSMakePoint(NSMinX(rectInScreen) - NSWidth(bounds) + edgeInsets.right, NSMaxY(rectInScreen) - (NSMidY(rectInScreen) - NSMidY(bounds)));
-                    break;
-                case OEMinYEdge:
-                    origin = NSMakePoint(NSMinX(rectInScreen) + NSMidX(rectInScreen) - NSMidX(bounds), NSMaxY(rectInScreen) + NSHeight(bounds) - edgeInsets.bottom);
-                    break;
-                case OEMaxYEdge:
-                    origin = NSMakePoint(NSMinX(rectInScreen) + NSMidX(rectInScreen) - NSMidX(bounds), NSMinY(rectInScreen) - edgeInsets.top);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        [result setFrameTopLeftPoint:origin];
+        [result OE_calculateOriginInRelationshipToRect:rectInScreen];
         [result OE_showWindowForView:view withEvent:event];
     }
 }
@@ -141,6 +115,12 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)OE_setEdge:(OERectEdge)edge
+{
+    [_view setEdge:edge];
+    [self setContentSize:[_view size]];
 }
 
 - (void)orderWindow:(NSWindowOrderingMode)place relativeTo:(NSInteger)otherWin
@@ -344,6 +324,111 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
     };
 
     [NSAnimationContext runAnimationGroup:changes completionHandler:completionHandler];
+}
+
+- (void)OE_calculateOriginInRelationshipToRect:(NSRect)rect
+{
+    // Calculate the top left point of the frame, this position is dependent on the edge that the arrow is visible on
+    const OERectEdge   edge        = [_view edge];
+    const NSRect       screenFrame = [[self screen] visibleFrame];
+
+    NSPoint origin = NSZeroPoint;
+    NSSize  size   = [self frame].size;
+
+    // Calculates the origin for the specified edge
+    NSPoint (^originForEdge)(OERectEdge edge) =
+    ^ (OERectEdge edge)
+    {
+        const NSRect       bounds     = [self convertRectToScreen:[_view frame]];
+        const NSEdgeInsets edgeInsets = [OEMenuView OE_backgroundEdgeInsetsForEdge:edge];
+        switch(edge)
+        {
+            case OENoEdge:   return NSMakePoint(NSMinX(rect) - edgeInsets.left + 1.0, NSMinY(rect) - size.height);
+            case OEMinXEdge: return NSMakePoint(NSMaxX(rect) - edgeInsets.right + 1.0, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
+            case OEMaxXEdge: return NSMakePoint(NSMinX(rect) - NSWidth(bounds) + edgeInsets.left - 1.0, NSMaxY(rect) - (NSMidY(rect) - NSMidY(bounds)));
+            case OEMinYEdge: return NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMaxY(rect) + NSHeight(bounds) - edgeInsets.top - 1.0);
+            case OEMaxYEdge: return NSMakePoint(NSMinX(rect) + NSMidX(rect) - NSMidX(bounds), NSMinY(rect) + edgeInsets.bottom + 1.0);
+            default:         break;
+        }
+        return NSZeroPoint;
+    };
+
+    origin = originForEdge(edge);
+    if(edge == OENoEdge)
+    {
+        if(origin.x < NSMinX(screenFrame))                   origin.x  = 0.0;
+        else if(origin.x + size.width > NSMaxX(screenFrame)) origin.x -= size.width;
+
+        if(origin.y < NSMinY(screenFrame))                    origin.y = 0.0;
+        else if(origin.y + size.height > NSMaxY(screenFrame)) origin.y = NSMaxY(screenFrame) - size.height;
+    }
+    else
+    {
+        switch(edge)
+        {
+            case OEMinXEdge:
+            case OEMaxXEdge:
+                if(origin.x < NSMinX(screenFrame) || (origin.x + size.width > NSMaxX(screenFrame)))
+                {
+                    NSLog(@"Flip to the other side.");
+                    OERectEdge newEdge = edge == OEMinXEdge ? OEMaxXEdge : OEMinXEdge;
+                    origin = originForEdge(newEdge);
+
+                    if(origin.x < NSMinX(screenFrame) || origin.x + size.width > NSMaxX(screenFrame))
+                    {
+                        // TODO: Make view smaller
+                        NSLog(@"Make view smaller");
+                    }
+                    else
+                    {
+                        // Flip successful
+                        [self OE_setEdge:newEdge];
+                    }
+                }
+                if(origin.y < NSMinY(screenFrame) || origin.y > NSMaxY(screenFrame))
+                {
+                    // TODO: Adjust arrow's position
+                    if(origin.y < NSMinY(screenFrame) || origin.y > NSMaxY(screenFrame))
+                    {
+                        // TODO: Make view smaller
+                        NSLog(@"Mak view smaller");
+                    }
+                }
+                break;
+            case OEMinYEdge:
+            case OEMaxYEdge:
+                if(origin.x < NSMinX(screenFrame) || (origin.x + size.width > NSMaxX(screenFrame)))
+                {
+                    // TODO: Adjust arrow's position
+                    if(origin.x < NSMinX(screenFrame) || origin.x + size.width > NSMaxX(screenFrame))
+                    {
+                        // TODO: Make view smaller
+                        NSLog(@"Make view smaller");
+                    }
+                }
+                if(origin.y < NSMinY(screenFrame) || origin.y > NSMaxY(screenFrame))
+                {
+                    NSLog(@"Flip to the other side.");
+                    OERectEdge newEdge = edge == OEMinYEdge ? OEMaxYEdge : OEMinYEdge;
+                    origin = originForEdge(newEdge);
+
+                    if(origin.y < NSMinY(screenFrame) || origin.y > NSMaxY(screenFrame))
+                    {
+                        // TODO: Make view smaller
+                        NSLog(@"Make view smaller");
+                    }
+                    else
+                    {
+                        // Flip successful
+                        [self OE_setEdge:newEdge];
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    [self setFrameTopLeftPoint:origin];
 }
 
 - (void)OE_calculateSubmenuOrigin
