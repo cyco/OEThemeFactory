@@ -395,75 +395,78 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
     NSEvent *event;
     while(!_closing && !_cancelTracking && (event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES]))
     {
-        const NSEventType type = [event type];
-        if(type == mouseUpEvent && (dragged || [event timestamp] - [initialEvent timestamp] > OEMenuClickDelay))
+        @autoreleasepool
         {
-            // Forward the mouse up message to the menu with the current focus
-            [menuWithMouseFocus->_view mouseUp:[self OE_mockMouseEvent:event]];
-            continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
-        }
-        else if((type == NSLeftMouseDragged) || (type == NSRightMouseDragged) || (type == NSOtherMouseDragged))
-        {
-            // Notify mouse up event that we've seen a mouse drag event
-            dragged = YES;
-
-            // Lets to figure which window is under the cursor. You would expect that [event window] would contain this information, when a mouse down
-            // operation is encountered, the windowing system will send all the events to the window that initiated the mouse down event until a mouse
-            // up event is reached.  Mouse drag events are only sent in between a mouse down and mouse up operation, therefore, [event window] does
-            // not have the information we really need.  We need to know which menu (or submenu) has the current focus.
-            const NSPoint  locationInScreen = [isa OE_locationInScreenForEvent:event];
-            NSWindow      *newWindowFocus   = [isa OE_windowAtPoint:locationInScreen];
-            if(menuWithMouseFocus != newWindowFocus)
+            const NSEventType type = [event type];
+            if(type == mouseUpEvent && (dragged || [event timestamp] - [initialEvent timestamp] > OEMenuClickDelay))
             {
-                // If the menu with the focus has changed, let the old menu know that the mouse has exited it's view
-                if(menuWithMouseFocus) [menuWithMouseFocus->_view mouseExited:[menuWithMouseFocus OE_mockMouseEvent:event]];
-                if([newWindowFocus isKindOfClass:[OEMenu class]])
+                // Forward the mouse up message to the menu with the current focus
+                [menuWithMouseFocus->_view mouseUp:[self OE_mockMouseEvent:event]];
+                continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+            }
+            else if((type == NSLeftMouseDragged) || (type == NSRightMouseDragged) || (type == NSOtherMouseDragged))
+            {
+                // Notify mouse up event that we've seen a mouse drag event
+                dragged = YES;
+
+                // Lets to figure which window is under the cursor. You would expect that [event window] would contain this information, when a mouse down
+                // operation is encountered, the windowing system will send all the events to the window that initiated the mouse down event until a mouse
+                // up event is reached.  Mouse drag events are only sent in between a mouse down and mouse up operation, therefore, [event window] does
+                // not have the information we really need.  We need to know which menu (or submenu) has the current focus.
+                const NSPoint  locationInScreen = [isa OE_locationInScreenForEvent:event];
+                NSWindow      *newWindowFocus   = [isa OE_windowAtPoint:locationInScreen];
+                if(menuWithMouseFocus != newWindowFocus)
                 {
-                    // Let the new menu know that the mouse has enterd it's view
-                    menuWithMouseFocus = (OEMenu *)newWindowFocus;
-                    [menuWithMouseFocus->_view mouseEntered:[menuWithMouseFocus OE_mockMouseEvent:event]];
+                    // If the menu with the focus has changed, let the old menu know that the mouse has exited it's view
+                    if(menuWithMouseFocus) [menuWithMouseFocus->_view mouseExited:[menuWithMouseFocus OE_mockMouseEvent:event]];
+                    if([newWindowFocus isKindOfClass:[OEMenu class]])
+                    {
+                        // Let the new menu know that the mouse has enterd it's view
+                        menuWithMouseFocus = (OEMenu *)newWindowFocus;
+                        [menuWithMouseFocus->_view mouseEntered:[menuWithMouseFocus OE_mockMouseEvent:event]];
+                    }
+                }
+                else
+                {
+                    // If there has been no change, then let the current menu know that the mouse has been dragged
+                    [menuWithMouseFocus->_view mouseDragged:[menuWithMouseFocus OE_mockMouseEvent:event]];
+                }
+                continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+            }
+            else if((type == NSMouseMoved) || (type == NSMouseEntered))
+            {
+                // Lets keep track of which menu has the current focus. After the windowing system receives a mouse up event,
+                // it will forward any mouse position changes as mouse moved, entered, and exited messages, now [event window]
+                // communicates the correct menu (or submenu) that is under that is under the cursor.
+                if([[event window] isKindOfClass:[OEMenu class]]) menuWithMouseFocus = (OEMenu *)[event window];
+            }
+            else if((type == NSLeftMouseDown || type == NSRightMouseDown || type == NSOtherMouseDown) && ![[event window] isKindOfClass:isa])
+            {
+                // If we are tracking the mouse after a mouse up operation and we detect
+                [self cancelTracking];
+                continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+            }
+            else if((type == NSKeyDown) || (type == NSKeyUp))
+            {
+                // Key down messages should be sent to the deepest submenu that is open
+                OEMenu *submenu = self;
+                while(submenu->_submenu) submenu = submenu->_submenu;
+                [submenu sendEvent:event];
+                continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+            }
+            else if(type == NSFlagsChanged)
+            {
+                // Flags changes should be sent to all submenu's so that they can be updated appropriately
+                OEMenu *submenu = self;
+                while(submenu)
+                {
+                    [submenu sendEvent:event];
+                    submenu = submenu->_submenu;
                 }
             }
-            else
-            {
-                // If there has been no change, then let the current menu know that the mouse has been dragged
-                [menuWithMouseFocus->_view mouseDragged:[menuWithMouseFocus OE_mockMouseEvent:event]];
-            }
-            continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+            // If we've gotten this far, then we need to forward the event to NSApp for additional / further processing
+            [NSApp sendEvent:event];
         }
-        else if((type == NSMouseMoved) || (type == NSMouseEntered))
-        {
-            // Lets keep track of which menu has the current focus. After the windowing system receives a mouse up event,
-            // it will forward any mouse position changes as mouse moved, entered, and exited messages, now [event window]
-            // communicates the correct menu (or submenu) that is under that is under the cursor.
-            if([[event window] isKindOfClass:[OEMenu class]]) menuWithMouseFocus = (OEMenu *)[event window];
-        }
-        else if((type == NSLeftMouseDown || type == NSRightMouseDown || type == NSOtherMouseDown) && ![[event window] isKindOfClass:isa])
-        {
-            // If we are tracking the mouse after a mouse up operation and we detect
-            [self cancelTracking];
-            continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
-        }
-        else if((type == NSKeyDown) || (type == NSKeyUp))
-        {
-            // Key down messages should be sent to the deepest submenu that is open
-            OEMenu *submenu = self;
-            while(submenu->_submenu) submenu = submenu->_submenu;
-            [submenu sendEvent:event];
-            continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
-        }
-        else if(type == NSFlagsChanged)
-        {
-            // Flags changes should be sent to all submenu's so that they can be updated appropriately
-            OEMenu *submenu = self;
-            while(submenu)
-            {
-                [submenu sendEvent:event];
-                submenu = submenu->_submenu;
-            }
-        }
-        // If we've gotten this far, then we need to forward the event to NSApp for additional / further processing
-        [NSApp sendEvent:event];
     }
     [NSApp discardEventsMatchingMask:NSAnyEventMask beforeEvent:event];
     if([delegate respondsToSelector:@selector(menuDidClose:)]) [delegate menuDidClose:[_view menu]];
