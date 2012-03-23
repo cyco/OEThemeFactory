@@ -319,9 +319,16 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
     if(_cancelTracking) return;
     _cancelTracking = YES;
 
-    [_submenu OE_cancelTrackingWithFadeDuration:duration];
-    [_supermenu OE_cancelTrackingWithFadeDuration:duration];
-    [self OE_hideWindowWithFadeDuration:duration];
+    if(_supermenu)
+    {
+        OEMenu *supermenu = self;
+        while(supermenu->_supermenu) supermenu = supermenu->_supermenu;
+        [supermenu OE_cancelTrackingWithFadeDuration:duration];
+    }
+    else
+    {
+        [self OE_hideWindowWithFadeDuration:duration];
+    }
 }
 
 - (void)cancelTracking
@@ -474,11 +481,18 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration
 {
+    if(![self isVisible] || [self alphaValue] == 0.0) return;
+
     void (^changes)(NSAnimationContext *context) =
     ^ (NSAnimationContext *context)
     {
         [context setDuration:duration];
-        [[self animator] setAlphaValue:0.0];
+        OEMenu *submenu = self;
+        while(submenu)
+        {
+            [[submenu animator] setAlphaValue:0.0];
+            submenu = submenu->_submenu;
+        }
     };
 
     void (^completionHandler)(void) = ^{
