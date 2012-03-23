@@ -358,13 +358,19 @@ static NSMutableArray *sharedMenuStack;
     return window == nil ? locationInWindow : [window convertBaseToScreen:locationInWindow];
 }
 
-+ (NSWindow *)OE_windowAtPoint:(NSPoint)point
++ (OEMenu *)OE_menuAtPoint:(NSPoint)point
 {
-    for(NSWindow *window in [NSApp orderedWindows])
+    __block OEMenu *result = nil;
+    [sharedMenuStack enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:
+     ^ (OEMenu *obj, NSUInteger idx, BOOL *stop)
     {
-        if(NSPointInRect(point, [window frame])) return window;
-    }
-    return nil;
+        if(NSPointInRect(point, [obj frame]))
+        {
+            result = obj;
+            *stop = YES;
+        }
+    }];
+    return result;
 }
 
 - (NSEvent *)OE_mockMouseEvent:(NSEvent *)event
@@ -422,17 +428,17 @@ static NSMutableArray *sharedMenuStack;
                 // Lets to figure which window is under the cursor. You would expect that [event window] would contain this information, when a mouse down
                 // operation is encountered, the windowing system will send all the events to the window that initiated the mouse down event until a mouse
                 // up event is reached.  Mouse drag events are only sent in between a mouse down and mouse up operation, therefore, [event window] does
-                // not have the information we really need.  We need to know which menu (or submenu) has the current focus.
+                // not have the information we really need.
                 const NSPoint  locationInScreen = [isa OE_locationInScreenForEvent:event];
-                NSWindow      *newWindowFocus   = [isa OE_windowAtPoint:locationInScreen];
-                if(menuWithMouseFocus != newWindowFocus)
+                OEMenu        *newMenuFocus     = [isa OE_menuAtPoint:locationInScreen];
+                if(menuWithMouseFocus != newMenuFocus)
                 {
                     // If the menu with the focus has changed, let the old menu know that the mouse has exited it's view
                     if(menuWithMouseFocus) [menuWithMouseFocus->_view mouseExited:[menuWithMouseFocus OE_mockMouseEvent:event]];
-                    if([newWindowFocus isKindOfClass:[OEMenu class]])
+                    if([newMenuFocus isKindOfClass:[OEMenu class]])
                     {
                         // Let the new menu know that the mouse has enterd it's view
-                        menuWithMouseFocus = (OEMenu *)newWindowFocus;
+                        menuWithMouseFocus = newMenuFocus;
                         [menuWithMouseFocus->_view mouseEntered:[menuWithMouseFocus OE_mockMouseEvent:event]];
                     }
                 }
