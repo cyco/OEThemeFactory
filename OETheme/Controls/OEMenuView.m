@@ -397,7 +397,6 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     _needsLayout = YES;
     [self setNeedsDisplay:YES];
 }
-
 - (void)OE_layoutIfNeeded
 {
     if(!_needsLayout) return;
@@ -414,37 +413,67 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     }
     else
     {
-        _borderPath = [NSBezierPath bezierPath];
+        NSPoint point1;
+        NSPoint point2;
+        NSPoint point3;
 
+        CGFloat v1, v2;
         switch(_edge)
         {
             case OEMinXEdge:
-                [_borderPath moveToPoint:NSMakePoint(NSMinX(bounds),                             NSMidY(bounds) + OEMaxXEdgeArrowSize.height / 2)];
-                [_borderPath lineToPoint:NSMakePoint(NSMinX(bounds) - OEMaxXEdgeArrowSize.width, NSMidY(bounds))];
-                [_borderPath lineToPoint:NSMakePoint(NSMinX(bounds),                             NSMidY(bounds) - OEMaxXEdgeArrowSize.height / 2)];
-                [_borderPath lineToPoint:NSMakePoint(NSMinX(bounds),                             NSMidY(bounds) + OEMaxXEdgeArrowSize.height)];
-                break;
             case OEMaxXEdge:
-                [_borderPath moveToPoint:NSMakePoint(NSMaxX(bounds),                             NSMidY(bounds) + OEMinXEdgeArrowSize.height / 2)];
-                [_borderPath lineToPoint:NSMakePoint(NSMaxX(bounds) + OEMinXEdgeArrowSize.width, NSMidY(bounds))];
-                [_borderPath lineToPoint:NSMakePoint(NSMaxX(bounds),                             NSMidY(bounds) - OEMinXEdgeArrowSize.height / 2)];
-                [_borderPath lineToPoint:NSMakePoint(NSMaxX(bounds),                             NSMidY(bounds) + OEMinXEdgeArrowSize.height)];
+                if(_edge == OEMinXEdge)
+                {
+                    _rectForArrow.size     = OEMinXEdgeArrowSize;
+                    _rectForArrow.origin.x = _attachedPoint.x +_backgroundEdgeInsets.left - _rectForArrow.size.width;
+                    v1 = NSMaxX(_rectForArrow);
+                    v2 = NSMaxX(_rectForArrow);
+                }
+                else
+                {
+                    _rectForArrow.size     = OEMaxXEdgeArrowSize;
+                    _rectForArrow.origin.x = _attachedPoint.x - _backgroundEdgeInsets.right;
+                    v1                     = NSMinX(_rectForArrow);
+                    v2                     = NSMaxX(_rectForArrow);
+                }
+                _rectForArrow.origin.y = _attachedPoint.y - floor((abs(_backgroundEdgeInsets.top - _backgroundEdgeInsets.bottom) + _rectForArrow.size.height) / 2.0);
+
+                point1 = NSMakePoint(v1, NSMinY(_rectForArrow));
+                point2 = NSMakePoint(v2, floor(NSMidY(_rectForArrow)));
+                point3 = NSMakePoint(v1, NSMaxY(_rectForArrow));
                 break;
             case OEMinYEdge:
-                [_borderPath moveToPoint:NSMakePoint(NSMidX(bounds) - OEMaxYEdgeArrowSize.width / 2, NSMinY(bounds))];
-                [_borderPath lineToPoint:NSMakePoint(NSMidX(bounds),                                 NSMinY(bounds) - OEMaxYEdgeArrowSize.height)];
-                [_borderPath lineToPoint:NSMakePoint(NSMidX(bounds) + OEMaxYEdgeArrowSize.width / 2, NSMinY(bounds))];
-                [_borderPath lineToPoint:NSMakePoint(NSMidX(bounds) - OEMaxYEdgeArrowSize.width / 2, NSMinY(bounds))];
-                break;
             case OEMaxYEdge:
-                [_borderPath moveToPoint:NSMakePoint(NSMidX(bounds) - OEMinYEdgeArrowSize.width / 2, NSMaxY(bounds))];
-                [_borderPath lineToPoint:NSMakePoint(NSMidX(bounds),                                 NSMaxY(bounds) + OEMinYEdgeArrowSize.height)];
-                [_borderPath lineToPoint:NSMakePoint(NSMidX(bounds) + OEMinYEdgeArrowSize.width / 2, NSMaxY(bounds))];
-                [_borderPath lineToPoint:NSMakePoint(NSMidX(bounds) - OEMinYEdgeArrowSize.width / 2, NSMaxY(bounds))];
+                if(_edge == OEMinYEdge)
+                {
+                    _rectForArrow.size     = OEMinYEdgeArrowSize;
+                    _rectForArrow.origin.y = _attachedPoint.y + _backgroundEdgeInsets.bottom - _rectForArrow.size.height;
+                    v1 = NSMaxY(_rectForArrow);
+                    v2 = NSMinY(_rectForArrow);
+                }
+                else
+                {
+                    _rectForArrow.size     = OEMinYEdgeArrowSize;
+                    _rectForArrow.origin.y = _attachedPoint.y - _backgroundEdgeInsets.top;
+                    v1                     = NSMinY(_rectForArrow);
+                    v2                     = NSMaxY(_rectForArrow);
+                }
+                _rectForArrow.origin.x = _attachedPoint.x - floor((abs(_backgroundEdgeInsets.left - _backgroundEdgeInsets.right) + _rectForArrow.size.width) / 2.0);
+
+                point1 = NSMakePoint(NSMinX(_rectForArrow),        v1);
+                point2 = NSMakePoint(floor(NSMidX(_rectForArrow)), v2);
+                point3 = NSMakePoint(NSMaxX(_rectForArrow),        v1);
                 break;
-            default: break;
+
+            case OENoEdge:
+                break;
         }
 
+        _borderPath = [NSBezierPath bezierPath];
+        [_borderPath moveToPoint:point1];
+        [_borderPath lineToPoint:point2];
+        [_borderPath lineToPoint:point3];
+        [_borderPath lineToPoint:point1];
         [_borderPath appendBezierPathWithRoundedRect:bounds xRadius:2 yRadius:2];
     }
 
@@ -508,6 +537,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
         [_backgroundColor setFill];
         [_borderPath fill];
     }
+
     [_backgroundGradient drawInBezierPath:_borderPath angle:90];
 
     if([self OE_isSubmenu] || _edge == OENoEdge)
@@ -522,22 +552,22 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
         switch(_edge)
         {
             case OEMaxXEdge:
+                arrowRect.origin.y     = NSMidY(_rectForArrow) - NSMidY(arrowRect);
                 arrowRect.origin.x     = NSMaxX(borderRect) - NSWidth(arrowRect);
-                arrowRect.origin.y     = NSMidY(borderRect) - NSMidY(arrowRect);
                 borderRect.size.width -= OEMinXEdgeArrowSize.width - 1.0;
                 break;
             case OEMinXEdge:
-                arrowRect.origin.y     = NSMidY(borderRect) - NSMidY(arrowRect);
+                arrowRect.origin.y     = NSMidY(_rectForArrow) - NSMidY(arrowRect);
                 borderRect.origin.x   += OEMaxXEdgeArrowSize.width - 1.0;
                 borderRect.size.width -= OEMaxXEdgeArrowSize.width - 1.0;
                 break;
             case OEMaxYEdge:
+                arrowRect.origin.x      = NSMidX(_rectForArrow) - NSMidX(arrowRect);
                 arrowRect.origin.y      = NSMaxY(borderRect) - NSHeight(arrowRect);
-                arrowRect.origin.x      = NSMidX(borderRect) - NSMidX(arrowRect);
                 borderRect.size.height -= OEMinYEdgeArrowSize.height - 1.0;
                 break;
             case OEMinYEdge:
-                arrowRect.origin.x      = NSMidX(borderRect) - NSMidX(arrowRect);
+                arrowRect.origin.x      = NSMidX(_rectForArrow) - NSMidX(arrowRect);
                 borderRect.origin.y    += OEMaxYEdgeArrowSize.height - 1.0;
                 borderRect.size.height -= OEMaxYEdgeArrowSize.height - 1.0;
                 break;
@@ -776,6 +806,18 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 {
     NSMenuItem *realHighlightedItem = [[_highlightedItem extraData] itemWithModifierMask:_lasKeyModifierMask];
     return ([realHighlightedItem isEnabled] && ![realHighlightedItem isSeparatorItem] ? realHighlightedItem : nil);
+}
+
+- (void)setAttachedPoint:(NSPoint)attachedPoint
+{
+    if(NSEqualPoints(_attachedPoint, attachedPoint)) return;
+    _attachedPoint = attachedPoint;
+    [self OE_setNeedsLayout];
+}
+
+- (NSPoint)attachedPoint
+{
+    return _attachedPoint;
 }
 
 @end

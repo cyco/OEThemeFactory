@@ -31,6 +31,8 @@ typedef enum _OERectEdge
     OEMenuStyle   _style;               // Menu style to use
     OERectEdge    _edge;                // The arrow's edge
     NSBezierPath *_borderPath;          // The path of the background image (to include the arrow)
+    NSPoint       _attachedPoint;
+    NSRect        _rectForArrow;
 
     NSTrackingArea   *_trackingArea;    // Tracking area
 
@@ -68,5 +70,6 @@ typedef enum _OERectEdge
 @property(nonatomic, assign)   OEMenuStyle   style;
 @property(nonatomic, assign)   OERectEdge    edge;
 @property(nonatomic, readonly) NSEdgeInsets  backgroundEdgeInsets;
+@property(nonatomic, assign)   NSPoint       attachedPoint;
 
 @end

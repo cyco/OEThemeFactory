@@ -23,6 +23,7 @@
     __unsafe_unretained OEMenu *_supermenu;
     OEMenu                     *_submenu;
     NSTimer                    *_showSubmenuTimer;
+    BOOL                        _submenuOnAlternateSide;
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event;
