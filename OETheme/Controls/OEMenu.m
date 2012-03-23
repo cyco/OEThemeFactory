@@ -28,6 +28,8 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
 @end
 
+static NSMutableArray *sharedMenuStack;
+
 @implementation OEMenu
 
 + (OEMenu *)popUpContextMenuWithMenu:(NSMenu *)menu withRect:(NSRect)rect
@@ -78,6 +80,11 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
 - (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)aStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag screen:(NSScreen *)screen
 {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedMenuStack = [NSMutableArray array];
+    });
+
     if((self = [super initWithContentRect:contentRect styleMask:aStyle backing:bufferingType defer:flag screen:screen]))
     {
         _view = [[OEMenuView alloc] initWithFrame:[[self contentView] bounds]];
@@ -90,10 +97,6 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
         [self setHasShadow:NO];
         [self setReleasedWhenClosed:YES];
         [self setCollectionBehavior:NSWindowCollectionBehaviorTransient | NSWindowCollectionBehaviorIgnoresCycle];
-
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationNotification:) name:NSApplicationDidResignActiveNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationNotification:) name:NSApplicationDidHideNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuWillShow:) name:NSMenuDidBeginTrackingNotification object:nil];
     }
     return self;
 }
@@ -291,12 +294,6 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
     }
 }
 
-- (void)removeChildWindow:(NSWindow *)childWin
-{
-    if(childWin == _submenu) _submenu = nil;
-    [super removeChildWindow:childWin];
-}
-
 - (void)setMenu:(NSMenu *)menu
 {
     [super setMenu:menu];
@@ -319,11 +316,9 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
     if(_cancelTracking) return;
     _cancelTracking = YES;
 
-    if(_supermenu)
+    if(self != [sharedMenuStack objectAtIndex:0])
     {
-        OEMenu *supermenu = self;
-        while(supermenu->_supermenu) supermenu = supermenu->_supermenu;
-        [supermenu OE_cancelTrackingWithFadeDuration:duration];
+        [[sharedMenuStack objectAtIndex:0] OE_cancelTrackingWithFadeDuration:duration];
     }
     else
     {
@@ -343,8 +338,16 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
 - (void)OE_showWindowForView:(NSView *)view
 {
+    [sharedMenuStack addObject:self];
+    if([sharedMenuStack count] == 1)
+    {
+        // We only need to register for these notifications once, so just do it to the first menu that becomes visible
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationNotification:) name:NSApplicationDidResignActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationNotification:) name:NSApplicationDidHideNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuWillShow:) name:NSMenuDidBeginTrackingNotification object:nil];
+    }
+
     NSWindow *parentWindow = [view window];
-    [parentWindow addChildWindow:self ordered:NSWindowAbove];
     if(![parentWindow isKindOfClass:[OEMenu class]] || [parentWindow isVisible]) [self orderFrontRegardless];
 }
 
@@ -456,20 +459,13 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
             else if((type == NSKeyDown) || (type == NSKeyUp))
             {
                 // Key down messages should be sent to the deepest submenu that is open
-                OEMenu *submenu = self;
-                while(submenu->_submenu) submenu = submenu->_submenu;
-                [submenu sendEvent:event];
+                [[sharedMenuStack lastObject] sendEvent:event];
                 continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
             }
             else if(type == NSFlagsChanged)
             {
                 // Flags changes should be sent to all submenu's so that they can be updated appropriately
-                OEMenu *submenu = self;
-                while(submenu)
-                {
-                    [submenu sendEvent:event];
-                    submenu = submenu->_submenu;
-                }
+                [sharedMenuStack makeObjectsPerformSelector:@selector(sendEvent:) withObject:event];
             }
             // If we've gotten this far, then we need to forward the event to NSApp for additional / further processing
             [NSApp sendEvent:event];
@@ -483,20 +479,23 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 {
     if(![self isVisible] || [self alphaValue] == 0.0) return;
 
+    NSUInteger  index = [sharedMenuStack indexOfObject:self];
+    NSUInteger  len   = [sharedMenuStack count] - index;
+    NSArray    *menus = [sharedMenuStack objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index, len)]];
+
     void (^changes)(NSAnimationContext *context) =
     ^ (NSAnimationContext *context)
     {
         [context setDuration:duration];
-        OEMenu *submenu = self;
-        while(submenu)
-        {
-            [[submenu animator] setAlphaValue:0.0];
-            submenu = submenu->_submenu;
-        }
+        [menus enumerateObjectsUsingBlock:
+         ^ (OEMenu *obj, NSUInteger idx, BOOL *stop)
+         {
+             [[obj animator] setAlphaValue:0.0];
+         }];
     };
 
     void (^completionHandler)(void) = ^{
-        [[self parentWindow] removeChildWindow:self];
+        [sharedMenuStack removeObjectsInArray:menus];
     };
 
     [NSAnimationContext runAnimationGroup:changes completionHandler:completionHandler];
@@ -508,9 +507,8 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
 - (void)OE_setClosing:(BOOL)closing
 {
-    OEMenu *supermenu = self;
-    while(supermenu->_supermenu) supermenu = supermenu->_supermenu;
-    supermenu->_closing = closing;
+    OEMenu *topMenu = [sharedMenuStack objectAtIndex:0];
+    if(topMenu) topMenu->_closing = closing;
 }
 
 - (void)OE_setSubmenu:(NSMenu *)submenu
