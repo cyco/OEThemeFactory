@@ -499,9 +499,10 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 - (void)OE_setSubmenu:(NSMenu *)submenu
 {
     if([_submenu menu] == submenu) return;
+    [_submenu OE_hideWindowWithoutAnimation];
+
     if(submenu == nil)
     {
-        [_submenu OE_hideWindowWithFadeDuration:OEMenuFadeOutDuration];
         _submenu = nil;
         return;
     }
