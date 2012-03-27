@@ -508,6 +508,7 @@ static NSMutableArray *sharedMenuStack;
                 // Flags changes should be sent to all submenu's so that they can be updated appropriately
                 [sharedMenuStack makeObjectsPerformSelector:@selector(sendEvent:) withObject:event];
             }
+
             // If we've gotten this far, then we need to forward the event to NSApp for additional / further processing
             [NSApp sendEvent:event];
         }
@@ -520,10 +521,14 @@ static NSMutableArray *sharedMenuStack;
 
 @implementation OEMenu (OEMenuViewAdditions)
 
-- (void)OE_setClosing:(BOOL)closing
++ (void)OE_setClosing:(BOOL)closing
 {
-    OEMenu *topMenu = [sharedMenuStack objectAtIndex:0];
-    if(topMenu) topMenu->_closing = closing;
+    ((OEMenu *)[sharedMenuStack objectAtIndex:0])->_closing = closing;
+}
+
++ (BOOL)OE_closing
+{
+    return ((OEMenu *)[sharedMenuStack objectAtIndex:0])->_closing;
 }
 
 - (void)OE_setSubmenu:(NSMenu *)submenu

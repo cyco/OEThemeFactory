@@ -15,9 +15,11 @@ extern const NSEdgeInsets OEMenuContentEdgeInsets;
 
 @interface OEMenu (OEMenuViewAdditions)
 
++ (void)OE_setClosing:(BOOL)closing;
++ (BOOL)OE_closing;
+
 - (void)OE_cancelTrackingWithCompletionHandler:(void (^)(void))completionHandler;
 - (void)OE_hideWindowWithoutAnimation;
-- (void)OE_setClosing:(BOOL)closing;
 - (void)OE_setSubmenu:(NSMenu *)submenu;
 - (OEMenu *)OE_submenu;
 - (OEMenuView *)OE_view;

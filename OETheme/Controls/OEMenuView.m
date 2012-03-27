@@ -167,37 +167,37 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)mouseEntered:(NSEvent *)theEvent
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
     [self OE_performAction];
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseExited:(NSEvent *)theEvent
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)flagsChanged:(NSEvent *)theEvent
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
 
     // Figure out if any of the modifier flags that we are interested have changed
     NSUInteger modiferFlags = [theEvent modifierFlags] & _keyModifierMask;
@@ -211,7 +211,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent
 {
-    if(_closing) return YES;
+    if([OEMenu OE_closing]) return YES;
 
     // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
     if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
@@ -226,7 +226,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveUp:(id)sender
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
 
     // There is nothing to do if there are no items
     const NSInteger count = [[_menu itemArray] count];
@@ -253,7 +253,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveDown:(id)sender
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
 
     // There is nothing to do if there are no items
     const NSInteger count = [[_menu itemArray] count];
@@ -280,13 +280,13 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveLeft:(id)sender
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
     if([self OE_isSubmenu]) [(OEMenu *)[self window] OE_hideWindowWithoutAnimation];
 }
 
 - (void)moveRight:(id)sender
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
 
     OEMenu *submenu = [(OEMenu *)[self window] OE_submenu];
     if([_highlightedItem hasSubmenu] && [submenu menu] != [_highlightedItem submenu])
@@ -299,7 +299,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)cancelOperation:(id)sender
 {
-    if(_closing) return;
+    if([OEMenu OE_closing]) return;
     [self OE_cancelTracking];
 }
 
@@ -346,10 +346,9 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)OE_performAction
 {
-    if([[self highlightedItem] hasSubmenu]) return;
+    if([OEMenu OE_closing] || [[self highlightedItem] hasSubmenu]) return;
 
-    _closing = YES;
-    [(OEMenu *)[self window] OE_setClosing:YES];
+    [OEMenu OE_setClosing:YES];
 
     if([self highlightedItem] != nil && ![[self highlightedItem] isSeparatorItem])
     {
