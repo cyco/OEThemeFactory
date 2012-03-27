@@ -294,6 +294,12 @@ static NSMutableArray *sharedMenuStack;
     }
 }
 
+- (void)removeChildWindow:(NSWindow *)childWin
+{
+    if(childWin == _submenu) _submenu = nil;
+    [super removeChildWindow:childWin];
+}
+
 - (void)setMenu:(NSMenu *)menu
 {
     [super setMenu:menu];
@@ -348,6 +354,7 @@ static NSMutableArray *sharedMenuStack;
     }
 
     NSWindow *parentWindow = [view window];
+    [parentWindow addChildWindow:self ordered:NSWindowAbove];
     if(![parentWindow isKindOfClass:[OEMenu class]] || [parentWindow isVisible]) [self orderFrontRegardless];
 }
 
@@ -501,6 +508,7 @@ static NSMutableArray *sharedMenuStack;
     };
 
     void (^completionHandler)(void) = ^{
+        [[self parentWindow] removeChildWindow:self];
         [sharedMenuStack removeObjectsInArray:menus];
     };
 
