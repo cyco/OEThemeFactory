@@ -22,7 +22,6 @@
 
     __unsafe_unretained OEMenu *_supermenu;
     OEMenu                     *_submenu;
-    NSTimer                    *_showSubmenuTimer;
     BOOL                        _submenuOnAlternateSide;
 }
 
