@@ -23,8 +23,8 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
 - (void)OE_applicationNotification:(NSNotification *)notification;
 - (void)OE_menuWillShow:(NSNotification *)notification;
+- (void)OE_hideWindowWithFadeDuration:(CGFloat)duration completionHandler:(void (^)(void))completionHandler;
 - (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent;
-- (void)OE_hideWindowWithFadeDuration:(CGFloat)duration;
 
 @end
 
@@ -317,29 +317,57 @@ static NSMutableArray *sharedMenuStack;
     [self cancelTracking];
 }
 
-- (void)OE_cancelTrackingWithFadeDuration:(CGFloat)duration
+- (void)OE_hideWindowWithFadeDuration:(CGFloat)duration completionHandler:(void (^)(void))completionHandler
+{
+    if(![self isVisible] || [self alphaValue] == 0.0) return;
+
+    NSUInteger  index = [sharedMenuStack indexOfObject:self];
+    NSUInteger  len   = [sharedMenuStack count] - index;
+    NSArray    *menus = [sharedMenuStack objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index, len)]];
+
+    void (^changes)(NSAnimationContext *context) =
+    ^ (NSAnimationContext *context)
+    {
+        [context setDuration:duration];
+        [menus enumerateObjectsUsingBlock:
+         ^ (OEMenu *obj, NSUInteger idx, BOOL *stop)
+         {
+             [[obj animator] setAlphaValue:0.0];
+         }];
+    };
+
+    void (^fireCompletionHandler)(void) = ^{
+        if(completionHandler) completionHandler();
+        [[self parentWindow] removeChildWindow:self];
+        [sharedMenuStack removeObjectsInArray:menus];
+    };
+
+    [NSAnimationContext runAnimationGroup:changes completionHandler:fireCompletionHandler];
+}
+
+- (void)OE_cancelTrackingWithFadeDuration:(CGFloat)duration completionHandler:(void (^)(void))completionHandler
 {
     if(_cancelTracking) return;
     _cancelTracking = YES;
 
     if(self != [sharedMenuStack objectAtIndex:0])
     {
-        [[sharedMenuStack objectAtIndex:0] OE_cancelTrackingWithFadeDuration:duration];
+        [[sharedMenuStack objectAtIndex:0] OE_cancelTrackingWithFadeDuration:duration completionHandler:completionHandler];
     }
     else
     {
-        [self OE_hideWindowWithFadeDuration:duration];
+        [self OE_hideWindowWithFadeDuration:duration completionHandler:completionHandler];
     }
 }
 
 - (void)cancelTracking
 {
-    [self OE_cancelTrackingWithFadeDuration:OEMenuFadeOutDuration];
+    [self OE_cancelTrackingWithFadeDuration:OEMenuFadeOutDuration completionHandler:nil];
 }
 
 - (void)cancelTrackingWithoutAnimation
 {
-    [self OE_cancelTrackingWithFadeDuration:0.0];
+    [self OE_cancelTrackingWithFadeDuration:0.0 completionHandler:nil];
 }
 
 - (void)OE_showWindowForView:(NSView *)view
@@ -488,33 +516,6 @@ static NSMutableArray *sharedMenuStack;
     if([delegate respondsToSelector:@selector(menuDidClose:)]) [delegate menuDidClose:[_view menu]];
 }
 
-- (void)OE_hideWindowWithFadeDuration:(CGFloat)duration
-{
-    if(![self isVisible] || [self alphaValue] == 0.0) return;
-
-    NSUInteger  index = [sharedMenuStack indexOfObject:self];
-    NSUInteger  len   = [sharedMenuStack count] - index;
-    NSArray    *menus = [sharedMenuStack objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index, len)]];
-
-    void (^changes)(NSAnimationContext *context) =
-    ^ (NSAnimationContext *context)
-    {
-        [context setDuration:duration];
-        [menus enumerateObjectsUsingBlock:
-         ^ (OEMenu *obj, NSUInteger idx, BOOL *stop)
-         {
-             [[obj animator] setAlphaValue:0.0];
-         }];
-    };
-
-    void (^completionHandler)(void) = ^{
-        [[self parentWindow] removeChildWindow:self];
-        [sharedMenuStack removeObjectsInArray:menus];
-    };
-
-    [NSAnimationContext runAnimationGroup:changes completionHandler:completionHandler];
-}
-
 @end
 
 @implementation OEMenu (OEMenuViewAdditions)
@@ -560,7 +561,12 @@ static NSMutableArray *sharedMenuStack;
 
 - (void)OE_hideWindowWithoutAnimation
 {
-    [self OE_hideWindowWithFadeDuration:0.0];
+    [self OE_hideWindowWithFadeDuration:0.0 completionHandler:nil];
+}
+
+- (void)OE_cancelTrackingWithCompletionHandler:(void (^)(void))completionHandler
+{
+    [self OE_cancelTrackingWithFadeDuration:OEMenuFadeOutDuration completionHandler:completionHandler];
 }
 
 @end

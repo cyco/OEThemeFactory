@@ -308,9 +308,15 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     [(OEMenu *)[self window] cancelTracking];
 }
 
+- (void)OE_cancelTrackingWithCompletionHandler:(void (^)(void))completionHandler
+{
+    [(OEMenu *)[self window] OE_cancelTrackingWithCompletionHandler:completionHandler];
+}
+
 - (void)OE_flashItem:(NSTimer *)sender
 {
-    NSMenuItem *item = [sender userInfo];
+    NSMenuItem *item            = [sender userInfo];
+    NSMenuItem *highlightedItem = [self highlightedItem];
     [self setHighlightedItem:item];
 
     [_flashTimer invalidate];
@@ -323,7 +329,18 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     }
     else
     {
-        [self OE_cancelTracking];
+        OEPopUpButtonCell *cell = [highlightedItem target];
+        if([cell isKindOfClass:[NSPopUpButtonCell class]])
+        {
+            [self OE_cancelTrackingWithCompletionHandler:^{
+                if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:highlightedItem];
+                [NSApp sendAction:[highlightedItem action] to:[highlightedItem target] from:highlightedItem];
+            }];
+        }
+        else
+        {
+            [self OE_cancelTracking];
+        }
     }
 }
 
@@ -336,10 +353,6 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
     if([self highlightedItem] != nil && ![[self highlightedItem] isSeparatorItem])
     {
-        OEPopUpButtonCell *cell = [[self highlightedItem] target];
-        if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:[self highlightedItem]];
-        [NSApp sendAction:[[self highlightedItem] action] to:[[self highlightedItem] target] from:[self highlightedItem]];
-
         _flashTimer = [NSTimer timerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:[self highlightedItem] repeats:NO];
         [[NSRunLoop currentRunLoop] addTimer:_flashTimer forMode:NSDefaultRunLoopMode];
         [self setHighlightedItem:nil];
