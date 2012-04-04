@@ -258,7 +258,8 @@ static NSMutableArray *sharedMenuStack;
         return 0.0;
     };
 
-    NSRect frame = { .origin = { .x = xForEdge(_submenuOnAlternateSide ? OEMinXEdge : OEMaxXEdge), .y = NSMaxY(rectInScreen) - size.height + OEMenuContentEdgeInsets.top + edgeInsets.top }, .size = size };
+    OERectEdge edge = ([_view edge] == OENoEdge ? OEMaxXEdge : [_view edge]);
+    NSRect frame = { .origin = { .x = xForEdge(edge), .y = NSMaxY(rectInScreen) - size.height + OEMenuContentEdgeInsets.top + edgeInsets.top }, .size = size };
 
     // Adjust the frame's dimensions not to be bigger than the screen
     frame.size.height = MIN(NSHeight(frame), NSHeight(screenFrame));
@@ -269,18 +270,18 @@ static NSMutableArray *sharedMenuStack;
     {
         // Flip to the other side
         frame.origin.x = xForEdge(OEMaxXEdge);
-        _submenuOnAlternateSide = NO;
+        edge = OEMaxXEdge;
     }
     else if(NSMaxX(frame) > NSMaxX(screenFrame))
     {
         // Flip to the other side
         frame.origin.x = xForEdge(OEMinXEdge);
-        _submenuOnAlternateSide = YES;
+        edge = OEMinXEdge;
     }
+    [_submenu->_view setEdge:edge];
 
     frame.origin.y = MIN(MAX(NSMinY(frame), NSMinY(screenFrame)), NSMaxY(screenFrame) - NSHeight(frame));
 
-    _submenu->_submenuOnAlternateSide = _submenuOnAlternateSide;
     [_submenu setFrame:frame display:[self isVisible]];
 }
 

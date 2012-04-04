@@ -130,7 +130,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     _menuItemAttributes = [[OETheme sharedTheme] themeTextAttributesForKey:[styleKeyPrefix stringByAppendingString:@"item"]];
     _submenuArrow       = [[OETheme sharedTheme] themeImageForKey:[styleKeyPrefix stringByAppendingString:@"submenu_arrow"]];
 
-    if(_edge == OENoEdge)
+    if([self OE_isSubmenu] || _edge == OENoEdge)
     {
         _arrowImage = nil;
     }
@@ -409,6 +409,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     _needsLayout = YES;
     [self setNeedsDisplay:YES];
 }
+
 - (void)OE_layoutIfNeeded
 {
     if(!_needsLayout) return;
@@ -785,9 +786,13 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     if(_edge != edge)
     {
         _edge = edge;
-        [self OE_setupCachedThemeItems];
-        [self OE_updateInsets];
-        [self OE_setNeedsLayout];
+
+        if(![self OE_isSubmenu])
+        {
+            [self OE_setupCachedThemeItems];
+            [self OE_updateInsets];
+            [self OE_setNeedsLayout];
+        }
     }
 }
 
