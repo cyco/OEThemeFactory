@@ -248,7 +248,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
         }
     }
 
-    [self setHighlightedItemWithoutExpandingSubmenu:item];
+    [self setHighlightedItem:item];
 }
 
 - (void)moveDown:(id)sender
@@ -275,7 +275,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
         }
     }
 
-    [self setHighlightedItemWithoutExpandingSubmenu:item];
+    [self setHighlightedItem:item];
 }
 
 - (void)moveLeft:(id)sender
@@ -288,13 +288,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 {
     if([OEMenu OE_closing]) return;
 
-    OEMenu *submenu = [(OEMenu *)[self window] OE_submenu];
-    if([_highlightedItem hasSubmenu] && [submenu menu] != [_highlightedItem submenu])
-    {
-        [self setHighlightedItem:_highlightedItem];
-        if((submenu = [(OEMenu *)[self window] OE_submenu]))
-            [[submenu OE_view] moveDown:sender];
-    }
+    // If there was a submenu to expand, select the first entry of the submenu
+    if ([self OE_expandHighlightedItemSubmenu]) [[[(OEMenu *)[self window] OE_submenu] OE_view] moveDown:self];
 }
 
 - (void)cancelOperation:(id)sender
@@ -692,9 +687,17 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     }
 }
 
+- (BOOL)OE_expandHighlightedItemSubmenu
+{
+    OEMenu *menu = (OEMenu *)[self window];
+    [menu OE_setSubmenu:[_highlightedItem submenu]];
+    return [_highlightedItem hasSubmenu];
+}
+
 - (void)highlightItemAtPoint:(NSPoint)point
 {
     [self setHighlightedItem:[self itemAtPoint:point]];
+    [self OE_expandHighlightedItemSubmenu];
 }
 
 - (NSMenuItem *)itemAtPoint:(NSPoint)point
@@ -801,7 +804,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     return _edge;
 }
 
-- (void)setHighlightedItemWithoutExpandingSubmenu:(NSMenuItem *)highlightedItem
+- (void)setHighlightedItem:(NSMenuItem *)highlightedItem
 {
     NSMenuItem *realHighlightedItem = [highlightedItem isSeparatorItem] ? nil : [[highlightedItem extraData] primaryItem] ?: highlightedItem;
     if(_highlightedItem != realHighlightedItem)
@@ -809,14 +812,6 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
         _highlightedItem = realHighlightedItem;
         [self setNeedsDisplay:YES];
     }
-}
-
-- (void)setHighlightedItem:(NSMenuItem *)highlightedItem
-{
-    [self setHighlightedItemWithoutExpandingSubmenu:highlightedItem];
-
-    OEMenu *menu = (OEMenu *)[self window];
-    [menu OE_setSubmenu:[_highlightedItem submenu]];
 }
 
 - (NSMenuItem *)highlightedItem
