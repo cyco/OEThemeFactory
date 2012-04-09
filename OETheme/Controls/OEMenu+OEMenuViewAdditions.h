@@ -17,11 +17,13 @@ extern const NSEdgeInsets OEMenuContentEdgeInsets;
 
 + (void)OE_setClosing:(BOOL)closing;
 + (BOOL)OE_closing;
++ (OEMenu *)OE_menuAtPoint:(NSPoint)point;
 
 - (void)OE_cancelTrackingWithCompletionHandler:(void (^)(void))completionHandler;
 - (void)OE_hideWindowWithoutAnimation;
 - (void)OE_setSubmenu:(NSMenu *)submenu;
 - (OEMenu *)OE_submenu;
+- (OEMenu *)OE_supermenu;
 - (OEMenuView *)OE_view;
 
 @end

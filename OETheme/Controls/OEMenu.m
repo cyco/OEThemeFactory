@@ -395,21 +395,6 @@ static NSMutableArray *sharedMenuStack;
     return window == nil ? locationInWindow : [window convertBaseToScreen:locationInWindow];
 }
 
-+ (OEMenu *)OE_menuAtPoint:(NSPoint)point
-{
-    __block OEMenu *result = nil;
-    [sharedMenuStack enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:
-     ^ (OEMenu *obj, NSUInteger idx, BOOL *stop)
-    {
-        if(NSPointInRect(point, [obj frame]))
-        {
-            result = obj;
-            *stop = YES;
-        }
-    }];
-    return result;
-}
-
 - (NSEvent *)OE_mockMouseEvent:(NSEvent *)event
 {
     if([event window] == self || [[event window] isKindOfClass:[OEMenu class]]) return event;
@@ -533,6 +518,21 @@ static NSMutableArray *sharedMenuStack;
     return ((OEMenu *)[sharedMenuStack objectAtIndex:0])->_closing;
 }
 
++ (OEMenu *)OE_menuAtPoint:(NSPoint)point
+{
+    __block OEMenu *result = nil;
+    [sharedMenuStack enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:
+     ^ (OEMenu *obj, NSUInteger idx, BOOL *stop)
+     {
+         if(NSPointInRect(point, [obj frame]))
+         {
+             result = obj;
+             *stop = YES;
+         }
+     }];
+    return result;
+}
+
 - (void)OE_setSubmenu:(NSMenu *)submenu
 {
     if([_submenu menu] == submenu) return;
@@ -559,6 +559,11 @@ static NSMutableArray *sharedMenuStack;
 - (OEMenu *)OE_submenu
 {
     return _submenu;
+}
+
+- (OEMenu *)OE_supermenu
+{
+    return _supermenu;
 }
 
 - (OEMenuView *)OE_view
