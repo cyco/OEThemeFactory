@@ -18,7 +18,6 @@
     OEMenuView *_view;
     BOOL        _cancelTracking;
     BOOL        _closing;
-    id          _localMonitor;
 
     __unsafe_unretained OEMenu *_supermenu;
     OEMenu                     *_submenu;
