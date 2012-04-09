@@ -21,8 +21,9 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 - (void)OE_updateFrameAttachedToView:(NSView *)attachedView onEdge:(OERectEdge)edge;
 - (void)OE_updateFrameForSubmenu;
 
-- (void)OE_applicationNotification:(NSNotification *)notification;
-- (void)OE_menuWillShow:(NSNotification *)notification;
+- (void)OE_applicationActivityNotification:(NSNotification *)notification;
+- (void)OE_menuWillBeginTrackingNotification:(NSNotification *)notification;
+
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration completionHandler:(void (^)(void))completionHandler;
 - (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent;
 
@@ -308,12 +309,12 @@ static NSMutableArray *sharedMenuStack;
     [self setContentSize:[_view size]];
 }
 
-- (void)OE_applicationNotification:(NSNotification *)notification
+- (void)OE_applicationActivityNotification:(NSNotification *)notification
 {
     [self cancelTrackingWithoutAnimation];
 }
 
-- (void)OE_menuWillShow:(NSNotification *)notification
+- (void)OE_menuWillBeginTrackingNotification:(NSNotification *)notification
 {
     [self cancelTracking];
 }
@@ -377,9 +378,9 @@ static NSMutableArray *sharedMenuStack;
     if([sharedMenuStack count] == 1)
     {
         // We only need to register for these notifications once, so just do it to the first menu that becomes visible
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationNotification:) name:NSApplicationDidResignActiveNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationNotification:) name:NSApplicationDidHideNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuWillShow:) name:NSMenuDidBeginTrackingNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationActivityNotification:) name:NSApplicationDidResignActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_applicationActivityNotification:) name:NSApplicationDidHideNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuWillBeginTrackingNotification:) name:NSMenuDidBeginTrackingNotification object:nil];
     }
 
     NSWindow *parentWindow = [view window];
