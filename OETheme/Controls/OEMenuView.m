@@ -286,7 +286,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     if([OEMenu OE_closing]) return;
 
     // If there was a submenu to expand, select the first entry of the submenu
-    if ([self OE_expandHighlightedItemSubmenu]) [[[(OEMenu *)[self window] OE_submenu] OE_view] moveDown:self];
+    [self OE_immediatelyExpandHighlightedItemSubmenu];
+    if([_highlightedItem hasSubmenu]) [[[(OEMenu *)[self window] OE_submenu] OE_view] moveDown:self];
 }
 
 - (void)cancelOperation:(id)sender
@@ -667,11 +668,17 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     }
 }
 
-- (BOOL)OE_expandHighlightedItemSubmenu
+- (void)OE_immediatelyExpandHighlightedItemSubmenu
 {
     OEMenu *menu = (OEMenu *)[self window];
     [menu OE_setSubmenu:[_highlightedItem submenu]];
-    return [_highlightedItem hasSubmenu];
+}
+
+- (void)OE_expandHighlightedItemSubmenu
+{
+    [self performSelector:@selector(OE_immediatelyExpandHighlightedItemSubmenu) withObject:nil afterDelay:OEMenuItemShowSubmenuDelay];
+}
+
 }
 
 - (void)highlightItemAtPoint:(NSPoint)point
