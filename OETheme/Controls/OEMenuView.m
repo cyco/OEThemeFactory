@@ -16,6 +16,7 @@
 
 #pragma mark -
 #pragma mark Menu Item Spacing
+
 const        CGFloat OEMenuItemTickMarkWidth      = 19.0;
 const        CGFloat OEMenuItemImageWidth         = 22.0;
 const        CGFloat OEMenuItemSubmenuArrowWidth  = 10.0;
@@ -50,16 +51,12 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 #pragma mark -
 #pragma mark Animation Timing
 
-static const CGFloat OEMenuItemFlashDelay = 0.075;
+static const CGFloat OEMenuItemFlashDelay       = 0.075;
+static const CGFloat OEMenuItemHighlightDelay   = 1.0;
+static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 
 #pragma mark -
 #pragma mark Convenience Functions
-
-// Returns an NSString key that represents the specified menu style and component
-static inline NSString *OENSStringFromOEMenuStyle(OEMenuStyle style, NSString *component)
-{
-    return [(style == OEMenuStyleDark ? @"dark_menu_" : @"light_menu_") stringByAppendingString:component];
-}
 
 // Returns an NSRect inset using the specified edge insets
 static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
@@ -117,7 +114,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)OE_setupCachedThemeItems
 {
-    NSString *styleKeyPrefix = OENSStringFromOEMenuStyle(_style, @"");
+    NSString *styleKeyPrefix = (_style == OEMenuStyleDark ? @"dark_menu_" : @"light_menu_");
     _menuItemSeparatorImage  = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"separator_item"] forState:OEThemeStateDefault];
     _backgroundImage         = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];
     _backgroundColor         = [[OETheme sharedTheme] colorForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];
@@ -201,7 +198,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     NSUInteger modiferFlags = [theEvent modifierFlags] & _keyModifierMask;
     if(_lasKeyModifierMask != modiferFlags)
     {
-        // A redraw will change the menu items, we should probably just redraw the items that need to be redrawn -- but this may be more expensive operation than what it is worth
+        // A redraw will change the menu items, we should probably just redraw the items that need to be redrawn -- but figuring this out may be more expensive than what it is worth
         _lasKeyModifierMask = modiferFlags;
         [self setNeedsDisplay:YES];
     }
@@ -214,8 +211,10 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
     if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
     {
+        // If return key or space is key is invoked, it will either open the associated submenu or perform the associated action
         if([_highlightedItem hasSubmenu]) [self moveRight:nil];
         else                              [self OE_performAction];
+
         return YES;
     }
 
@@ -352,7 +351,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (OEThemeState)OE_currentStateFromMenuItem:(NSMenuItem *)item
 {
-    return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:[self highlightedItem] == item enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
+    return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:([self highlightedItem] == item) enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
 }
 
 - (NSDictionary *)OE_textAttributes:(OEThemeTextAttributes *)themeTextAttributes forState:(OEThemeState)state
