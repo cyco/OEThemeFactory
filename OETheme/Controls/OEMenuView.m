@@ -75,6 +75,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)OE_layoutIfNeeded;
 - (void)OE_updateInsets;
 - (void)OE_performAction;
+- (OEMenu *)OE_menu;
 
 @end
 
@@ -163,37 +164,37 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)mouseEntered:(NSEvent *)theEvent
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
     [self OE_performAction];
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseExited:(NSEvent *)theEvent
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)flagsChanged:(NSEvent *)theEvent
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
 
     // Figure out if any of the modifier flags that we are interested have changed
     NSUInteger modiferFlags = [theEvent modifierFlags] & _keyModifierMask;
@@ -207,7 +208,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent
 {
-    if([OEMenu OE_closing]) return YES;
+    if([[self OE_menu] OE_closing]) return YES;
 
     // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
     if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
@@ -224,7 +225,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveUp:(id)sender
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
 
     // There is nothing to do if there are no items
     const NSInteger count = [[_menu itemArray] count];
@@ -251,7 +252,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveDown:(id)sender
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
 
     // There is nothing to do if there are no items
     const NSInteger count = [[_menu itemArray] count];
@@ -278,33 +279,33 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)moveLeft:(id)sender
 {
-    if([OEMenu OE_closing]) return;
-    if([self OE_isSubmenu]) [(OEMenu *)[self window] OE_hideWindowWithoutAnimation];
+    if([[self OE_menu] OE_closing]) return;
+    if([self OE_isSubmenu]) [[self OE_menu] OE_hideWindowWithoutAnimation];
 }
 
 - (void)moveRight:(id)sender
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
 
     // If there was a submenu to expand, select the first entry of the submenu
     [self OE_immediatelyExpandHighlightedItemSubmenu];
-    if([_highlightedItem hasSubmenu]) [[[(OEMenu *)[self window] OE_submenu] OE_view] moveDown:self];
+    if([_highlightedItem hasSubmenu]) [[[[self OE_menu] OE_submenu] OE_view] moveDown:self];
 }
 
 - (void)cancelOperation:(id)sender
 {
-    if([OEMenu OE_closing]) return;
+    if([[self OE_menu] OE_closing]) return;
     [self OE_cancelTracking];
 }
 
 - (void)OE_cancelTracking
 {
-    [(OEMenu *)[self window] cancelTracking];
+    [[self OE_menu] cancelTracking];
 }
 
 - (void)OE_cancelTrackingWithCompletionHandler:(void (^)(void))completionHandler
 {
-    [(OEMenu *)[self window] OE_cancelTrackingWithCompletionHandler:completionHandler];
+    [[self OE_menu] OE_cancelTrackingWithCompletionHandler:completionHandler];
 }
 
 - (void)OE_flashItem:(NSMenuItem *)highlightedItem
@@ -325,8 +326,8 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)OE_performAction
 {
-    if([OEMenu OE_closing] || [[self highlightedItem] hasSubmenu]) return;
-    [OEMenu OE_setClosing:YES];
+    if([[self OE_menu] OE_closing] || [[self highlightedItem] hasSubmenu]) return;
+    [[self OE_menu] OE_setClosing:YES];
 
     if([self highlightedItem] != nil && ![[self highlightedItem] isSeparatorItem])
     {
@@ -338,6 +339,11 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     {
         [self OE_cancelTracking];
     }
+}
+
+- (OEMenu *)OE_menu
+{
+    return (OEMenu *)[self window];
 }
 
 - (void)setFrameSize:(NSSize)newSize
@@ -672,7 +678,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)OE_immediatelyExpandHighlightedItemSubmenu
 {
-    OEMenu *menu = (OEMenu *)[self window];
+    OEMenu *menu = [self OE_menu];
     [menu OE_setSubmenu:[_highlightedItem submenu]];
 }
 
@@ -684,7 +690,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)OE_setHighlightedItem:(NSMenuItem *)highlightedItem
 {
     // Go ahead and switch the highlighted item (and expand the submenu as appropriate)
-    [(OEMenu *)[self window] OE_setSubmenu:nil];
+    [[self OE_menu] OE_setSubmenu:nil];
     [self setHighlightedItem:highlightedItem];
     if([highlightedItem hasSubmenu]) [self OE_expandHighlightedItemSubmenu];
 }
@@ -732,7 +738,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
         return;
     }
 
-    OEMenu *menu = (OEMenu *)[self window];
+    OEMenu *menu = [self OE_menu];
     OEMenu *submenu = [menu OE_submenu];
 
     // If there is a menu open, then check to see if we are trying to move our mouse to that menu -- if we are, then delay any changes to see if the user makes it to the menu
@@ -750,10 +756,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     }
     else
     {
-        [(OEMenu *)[self window] OE_setSubmenu:nil];
-        [self setHighlightedItem:highlightedItem];
-        if([highlightedItem hasSubmenu]) [self OE_expandHighlightedItemSubmenu];
-        else                             [self OE_immediatelyExpandHighlightedItemSubmenu];
+        [self OE_setHighlightedItem:highlightedItem];
     }
     _lastMousePoint = point;
 }

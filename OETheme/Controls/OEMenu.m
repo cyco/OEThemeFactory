@@ -541,6 +541,7 @@ static NSMutableArray *sharedMenuStack;
             {
                 // Flags changes should be sent to all submenu's so that they can be updated appropriately
                 [sharedMenuStack makeObjectsPerformSelector:@selector(sendEvent:) withObject:event];
+                continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.
             }
 
             // If we've gotten this far, then we need to forward the event to NSApp for additional / further processing
@@ -557,16 +558,6 @@ static NSMutableArray *sharedMenuStack;
 
 @implementation OEMenu (OEMenuViewAdditions)
 
-+ (void)OE_setClosing:(BOOL)closing
-{
-    ((OEMenu *)[sharedMenuStack objectAtIndex:0])->_closing = closing;
-}
-
-+ (BOOL)OE_closing
-{
-    return ((OEMenu *)[sharedMenuStack objectAtIndex:0])->_closing;
-}
-
 + (OEMenu *)OE_menuAtPoint:(NSPoint)point
 {
     __block OEMenu *result = nil;
@@ -580,6 +571,18 @@ static NSMutableArray *sharedMenuStack;
          }
      }];
     return result;
+}
+
+- (void)OE_setClosing:(BOOL)closing
+{
+    if([sharedMenuStack objectAtIndex:0] != self) [[sharedMenuStack objectAtIndex:0] OE_setClosing:closing];
+    else                                          _closing = closing;
+}
+
+- (BOOL)OE_closing
+{
+    if([sharedMenuStack objectAtIndex:0] != self) return [[sharedMenuStack objectAtIndex:0] OE_closing];
+    return _closing;
 }
 
 - (void)OE_setSubmenu:(NSMenu *)submenu
