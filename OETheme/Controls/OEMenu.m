@@ -316,7 +316,7 @@ static NSMutableArray *sharedMenuStack;
 
 - (void)OE_menuWillBeginTrackingNotification:(NSNotification *)notification
 {
-    [self cancelTracking];
+    if([notification object] != [self menu]) [self cancelTracking];
 }
 
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration completionHandler:(void (^)(void))completionHandler
