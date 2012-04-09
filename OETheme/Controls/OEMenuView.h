@@ -54,6 +54,8 @@ typedef enum _OERectEdge
     OEThemeImage          *_submenuArrow;
 
     NSMenuItem *_highlightedItem;
+    NSTimer    *_delayedHighlightTimer;
+    NSPoint     _lastMousePoint;
 }
 
 // Highlights item at specified point

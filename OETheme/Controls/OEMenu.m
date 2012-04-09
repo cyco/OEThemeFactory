@@ -13,7 +13,7 @@
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 
 static const CGFloat OEMenuFadeOutDuration = 0.075; // Animation duration to fade the menu out
-static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before menu interprets a click to mean a drag operation
+static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before menu interprets a mouse down event between a click or drag operation
 
 @interface OEMenu ()
 
@@ -106,17 +106,13 @@ static NSMutableArray *sharedMenuStack;
     NSRect results      = NSZeroRect;
     NSRect visibleFrame = [[self screen] visibleFrame];
 
+    // Invoked to allow the delegate to specify a display location for the menu.
     id<NSMenuDelegate> delegate = [[self menu] delegate];
     if([delegate respondsToSelector:@selector(confinementRectForMenu:onScreen:)]) results = [delegate confinementRectForMenu:[self menu] onScreen:screen];
 
-    if(NSIsEmptyRect(results)) return [[self screen] visibleFrame];
-
-    // Make sure that the confinement rect is within the screen's visible rect
-    results.origin.x = MAX(NSMinX(results), NSMinX(visibleFrame));
-    results.origin.y = MAX(NSMinY(results), NSMinY(visibleFrame));
-
-    if(NSMaxX(results) > NSMaxX(visibleFrame)) results.size.width  = NSMaxX(visibleFrame) - NSMinX(results);
-    if(NSMaxY(results) > NSMaxY(visibleFrame)) results.size.height = NSMaxY(visibleFrame) - NSMaxY(results);
+    // If delegate is not implemented or it returns NSZeroRect then return the screen's visible frame
+    if(NSEqualRects(results, NSZeroRect)) results = [[self screen] visibleFrame];
+    else                                  results = NSIntersectionRect(visibleFrame, results);
 
     return results;
 }
@@ -187,7 +183,7 @@ static NSMutableArray *sharedMenuStack;
             {
                 NSLog(@"Flip to the other side.");
                 OERectEdge newEdge = edge == OEMinXEdge ? OEMaxXEdge : OEMinXEdge;
-                frame.origin = originForEdge(newEdge);
+                frame.origin = [self OE_originAttachedToScreenRect:rect withArrowOnEdge:newEdge];
 
                 if(NSMinX(frame) < NSMinX(screenFrame) || NSMaxX(frame) > NSMaxX(screenFrame))
                 {
@@ -214,7 +210,7 @@ static NSMutableArray *sharedMenuStack;
             {
                 NSLog(@"Flip to the other side.");
                 OERectEdge newEdge = edge == OEMinYEdge ? OEMaxYEdge : OEMinYEdge;
-                frame.origin = originForEdge(newEdge);
+                frame.origin = [self OE_originAttachedToScreenRect:rect withArrowOnEdge:newEdge];
 
                 if(NSMinY(frame) < NSMinY(screenFrame) || NSMaxY(frame) > NSMaxY(screenFrame))
                 {
@@ -243,6 +239,7 @@ static NSMutableArray *sharedMenuStack;
             break;
     }
     [self setFrame:frame display:[self isVisible]];
+
     if(!NSEqualPoints(attachedPoint, NSZeroPoint))
     {
         attachedPoint = [_view convertPoint:[self convertScreenToBase:attachedPoint] fromView:nil];
@@ -327,7 +324,7 @@ static NSMutableArray *sharedMenuStack;
 
 - (void)OE_menuWillBeginTrackingNotification:(NSNotification *)notification
 {
-    if([notification object] != [self menu]) [self cancelTracking];
+    if([notification object] != [self menu]) [self cancelTrackingWithoutAnimation];
 }
 
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration completionHandler:(void (^)(void))completionHandler
@@ -399,11 +396,35 @@ static NSMutableArray *sharedMenuStack;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuWillBeginTrackingNotification:) name:NSMenuDidBeginTrackingNotification object:nil];
     }
 
+#if 0
+    // TODO: Track additions and subtractions from the menu
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuDidAddItemNotification:) name:NSMenuDidAddItemNotification object:[self menu]];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuDidRemoveItemNotification:) name:NSMenuDidRemoveItemNotification object:[self menu]];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuDidChangeItemNotification:) name:NSMenuDidChangeItemNotification object:[self menu]];
+#endif
+
     // Invoked when a menu is about to open.
     id<NSMenuDelegate> delegate = [[_view menu] delegate];
     if([delegate respondsToSelector:@selector(menuWillOpen:)]) [delegate menuWillOpen:[_view menu]];
 
-    NSWindow *parentWindow = [view window];
+#if 0
+    // TODO: -numberOfItemsInMenu:
+    // Invoked when a menu is about to be displayed at the start of a tracking session so the delegate can specify the number of items in the menu.
+    if([delegate respondsToSelector:@selector(numberOfItemsInMenu:)] && [delegate respondsToSelector:@selector(menu:updateItem:atIndex:shouldCancel:)])
+    {
+        NSInteger numberOfMenuItems = [delegate numberOfItemsInMenu:[self menu]];
+        if(numberOfMenuItems > 0)
+        {
+            // Resize the menu
+            NSArray *itemArray = [[self menu] itemArray];
+            for(NSInteger i = 0; i < numberOfMenuItems; i++)
+            {
+                if([delegate menu:[self menu] updateItem:[itemArray objectAtIndex:i] atIndex:i shouldCancel:([OEMenu OE_closing] || _cancelTracking)]) break;
+            }
+        }
+    }
+#endif
+
     [parentWindow addChildWindow:self ordered:NSWindowAbove];
     if(![parentWindow isKindOfClass:[OEMenu class]] || [parentWindow isVisible]) [self orderFrontRegardless];
 }
@@ -510,6 +531,8 @@ static NSMutableArray *sharedMenuStack;
             }
             else if((type == NSKeyDown) || (type == NSKeyUp))
             {
+                // TODO: -performKeyEquivalent:
+
                 // Key down messages should be sent to the deepest submenu that is open
                 [[sharedMenuStack lastObject] sendEvent:event];
                 continue;  // There is no need to forward this message to NSApp, go back to the start of the loop.

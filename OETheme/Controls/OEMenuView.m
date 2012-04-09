@@ -103,6 +103,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 {
     // Make sure that there are no associations
     [[_menu itemArray] makeObjectsPerformSelector:@selector(setExtraData:) withObject:nil];
+    [_delayedHighlightTimer invalidate];
 }
 
 - (void)OE_commonInit
@@ -680,12 +681,81 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     [self performSelector:@selector(OE_immediatelyExpandHighlightedItemSubmenu) withObject:nil afterDelay:OEMenuItemShowSubmenuDelay];
 }
 
+- (void)OE_setHighlightedItem:(NSMenuItem *)highlightedItem
+{
+    // Go ahead and switch the highlighted item (and expand the submenu as appropriate)
+    [(OEMenu *)[self window] OE_setSubmenu:nil];
+    [self setHighlightedItem:highlightedItem];
+    if([highlightedItem hasSubmenu]) [self OE_expandHighlightedItemSubmenu];
+}
+
+- (void)OE_delayedSetHighlightedItem:(NSTimer *)timer
+{
+    NSMenuItem *highlightedItem = [timer userInfo];
+    _delayedHighlightTimer = nil;
+
+    // If the mouse is hovering over one of the descendent menus, then ignore the request to highlight a new item and expand it's menu.  Figuring out if the mouse is over a descendent
+    // menu is done backwards, we start with the menu that is under the mouse and keep comparing it's supermenu to our view's associated menu. If they ever match, then the focusedMenu
+    // has to be a descendent of this view's associated menu.
+    OEMenu *focusedMenu = [OEMenu OE_menuAtPoint:[NSEvent mouseLocation]];
+    while (focusedMenu)
+    {
+        if ([focusedMenu OE_supermenu] == [self window]) return;
+        focusedMenu = [focusedMenu OE_supermenu];
+    }
+
+    [self OE_setHighlightedItem:highlightedItem];
 }
 
 - (void)highlightItemAtPoint:(NSPoint)point
 {
-    [self setHighlightedItem:[self itemAtPoint:point]];
-    [self OE_expandHighlightedItemSubmenu];
+    NSMenuItem *highlightedItem = [self itemAtPoint:point];
+
+    if(_delayedHighlightTimer)
+    {
+        // Check to see if we are already waiting to highlight the requested item
+        if ([_delayedHighlightTimer userInfo] == highlightedItem)
+        {
+            _lastMousePoint = point;
+            return;
+        }
+
+        // No we intend on highlighting a different item now
+        [_delayedHighlightTimer invalidate];
+        _delayedHighlightTimer = nil;
+    }
+
+    // Check to see if the item is already highlighted
+    if(_highlightedItem == highlightedItem)
+    {
+        _lastMousePoint = point;
+        return;
+    }
+
+    OEMenu *menu = (OEMenu *)[self window];
+    OEMenu *submenu = [menu OE_submenu];
+
+    // If there is a menu open, then check to see if we are trying to move our mouse to that menu -- if we are, then delay any changes to see if the user makes it to the menu
+    BOOL isMouseMovingCloser = NO;
+    if(submenu)
+    {
+        const CGFloat distance = point.x - _lastMousePoint.x;
+        isMouseMovingCloser    = ([[submenu OE_view] edge] == OEMinXEdge) ? (distance < -1.0) : (distance > 1.0);
+    }
+
+    if(isMouseMovingCloser)
+    {
+        _delayedHighlightTimer = [NSTimer timerWithTimeInterval:OEMenuItemHighlightDelay target:self selector:@selector(OE_delayedSetHighlightedItem:) userInfo:highlightedItem repeats:NO];
+        [[NSRunLoop currentRunLoop] addTimer:_delayedHighlightTimer forMode:NSDefaultRunLoopMode];
+    }
+    else
+    {
+        [(OEMenu *)[self window] OE_setSubmenu:nil];
+        [self setHighlightedItem:highlightedItem];
+        if([highlightedItem hasSubmenu]) [self OE_expandHighlightedItemSubmenu];
+        else                             [self OE_immediatelyExpandHighlightedItemSubmenu];
+    }
+    _lastMousePoint = point;
 }
 
 - (NSMenuItem *)itemAtPoint:(NSPoint)point
@@ -693,7 +763,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     NSArray *items = [_menu itemArray];
     for(NSMenuItem *item in items)
     {
-        if(NSPointInRect(point, [[item  extraData] frame])) return item;
+        if(NSPointInRect(point, [[item  extraData] frame])) return [item isSeparatorItem] ? nil : ([[item extraData] primaryItem] ?: item);
     }
 
     return nil;
