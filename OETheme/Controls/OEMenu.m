@@ -107,9 +107,29 @@ static NSMutableArray *sharedMenuStack;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (NSRect)OE_confinementRectForScreen:(NSScreen *)screen
+{
+    NSRect results      = NSZeroRect;
+    NSRect visibleFrame = [[self screen] visibleFrame];
+
+    id<NSMenuDelegate> delegate = [[self menu] delegate];
+    if([delegate respondsToSelector:@selector(confinementRectForMenu:onScreen:)]) results = [delegate confinementRectForMenu:[self menu] onScreen:screen];
+
+    if(NSIsEmptyRect(results)) return [[self screen] visibleFrame];
+
+    // Make sure that the confinement rect is within the screen's visible rect
+    results.origin.x = MAX(NSMinX(results), NSMinX(visibleFrame));
+    results.origin.y = MAX(NSMinY(results), NSMinY(visibleFrame));
+
+    if(NSMaxX(results) > NSMaxX(visibleFrame)) results.size.width  = NSMaxX(visibleFrame) - NSMinX(results);
+    if(NSMaxY(results) > NSMaxY(visibleFrame)) results.size.height = NSMaxY(visibleFrame) - NSMaxY(results);
+
+    return results;
+}
+
 - (void)OE_updateFrameAttachedToView:(NSView *)view alignSelectedItemWithRect:(NSRect)titleRect
 {
-    const NSRect       screenFrame      = [([self screen] ?: [[view window] screen]) visibleFrame];
+    const NSRect       screenFrame      = [self OE_confinementRectForScreen:([self screen] ?: [[view window] screen])];
     const NSEdgeInsets edgeInsets       = [_view backgroundEdgeInsets];
     const NSRect       buttonFrame      = [view bounds];
     const NSRect       selectedItemRect = [[[_view highlightedItem] extraData] frame];
@@ -136,7 +156,7 @@ static NSMutableArray *sharedMenuStack;
 {
     // Calculate the top left point of the frame, this position is dependent on the edge that the arrow is visible on
     NSWindow *attachedWindow = [attachedView window];
-    const NSRect screenFrame = [[self screen] visibleFrame];
+    const NSRect screenFrame = [self OE_confinementRectForScreen:[self screen]];
     const NSRect rect        = [attachedWindow convertRectToScreen:[attachedView convertRect:[attachedView bounds] toView:nil]];
 
     [_view setEdge:edge];             // Edge must be set first for -[OEMenuView size] to produce an accurate result
@@ -242,7 +262,7 @@ static NSMutableArray *sharedMenuStack;
 - (void)OE_updateFrameForSubmenu
 {
     const NSRect       rectInScreen = [self convertRectToScreen:[_view convertRect:[[[_view highlightedItem] extraData] frame] toView:nil]];
-    const NSRect       screenFrame  = [[self screen] visibleFrame];
+    const NSRect       screenFrame  = [self OE_confinementRectForScreen:[self screen]];
     const NSEdgeInsets edgeInsets   = [_view backgroundEdgeInsets];
     const NSSize       size         = [_submenu->_view size];
 
@@ -341,6 +361,11 @@ static NSMutableArray *sharedMenuStack;
     void (^fireCompletionHandler)(void) = ^{
         if(completionHandler) completionHandler();
         [[self parentWindow] removeChildWindow:self];
+
+        // Invoked after a menu closed.
+        id<NSMenuDelegate> delegate = [[self menu] delegate];
+        if([delegate respondsToSelector:@selector(menuDidClose:)]) [delegate menuDidClose:[_view menu]];
+
         [sharedMenuStack removeObjectsInArray:menus];
     };
 
@@ -383,6 +408,10 @@ static NSMutableArray *sharedMenuStack;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_menuWillBeginTrackingNotification:) name:NSMenuDidBeginTrackingNotification object:nil];
     }
 
+    // Invoked when a menu is about to open.
+    id<NSMenuDelegate> delegate = [[_view menu] delegate];
+    if([delegate respondsToSelector:@selector(menuWillOpen:)]) [delegate menuWillOpen:[_view menu]];
+
     NSWindow *parentWindow = [view window];
     [parentWindow addChildWindow:self ordered:NSWindowAbove];
     if(![parentWindow isKindOfClass:[OEMenu class]] || [parentWindow isVisible]) [self orderFrontRegardless];
@@ -405,9 +434,6 @@ static NSMutableArray *sharedMenuStack;
 
 - (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent
 {
-    id<NSMenuDelegate> delegate = [[_view menu] delegate];
-    if([delegate respondsToSelector:@selector(menuWillOpen:)]) [delegate menuWillOpen:[_view menu]];
-
     [self OE_showWindowForView:view];
 
     const NSEventType type         = [initialEvent type];
@@ -426,6 +452,10 @@ static NSMutableArray *sharedMenuStack;
         default:
             break;
     }
+
+    // Invoked when a menu is about to be displayed at the start of a tracking session so the delegate can modify the menu.
+    id<NSMenuDelegate> delegate = [[self menu] delegate];
+    if([delegate respondsToSelector:@selector(menuNeedsUpdate:)]) [delegate menuNeedsUpdate:[self menu]];
 
     OEMenu *menuWithMouseFocus = self; // Tracks menu that is currently under the cursor
     BOOL    dragged            = NO;   // Identifies if the mouse has seen a drag operation
@@ -501,7 +531,6 @@ static NSMutableArray *sharedMenuStack;
         }
     }
     [NSApp discardEventsMatchingMask:NSAnyEventMask beforeEvent:event];
-    if([delegate respondsToSelector:@selector(menuDidClose:)]) [delegate menuDidClose:[_view menu]];
 }
 
 @end
