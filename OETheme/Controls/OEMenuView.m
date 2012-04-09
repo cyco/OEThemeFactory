@@ -779,29 +779,19 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (NSSize)size
 {
-    NSArray      *items      = [_menu itemArray];
-    NSDictionary *attributes = [_menuItemAttributes textAttributesForState:OEThemeStateDefault];
-
-    const CGFloat   itemHeight = _containsImage ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
-    __block CGFloat height     = 0.0;
-    __block CGFloat width      = 0.0;
-
-    [items enumerateObjectsUsingBlock:
-     ^ (NSMenuItem *item, NSUInteger idx, BOOL *stop)
-     {
-         if(![item isHidden] && ![[item extraData] primaryItem])
-         {
-             height += ([item isSeparatorItem] ? OEMenuItemSeparatorHeight : itemHeight);
-             width   = MAX(width, [[item title] sizeWithAttributes:attributes].width);
-         }
-     }];
+    [self display];
 
     const CGFloat minimumWidthPadding  = _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right;
     const CGFloat minimumHeightPadding = _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom;
     const CGFloat minimumWidth         = OEMenuItemTickMarkWidth + (_containsImage ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth;
 
-    width  = ceil(MAX(width + minimumWidth, [_menu minimumWidth]) + minimumWidthPadding);
-    height = ceil(height + minimumHeightPadding);
+    NSScreen      *screen       = ([[self window] screen] ?: [NSScreen mainScreen]);
+    const NSRect   visibleFrame = [screen visibleFrame];
+    const CGFloat  maxWidth     = (_maximumSize.width <= 0 || _maximumSize.width > NSWidth(visibleFrame)) ? NSWidth(visibleFrame) : _maximumSize.width;
+    const CGFloat  maxHeight    = (_maximumSize.height <= 0 || _maximumSize.height > NSHeight(visibleFrame)) ? NSHeight(visibleFrame) : _maximumSize.height;
+
+    CGFloat width  = ceil(MIN(MAX(_cachedSize.width + minimumWidth, [_menu minimumWidth]), maxWidth) + minimumWidthPadding);
+    CGFloat height = ceil(MIN(_cachedSize.height, maxHeight) + minimumHeightPadding);
 
     return NSMakeSize(width, height);
 }

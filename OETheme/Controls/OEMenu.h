@@ -15,7 +15,6 @@
 extern NSString * const OEMenuOptionsStyleKey;
 extern NSString * const OEMenuOptionsArrowEdgeKey;
 extern NSString * const OEMenuOptionsMaximumSizeKey;
-extern NSString * const OEMenuOptionsMinimumSizeKey;
 extern NSString * const OEMenuOptionsHighlightedItemKey;
 
 @interface OEMenu : NSWindow

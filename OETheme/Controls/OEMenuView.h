@@ -34,6 +34,7 @@ typedef enum _OERectEdge
     NSPoint       _attachedPoint;
     NSRect        _rectForArrow;
 
+    NSSize        _cachedSize;
     NSSize        _minimumSize;
     NSSize        _maximumSize;
 

@@ -18,7 +18,6 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 NSString * const OEMenuOptionsStyleKey           = @"OEMenuStyle";
 NSString * const OEMenuOptionsArrowEdgeKey       = @"OEArrowEdge";
 NSString * const OEMenuOptionsMaximumSizeKey     = @"OEMaximumSize";
-NSString * const OEMenuOptionsMinimumSizeKey     = @"OEMinimumSize";
 NSString * const OEMenuOptionsHighlightedItemKey = @"OEHighlightedItem";
 
 @interface OEMenu ()
@@ -47,18 +46,27 @@ static NSMutableArray *sharedMenuStack;
     [result setMenu:menu];
 
 
-    NSNumber *style             = [options objectForKey:OEMenuOptionsStyleKey];
-    NSNumber *edge              = [options objectForKey:OEMenuOptionsArrowEdgeKey];
-    NSValue  *maxSize           = [options objectForKey:OEMenuOptionsMaximumSizeKey];
-    NSValue  *minSize           = [options objectForKey:OEMenuOptionsMinimumSizeKey];
+    NSNumber   *style           = [options objectForKey:OEMenuOptionsStyleKey];
+    NSNumber   *edge            = [options objectForKey:OEMenuOptionsArrowEdgeKey];
+    NSValue    *maxSize         = [options objectForKey:OEMenuOptionsMaximumSizeKey];
     NSMenuItem *highlightedItem = [options objectForKey:OEMenuOptionsHighlightedItemKey];
 
     OEMenuView *menuView = [result OE_view];
     if(style)           [menuView setStyle:[style unsignedIntegerValue]];
     if(edge)            [menuView setEdge:[edge unsignedIntegerValue]];
-    if(maxSize)         [menuView setMaximumSize:[maxSize sizeValue]];
-    if(minSize)         [menuView setMinimumSize:[minSize sizeValue]];
     if(highlightedItem) [menuView setHighlightedItem:highlightedItem];
+
+    if(maxSize)
+    {
+        const NSRect confinementRect = [result OE_confinementRectForScreen:[result screen]];
+        NSSize maximumSize           = [maxSize sizeValue];
+
+        if(maximumSize.width <= 0 || maximumSize.width > NSWidth(confinementRect))    maximumSize.width  = NSWidth(confinementRect);
+        if(maximumSize.height <= 0 || maximumSize.height > NSHeight(confinementRect)) maximumSize.height = NSHeight(confinementRect);
+
+        [menuView setMaximumSize:maximumSize];
+    };
+
     [menuView display];
 
     return result;
