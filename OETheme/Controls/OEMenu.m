@@ -15,6 +15,12 @@
 static const CGFloat OEMenuFadeOutDuration = 0.075; // Animation duration to fade the menu out
 static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before menu interprets a mouse down event between a click or drag operation
 
+NSString * const OEMenuOptionsStyleKey           = @"OEMenuStyle";
+NSString * const OEMenuOptionsArrowEdgeKey       = @"OEArrowEdge";
+NSString * const OEMenuOptionsMaximumSizeKey     = @"OEMaximumSize";
+NSString * const OEMenuOptionsMinimumSizeKey     = @"OEMinimumSize";
+NSString * const OEMenuOptionsHighlightedItemKey = @"OEHighlightedItem";
+
 @interface OEMenu ()
 
 - (void)OE_updateFrameAttachedToPopupButton:(OEPopUpButton *)buton alignSelectedItemWithRect:(NSRect)titleRect;
@@ -34,41 +40,50 @@ static NSMutableArray *sharedMenuStack;
 
 @implementation OEMenu
 
-+ (OEMenu *)OE_popUpContextMenuWithMenu:(NSMenu *)menu
++ (OEMenu *)OE_popUpContextMenuWithMenu:(NSMenu *)menu options:(NSDictionary *)options
 {
     OEMenu *result = [[self alloc] initWithContentRect:NSZeroRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
     NSAssert(result != nil, @"Out of memory.");
-
     [result setMenu:menu];
+
+
+    NSNumber *style             = [options objectForKey:OEMenuOptionsStyleKey];
+    NSNumber *edge              = [options objectForKey:OEMenuOptionsArrowEdgeKey];
+    NSValue  *maxSize           = [options objectForKey:OEMenuOptionsMaximumSizeKey];
+    NSValue  *minSize           = [options objectForKey:OEMenuOptionsMinimumSizeKey];
+    NSMenuItem *highlightedItem = [options objectForKey:OEMenuOptionsHighlightedItemKey];
+
+    OEMenuView *menuView = [result OE_view];
+    if(style)           [menuView setStyle:[style unsignedIntegerValue]];
+    if(edge)            [menuView setEdge:[edge unsignedIntegerValue]];
+    if(maxSize)         [menuView setMaximumSize:[maxSize sizeValue]];
+    if(minSize)         [menuView setMinimumSize:[minSize sizeValue]];
+    if(highlightedItem) [menuView setHighlightedItem:highlightedItem];
+    [menuView display];
+
     return result;
 }
 
-+ (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event
++ (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event options:(NSDictionary *)options
 {
-    // Create a popup using the style specified by the button
-    OEMenu     *result   = [self OE_popUpContextMenuWithMenu:[button menu]];
-    OEMenuView *menuView = [result OE_view];
-    [menuView setEdge:OENoEdge];
-    [menuView setStyle:[button menuStyle]];
-    [menuView setHighlightedItem:[button selectedItem]];
-    [menuView display];
-
     // Calculate the frame for the popup menu so that the popup menu's selected item hovers exactly over the popup button's title
     const NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
     const NSRect titleRectInScreen = [[button window] convertRectToScreen:[button convertRect:titleRectInButton toView:nil]];
+
+    // Create a popup using the style specified by the button
+    NSMutableDictionary *newOptions = (options ? [options mutableCopy] : [NSMutableDictionary dictionary]);
+    [newOptions setValue:[NSNumber numberWithUnsignedInteger:OENoEdge] forKey:OEMenuOptionsArrowEdgeKey];
+    [newOptions setValue:[button selectedItem] forKey:OEMenuOptionsHighlightedItemKey];
+
+    OEMenu *result = [self OE_popUpContextMenuWithMenu:[button menu] options:newOptions];
     [result OE_updateFrameAttachedToPopupButton:button alignSelectedItemWithRect:titleRectInScreen];
     [result OE_showMenuAttachedToWindow:[button window] withEvent:event];
 }
 
-+ (void)popUpContextMenu:(NSMenu *)menu forScreenRect:(NSRect)rect withArrowOnEdge:(OERectEdge)edge withStyle:(OEMenuStyle)style withEvent:(NSEvent *)event
++ (void)popUpContextMenu:(NSMenu *)menu forScreenRect:(NSRect)rect withEvent:(NSEvent *)event options:(NSDictionary *)options
 {
-    OEMenu     *result   = [self OE_popUpContextMenuWithMenu:menu];
-    OEMenuView *menuView = [result OE_view];
-    [menuView setStyle:style];
-    [menuView setEdge:edge];
-    [menuView display];
-
     // Calculate the frame for the popup menu so that the menu appears to be attached to the specified view
+    OEMenu *result = [self OE_popUpContextMenuWithMenu:menu options:options];
     [result OE_updateFrameAttachedToScreenRect:rect];
     [result OE_showMenuAttachedToWindow:[event window] withEvent:event];
 }
@@ -596,10 +611,12 @@ static NSMutableArray *sharedMenuStack;
         return;
     }
 
-    _submenu = [isa OE_popUpContextMenuWithMenu:submenu];
-    [_submenu setContentSize:[_submenu->_view size]];
+    _submenu = [isa OE_popUpContextMenuWithMenu:submenu options:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedInteger:[_view style]] forKey:OEMenuOptionsStyleKey]];
     _submenu->_supermenu = self;
-    [_submenu->_view setStyle:[_view style]];
+//
+//    [_submenu setContentSize:[_submenu->_view size]];
+//    [_submenu->_view setStyle:[_view style]];
+
     [self OE_updateFrameForSubmenu];
     [_submenu OE_showMenuAttachedToWindow:[_view window]];
 }

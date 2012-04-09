@@ -68,7 +68,7 @@
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-    [OEMenu popUpContextMenuForPopUpButton:self withEvent:theEvent];
+    [OEMenu popUpContextMenuForPopUpButton:self withEvent:theEvent options:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedInteger:[self menuStyle]] forKey:OEMenuOptionsStyleKey]];
 }
 
 - (void)OE_windowKeyChanged:(NSNotification *)notification

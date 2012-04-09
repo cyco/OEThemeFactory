@@ -34,6 +34,9 @@ typedef enum _OERectEdge
     NSPoint       _attachedPoint;
     NSRect        _rectForArrow;
 
+    NSSize        _minimumSize;
+    NSSize        _maximumSize;
+
     NSTrackingArea   *_trackingArea;    // Tracking area
 
     BOOL _needsLayout;                  // Flag used to notify that the menu item's frames should be invalidated
@@ -70,6 +73,8 @@ typedef enum _OERectEdge
 @property(nonatomic, retain)   NSMenu       *menu;
 @property(nonatomic, assign)   OEMenuStyle   style;
 @property(nonatomic, assign)   OERectEdge    edge;
+@property(nonatomic, assign)   NSSize        minimumSize;
+@property(nonatomic, assign)   NSSize        maximumSize;
 @property(nonatomic, readonly) NSEdgeInsets  backgroundEdgeInsets;
 @property(nonatomic, assign)   NSPoint       attachedPoint;
 

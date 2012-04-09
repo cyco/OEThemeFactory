@@ -870,6 +870,34 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     return _edge;
 }
 
+- (void)setMinimumSize:(NSSize)minimumSize
+{
+    if(!NSEqualSizes(_minimumSize, minimumSize))
+    {
+        _minimumSize = minimumSize;
+        [self OE_setNeedsLayout];
+    }
+}
+
+- (NSSize)minimumSize
+{
+    return _minimumSize;
+}
+
+- (void)setMaximumSize:(NSSize)maximumSize
+{
+    if(!NSEqualSizes(_maximumSize, maximumSize))
+    {
+        _maximumSize = maximumSize;
+        [self OE_setNeedsLayout];
+    }
+}
+
+- (NSSize)maximumSize
+{
+    return _maximumSize;
+}
+
 - (void)setHighlightedItem:(NSMenuItem *)highlightedItem
 {
     NSMenuItem *realHighlightedItem = [highlightedItem isSeparatorItem] ? nil : [[highlightedItem extraData] primaryItem] ?: highlightedItem;
