@@ -495,8 +495,10 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
              }
          }];
 
+        NSDictionary       *attributes    = [_menuItemAttributes textAttributesForState:OEThemeStateDefault];
         const CGFloat       itemHeight    = _containsImage ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
         __block CGFloat     y             = 0.0;
+        __block CGFloat     width         = 0.0;
         __block NSMenuItem *lastValidItem = nil;
 
         [items enumerateObjectsUsingBlock:
@@ -514,12 +516,15 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
                      const CGFloat height    = ([item isSeparatorItem] ? OEMenuItemSeparatorHeight : itemHeight);
                      const NSRect  itemFrame = NSMakeRect(NSMinX(bounds), NSMaxY(contentRect) - y - height, NSWidth(bounds), height);
                      [extraData setFrame:itemFrame];
-                     y += height;
+                     y     += height;
+                     width  = MAX(width, [[item title] sizeWithAttributes:attributes].width);
 
                      lastValidItem = item;
                  }
              }
          }];
+
+        _cachedSize = NSMakeSize(width, y);
     }
 }
 
