@@ -106,8 +106,6 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 {
     // Make sure that there are no associations
     [[_menu itemArray] makeObjectsPerformSelector:@selector(setExtraData:) withObject:nil];
-    [_flashTimer invalidate];
-    _flashTimer = nil;
 }
 
 - (void)OE_commonInit
@@ -308,47 +306,30 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     [(OEMenu *)[self window] OE_cancelTrackingWithCompletionHandler:completionHandler];
 }
 
-- (void)OE_flashItem:(NSTimer *)sender
+- (void)OE_flashItem:(NSMenuItem *)highlightedItem
 {
-    NSMenuItem *item            = [sender userInfo];
-    NSMenuItem *highlightedItem = [self highlightedItem];
-    [self setHighlightedItem:item];
+    [self setHighlightedItem:highlightedItem];
+    [self performSelector:@selector(OE_completeAction:) withObject:highlightedItem afterDelay:OEMenuItemFlashDelay];
+}
 
-    [_flashTimer invalidate];
-    _flashTimer = nil;
-
-    if(item != nil)
-    {
-        _flashTimer = [NSTimer timerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:nil repeats:NO];
-        [[NSRunLoop currentRunLoop] addTimer:_flashTimer forMode:NSDefaultRunLoopMode];
-    }
-    else
-    {
-        OEPopUpButtonCell *cell = [highlightedItem target];
-        if([cell isKindOfClass:[NSPopUpButtonCell class]])
-        {
-            [self OE_cancelTrackingWithCompletionHandler:^{
-                if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:highlightedItem];
-                [NSApp sendAction:[highlightedItem action] to:[highlightedItem target] from:highlightedItem];
-            }];
-        }
-        else
-        {
-            [self OE_cancelTracking];
-        }
-    }
+- (void)OE_completeAction:(NSMenuItem *)highlightedItem
+{
+    NSPopUpButtonCell *cell = [highlightedItem target];
+    [self OE_cancelTrackingWithCompletionHandler:^{
+        if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:highlightedItem];
+        [NSApp sendAction:[highlightedItem action] to:[highlightedItem target] from:highlightedItem];
+    }];
 }
 
 - (void)OE_performAction
 {
     if([OEMenu OE_closing] || [[self highlightedItem] hasSubmenu]) return;
-
     [OEMenu OE_setClosing:YES];
 
     if([self highlightedItem] != nil && ![[self highlightedItem] isSeparatorItem])
     {
-        _flashTimer = [NSTimer timerWithTimeInterval:OEMenuItemFlashDelay target:self selector:@selector(OE_flashItem:) userInfo:[self highlightedItem] repeats:NO];
-        [[NSRunLoop currentRunLoop] addTimer:_flashTimer forMode:NSDefaultRunLoopMode];
+        // Flash the highlighted item right before closing the submenu
+        [self performSelector:@selector(OE_flashItem:) withObject:[self highlightedItem] afterDelay:OEMenuItemFlashDelay];
         [self setHighlightedItem:nil];
     }
     else
