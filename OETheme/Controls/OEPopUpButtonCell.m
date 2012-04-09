@@ -12,12 +12,6 @@
 
 @synthesize stateMask = _stateMask;
 
-- (void)dismissPopUp
-{
-    NSLog(@"%@", NSStringFromSelector(_cmd));
-    [super dismissPopUp];
-}
-
 - (OEThemeState)OE_currentState
 {
     // This is a convenience method that retrieves the current state of the button
