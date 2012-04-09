@@ -171,12 +171,17 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)mouseUp:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
-    [self OE_performAction];
+
+    // If we are recovering from a mouse drag operation and the selected menu item has a submenu, then cancel our tracking
+    if (_dragging && [_highlightedItem hasSubmenu]) [self OE_cancelTracking];
+    else                                            [self OE_performAction];
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
+
+    _dragging = YES;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 

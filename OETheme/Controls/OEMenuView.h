@@ -53,6 +53,7 @@ typedef enum _OERectEdge
     OEThemeTextAttributes *_menuItemAttributes;
     OEThemeImage          *_submenuArrow;
 
+    BOOL        _dragging;
     NSMenuItem *_highlightedItem;
     NSTimer    *_delayedHighlightTimer;
     NSPoint     _lastMousePoint;
