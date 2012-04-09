@@ -316,10 +316,10 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 - (void)OE_flashItem:(NSMenuItem *)highlightedItem
 {
     [self setHighlightedItem:highlightedItem];
-    [self performSelector:@selector(OE_completeAction:) withObject:highlightedItem afterDelay:OEMenuItemFlashDelay];
+    [self performSelector:@selector(OE_sendAction:) withObject:highlightedItem afterDelay:OEMenuItemFlashDelay];
 }
 
-- (void)OE_completeAction:(NSMenuItem *)highlightedItem
+- (void)OE_sendAction:(NSMenuItem *)highlightedItem
 {
     [self OE_cancelTrackingWithCompletionHandler:^{
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:highlightedItem forKey:@"MenuItem"];
