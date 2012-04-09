@@ -457,6 +457,9 @@ static NSMutableArray *sharedMenuStack;
     id<NSMenuDelegate> delegate = [[self menu] delegate];
     if([delegate respondsToSelector:@selector(menuNeedsUpdate:)]) [delegate menuNeedsUpdate:[self menu]];
 
+    // Posted when menu tracking begins.
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSMenuDidBeginTrackingNotification object:[self menu]];
+
     OEMenu *menuWithMouseFocus = self; // Tracks menu that is currently under the cursor
     BOOL    dragged            = NO;   // Identifies if the mouse has seen a drag operation
 
@@ -531,6 +534,9 @@ static NSMutableArray *sharedMenuStack;
         }
     }
     [NSApp discardEventsMatchingMask:NSAnyEventMask beforeEvent:event];
+
+    // Posted when menu tracking ends, even if no action is sent.
+    [[NSNotificationCenter defaultCenter] postNotificationName:NSMenuDidEndTrackingNotification object:[self menu]];
 }
 
 @end

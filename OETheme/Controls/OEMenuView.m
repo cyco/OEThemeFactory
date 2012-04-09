@@ -314,10 +314,11 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 
 - (void)OE_completeAction:(NSMenuItem *)highlightedItem
 {
-    NSPopUpButtonCell *cell = [highlightedItem target];
     [self OE_cancelTrackingWithCompletionHandler:^{
-        if([cell isKindOfClass:[NSPopUpButtonCell class]]) [cell selectItem:highlightedItem];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:highlightedItem forKey:@"MenuItem"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSMenuWillSendActionNotification object:[self menu] userInfo:userInfo];
         [NSApp sendAction:[highlightedItem action] to:[highlightedItem target] from:highlightedItem];
+        [[NSNotificationCenter defaultCenter] postNotificationName:NSMenuDidSendActionNotification object:[self menu] userInfo:userInfo];
     }];
 }
 
