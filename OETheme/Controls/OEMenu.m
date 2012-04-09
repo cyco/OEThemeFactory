@@ -37,6 +37,8 @@ static NSMutableArray *sharedMenuStack;
 + (OEMenu *)OE_popUpContextMenuWithMenu:(NSMenu *)menu
 {
     OEMenu *result = [[self alloc] initWithContentRect:NSZeroRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
+    NSAssert(result != nil, @"Out of memory.");
+
     [result setMenu:menu];
     return result;
 }
