@@ -69,7 +69,8 @@
     [menu addItemWithTitle:@"Test 18" action:nil keyEquivalent:@""];
     [menu setMinimumWidth:500];
 
-    [OEMenu popUpContextMenu:menu arrowOnEdge:OEMinYEdge forView:sender withStyle:OEMenuStyleLight withEvent:nil];
+    NSRect rectInScreen = [[self window] convertRectToScreen:[sender convertRect:[sender bounds] toView:nil]];
+    [OEMenu popUpContextMenu:menu forScreenRect:rectInScreen withArrowOnEdge:OEMinYEdge withStyle:OEMenuStyleLight withEvent:nil];
 }
 
 @end

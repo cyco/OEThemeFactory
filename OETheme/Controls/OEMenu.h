@@ -24,7 +24,7 @@
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event;
-+ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge forView:(NSView *)view withStyle:(OEMenuStyle)style withEvent:(NSEvent *)event;
++ (void)popUpContextMenu:(NSMenu *)menu forScreenRect:(NSRect)rect withArrowOnEdge:(OERectEdge)edge withStyle:(OEMenuStyle)style withEvent:(NSEvent *)event;
 
 - (void)cancelTracking;
 - (void)cancelTrackingWithoutAnimation;

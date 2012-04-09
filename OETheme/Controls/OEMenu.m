@@ -17,15 +17,16 @@ static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before men
 
 @interface OEMenu ()
 
-- (void)OE_updateFrameAttachedToView:(NSView *)view alignSelectedItemWithRect:(NSRect)titleRect;
-- (void)OE_updateFrameAttachedToView:(NSView *)attachedView onEdge:(OERectEdge)edge;
+- (void)OE_updateFrameAttachedToPopupButton:(OEPopUpButton *)buton alignSelectedItemWithRect:(NSRect)titleRect;
+- (void)OE_updateFrameAttachedToScreenRect:(NSRect)rect;
 - (void)OE_updateFrameForSubmenu;
 
 - (void)OE_applicationActivityNotification:(NSNotification *)notification;
 - (void)OE_menuWillBeginTrackingNotification:(NSNotification *)notification;
 
 - (void)OE_hideWindowWithFadeDuration:(CGFloat)duration completionHandler:(void (^)(void))completionHandler;
-- (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent;
+- (void)OE_showMenuAttachedToWindow:(NSWindow *)parentWindow;
+- (void)OE_showMenuAttachedToWindow:(NSWindow *)parentWindow withEvent:(NSEvent *)initialEvent;
 
 @end
 
@@ -33,50 +34,41 @@ static NSMutableArray *sharedMenuStack;
 
 @implementation OEMenu
 
-+ (OEMenu *)popUpContextMenuWithMenu:(NSMenu *)menu withRect:(NSRect)rect
++ (OEMenu *)OE_popUpContextMenuWithMenu:(NSMenu *)menu
 {
-    OEMenu *result = [[self alloc] initWithContentRect:rect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
+    OEMenu *result = [[self alloc] initWithContentRect:NSZeroRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
     [result setMenu:menu];
     return result;
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event
 {
-    NSWindow *window = [button window];
+    // Create a popup using the style specified by the button
+    OEMenu     *result   = [self OE_popUpContextMenuWithMenu:[button menu]];
+    OEMenuView *menuView = [result OE_view];
+    [menuView setEdge:OENoEdge];
+    [menuView setStyle:[button menuStyle]];
+    [menuView setHighlightedItem:[button selectedItem]];
+    [menuView display];
 
-    const NSRect buttonFrame = [window convertRectToScreen:[button convertRect:[button frame] toView:nil]];
-    OEMenu *result           = [self popUpContextMenuWithMenu:[button menu] withRect:buttonFrame];
-    if(result != nil)
-    {
-        // Make sure result is not nil we don't want to dereference a null pointer
-        OEMenuView *menuView = result->_view;
-        [menuView setEdge:OENoEdge];
-        [menuView display];
-        [menuView setStyle:[button menuStyle]];
-        [menuView setHighlightedItem:[button selectedItem]];
-
-        // Calculate the frame for the popup menu so that the popup menu's selected item hovers exactly over the popup button's title
-        const NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
-        const NSRect titleRectInScreen = [window convertRectToScreen:[button convertRect:titleRectInButton toView:nil]];
-        [result OE_updateFrameAttachedToView:button alignSelectedItemWithRect:titleRectInScreen];
-        [result OE_showWindowForView:button withEvent:event];
-    }
+    // Calculate the frame for the popup menu so that the popup menu's selected item hovers exactly over the popup button's title
+    const NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
+    const NSRect titleRectInScreen = [[button window] convertRectToScreen:[button convertRect:titleRectInButton toView:nil]];
+    [result OE_updateFrameAttachedToPopupButton:button alignSelectedItemWithRect:titleRectInScreen];
+    [result OE_showMenuAttachedToWindow:[button window] withEvent:event];
 }
 
-+ (void)popUpContextMenu:(NSMenu *)menu arrowOnEdge:(OERectEdge)edge forView:(NSView *)view withStyle:(OEMenuStyle)style withEvent:(NSEvent *)event
++ (void)popUpContextMenu:(NSMenu *)menu forScreenRect:(NSRect)rect withArrowOnEdge:(OERectEdge)edge withStyle:(OEMenuStyle)style withEvent:(NSEvent *)event
 {
-    const NSRect rectInWindow = [view convertRect:[view bounds] toView:nil];
-    const NSRect rectInScreen = [[view window] convertRectToScreen:rectInWindow];
+    OEMenu     *result   = [self OE_popUpContextMenuWithMenu:menu];
+    OEMenuView *menuView = [result OE_view];
+    [menuView setStyle:style];
+    [menuView setEdge:edge];
+    [menuView display];
 
-    OEMenu *result = [self popUpContextMenuWithMenu:menu withRect:rectInScreen];
-    if(result != nil)
-    {
-        OEMenuView *menuView = result->_view;
-        [menuView display];
-        [menuView setStyle:style];
-        [result OE_updateFrameAttachedToView:view onEdge:edge];
-        [result OE_showWindowForView:view withEvent:event];
-    }
+    // Calculate the frame for the popup menu so that the menu appears to be attached to the specified view
+    [result OE_updateFrameAttachedToScreenRect:rect];
+    [result OE_showMenuAttachedToWindow:[event window] withEvent:event];
 }
 
 - (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)aStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag screen:(NSScreen *)screen
@@ -127,14 +119,15 @@ static NSMutableArray *sharedMenuStack;
     return results;
 }
 
-- (void)OE_updateFrameAttachedToView:(NSView *)view alignSelectedItemWithRect:(NSRect)titleRect
+// Updates the frame's position and dimensions as it relates to the provided pop up button, while aligning the selected item to the rect specified
+- (void)OE_updateFrameAttachedToPopupButton:(OEPopUpButton *)button alignSelectedItemWithRect:(NSRect)rect
 {
-    const NSRect       screenFrame      = [self OE_confinementRectForScreen:([self screen] ?: [[view window] screen])];
+    const NSRect       screenFrame      = [self OE_confinementRectForScreen:([self screen] ?: [[button window] screen])];
     const NSEdgeInsets edgeInsets       = [_view backgroundEdgeInsets];
-    const NSRect       buttonFrame      = [view bounds];
+    const NSRect       buttonFrame      = [button bounds];
     const NSRect       selectedItemRect = [[[_view highlightedItem] extraData] frame];
 
-    NSRect frame = { .origin = titleRect.origin, .size = [_view size] };
+    NSRect frame = { .origin = rect.origin, .size = [_view size] };
 
     // TODO: Adjust origin based on the button's and menu item's shadows
     frame.origin.x   -= edgeInsets.left + OEMenuItemTickMarkWidth - 1.0;
@@ -152,37 +145,33 @@ static NSMutableArray *sharedMenuStack;
     [self setFrame:frame display:[self isVisible]];
 }
 
-- (void)OE_updateFrameAttachedToView:(NSView *)attachedView onEdge:(OERectEdge)edge
+// Calculates the origin of the frame, this position is dependent on the edge that the arrow is visible on
+- (NSPoint)OE_originAttachedToScreenRect:(NSRect)rect withArrowOnEdge:(OERectEdge)edge
 {
-    // Calculate the top left point of the frame, this position is dependent on the edge that the arrow is visible on
-    NSWindow *attachedWindow = [attachedView window];
-    const NSRect screenFrame = [self OE_confinementRectForScreen:[self screen]];
-    const NSRect rect        = [attachedWindow convertRectToScreen:[attachedView convertRect:[attachedView bounds] toView:nil]];
-
-    [_view setEdge:edge];             // Edge must be set first for -[OEMenuView size] to produce an accurate result
-    const NSSize size = [_view size];
-
-    // Calculates the origin for the specified edge
-    NSPoint (^originForEdge)(OERectEdge edge) =
-    ^ (OERectEdge edge)
+    const NSRect       bounds     = { .size = [[self OE_view] size] };
+    const NSEdgeInsets edgeInsets = [OEMenuView OE_backgroundEdgeInsetsForEdge:edge];
+    switch(edge)
     {
-        const NSRect       bounds     = { .size = size };
-        const NSEdgeInsets edgeInsets = [OEMenuView OE_backgroundEdgeInsetsForEdge:edge];
-        switch(edge)
-        {
-            case OENoEdge:   return NSMakePoint(NSMinX(rect) - edgeInsets.left + 1.0,  NSMinY(rect) - size.height);
-            case OEMinXEdge: return NSMakePoint(NSMaxX(rect) - edgeInsets.right + 1.0, NSMidY(rect) - NSMidY(bounds));
-            case OEMaxXEdge: return NSMakePoint(NSMinX(rect) - NSWidth(bounds) + edgeInsets.left - 1.0, NSMidY(rect) - NSMidY(bounds));
-            case OEMinYEdge: return NSMakePoint(NSMidX(rect) - NSMidX(bounds), NSMaxY(rect) - edgeInsets.top - 1.0);
-            case OEMaxYEdge: return NSMakePoint(NSMidX(rect) - NSMidX(bounds), NSMinY(rect) - NSHeight(bounds) + edgeInsets.bottom + 1.0);
-            default:         break;
-        }
-        return NSZeroPoint;
-    };
+        case OENoEdge:   return NSMakePoint(NSMinX(rect) - edgeInsets.left + 1.0,  NSMinY(rect) - NSHeight(bounds));
+        case OEMinXEdge: return NSMakePoint(NSMaxX(rect) - edgeInsets.right + 1.0, NSMidY(rect) - NSMidY(bounds));
+        case OEMaxXEdge: return NSMakePoint(NSMinX(rect) - NSWidth(bounds) + edgeInsets.left - 1.0, NSMidY(rect) - NSMidY(bounds));
+        case OEMinYEdge: return NSMakePoint(NSMidX(rect) - NSMidX(bounds), NSMaxY(rect) - edgeInsets.top - 1.0);
+        case OEMaxYEdge: return NSMakePoint(NSMidX(rect) - NSMidX(bounds), NSMinY(rect) - NSHeight(bounds) + edgeInsets.bottom + 1.0);
+        default:         break;
+    }
+    return NSZeroPoint;
+}
+
+// Updates the frame's position and dimensions as it relates to the rect specified on the screen
+- (void)OE_updateFrameAttachedToScreenRect:(NSRect)rect
+{
+    const NSRect screenFrame = [self OE_confinementRectForScreen:[self screen]];
+    const NSSize size        = [_view size];
 
     // Figure out the size and position of the frame, as well as the anchor point.
-    NSRect  frame         = NSIntegralRect((NSRect){.origin = originForEdge(edge), .size = size });
-    NSPoint attachedPoint = NSZeroPoint;
+    OERectEdge edge          = [_view edge];
+    NSRect     frame         = NSIntegralRect((NSRect){.origin = [self OE_originAttachedToScreenRect:rect withArrowOnEdge:edge], .size = size });
+    NSPoint    attachedPoint = NSZeroPoint;
 
     // Adjust the frame's dimensions not to be bigger than the screen
     frame.size.height = MIN(NSHeight(frame), NSHeight(screenFrame));
@@ -397,7 +386,7 @@ static NSMutableArray *sharedMenuStack;
     [self OE_cancelTrackingWithFadeDuration:0.0 completionHandler:nil];
 }
 
-- (void)OE_showWindowForView:(NSView *)view
+- (void)OE_showMenuAttachedToWindow:(NSWindow *)parentWindow
 {
     [sharedMenuStack addObject:self];
     if([sharedMenuStack count] == 1)
@@ -432,9 +421,9 @@ static NSMutableArray *sharedMenuStack;
     return [NSEvent mouseEventWithType:[event type] location:location modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[self windowNumber] context:[event context] eventNumber:[event eventNumber] clickCount:[event clickCount] pressure:[event pressure]];
 }
 
-- (void)OE_showWindowForView:(NSView *)view withEvent:(NSEvent *)initialEvent
+- (void)OE_showMenuAttachedToWindow:(NSWindow *)parentWindow withEvent:(NSEvent *)initialEvent
 {
-    [self OE_showWindowForView:view];
+    [self OE_showMenuAttachedToWindow:parentWindow];
 
     const NSEventType type         = [initialEvent type];
     NSEventType       mouseUpEvent = 0;
@@ -579,16 +568,12 @@ static NSMutableArray *sharedMenuStack;
         return;
     }
 
-    const NSRect rectInScreen = [self convertRectToScreen:[_view convertRect:[[[_view highlightedItem] extraData] frame] toView:nil]];
-    _submenu = [isa popUpContextMenuWithMenu:submenu withRect:rectInScreen];
-    if(_submenu != nil)
-    {
-        [_submenu setContentSize:[_submenu->_view size]];
-        _submenu->_supermenu = self;
-        [_submenu->_view setStyle:[_view style]];
-        [self OE_updateFrameForSubmenu];
-        [_submenu OE_showWindowForView:_view];
-    }
+    _submenu = [isa OE_popUpContextMenuWithMenu:submenu];
+    [_submenu setContentSize:[_submenu->_view size]];
+    _submenu->_supermenu = self;
+    [_submenu->_view setStyle:[_view style]];
+    [self OE_updateFrameForSubmenu];
+    [_submenu OE_showMenuAttachedToWindow:[_view window]];
 }
 
 - (OEMenu *)OE_submenu
