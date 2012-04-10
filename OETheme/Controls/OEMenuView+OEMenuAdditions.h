@@ -10,6 +10,7 @@
 
 @interface OEMenuView (OEMenuAdditions)
 
-+ (NSEdgeInsets)OE_backgroundEdgeInsetsForEdge:(OERectEdge)edge;
++ (NSEdgeInsets)OE_backgroundEdgeInsetsForEdge:(OERectEdge)Edge;
+- (void)OE_layoutIfNeeded;
 
 @end

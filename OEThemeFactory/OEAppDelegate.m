@@ -69,8 +69,12 @@
     [menu addItemWithTitle:@"Test 18" action:nil keyEquivalent:@""];
     [menu setMinimumWidth:500];
 
+    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+                             [NSNumber numberWithUnsignedInteger:OEMaxYEdge], OEMenuOptionsArrowEdgeKey,
+                             [NSNumber numberWithUnsignedInteger:OEMenuStyleDark], OEMenuOptionsStyleKey,
+                             nil];
     NSRect rectInScreen = [[self window] convertRectToScreen:[sender convertRect:[sender bounds] toView:nil]];
-    [OEMenu popUpContextMenu:menu forScreenRect:rectInScreen withArrowOnEdge:OEMinYEdge withStyle:OEMenuStyleLight withEvent:nil];
+    [OEMenu popUpContextMenu:menu forScreenRect:rectInScreen withEvent:nil options:options];
 }
 
 @end

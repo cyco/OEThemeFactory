@@ -8,10 +8,9 @@
 
 #import "OEMenu.h"
 
-extern const CGFloat      OEMenuItemTickMarkWidth;
-extern const CGFloat      OEMenuItemImageWidth;
-extern const CGFloat      OEMenuItemSubmenuArrowWidth;
 extern const NSEdgeInsets OEMenuContentEdgeInsets;
+extern const NSEdgeInsets OEMenuItemInsets;
+extern const CGFloat      OEMenuItemTickMarkWidth;
 
 @interface OEMenu (OEMenuViewAdditions)
 
