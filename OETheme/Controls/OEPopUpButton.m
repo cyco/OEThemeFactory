@@ -7,7 +7,6 @@
 //
 
 #import "OEPopUpButton.h"
-#import "OEMenu.h"
 
 @interface OEPopUpButton ()
 
@@ -68,7 +67,11 @@
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-    [OEMenu popUpContextMenuForPopUpButton:self withEvent:theEvent options:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedInteger:[self menuStyle]] forKey:OEMenuOptionsStyleKey]];
+    NSPoint pointInButton = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    if(NSPointInRect(pointInButton, [self bounds]))
+    {
+        [OEMenu popUpContextMenuForPopUpButton:self withEvent:theEvent options:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedInteger:[self menuStyle]] forKey:OEMenuOptionsStyleKey]];
+    }
 }
 
 - (void)OE_windowKeyChanged:(NSNotification *)notification
