@@ -9,6 +9,8 @@
 #import "OEMenuScrollView.h"
 #import "OEMenuContentView.h"
 #import "OEMenuContentView+OEMenuView.h"
+#import "OEMenu.h"
+#import "OEMenu+OEMenuViewAdditions.h"
 
 @interface _OEMenuScroller : NSScroller
 @end
@@ -90,6 +92,16 @@
 + (BOOL)isCompatibleWithOverlayScrollers
 {
     return YES;
+}
+
+- (void)setDoubleValue:(double)aDouble
+{
+    [super setDoubleValue:aDouble];
+    if([[self window] isVisible])
+    {
+        OEMenuView *view = [(OEMenu *)[self window] OE_view];
+        [view highlightItemAtPoint:[view convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
+    }
 }
 
 - (void)drawKnob
