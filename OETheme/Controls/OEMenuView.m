@@ -711,8 +711,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     NSArray *subviews = [self subviews];
     if([subviews count] == 1)
     {
-        [[subviews lastObject] setFrame:contentBounds];
-        [[subviews lastObject] OE_layoutIfNeeded];
+        OEMenuScrollView *view = [subviews lastObject];
+        [view setFrame:contentBounds];
+        [view OE_layoutIfNeeded];
     }
     else if([subviews count] > 1)
     {
