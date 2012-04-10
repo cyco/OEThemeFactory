@@ -17,6 +17,7 @@
 @property(nonatomic, readonly) NSSize       intrinsicSize;
 @property(nonatomic, retain)   NSArray     *itemArray;
 
+@property(nonatomic, assign, getter = isScrollable)          BOOL scrollable;
 @property(nonatomic, assign, getter = doesMenuContainImages) BOOL containImages;
 
 @end

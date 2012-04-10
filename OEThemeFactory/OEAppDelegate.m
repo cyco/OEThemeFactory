@@ -10,6 +10,7 @@
 #import "OETheme.h"
 #import "NSColor+OEAdditions.h"
 #import "OEMenu.h"
+#import "OEInlineMenuItem.h"
 
 @implementation OEAppDelegate
 @synthesize window = _window;
@@ -39,35 +40,42 @@
 - (IBAction)showMenu:(id)sender
 {
     NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Test"];
+    [menu setMinimumWidth:500];
+
+    NSMenu *inlineMenu = [[NSMenu alloc] initWithTitle:@"Render with OEMenu"];
+    [inlineMenu addItemWithTitle:@"Test 2" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 3" action:nil keyEquivalent:@""];
+    [inlineMenu addItem:[NSMenuItem separatorItem]];
+    [inlineMenu addItemWithTitle:@"Test 4" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 5" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 6" action:nil keyEquivalent:@""];
+    [inlineMenu addItem:[NSMenuItem separatorItem]];
+    [inlineMenu addItemWithTitle:@"Test 7" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 8" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 9" action:nil keyEquivalent:@""];
+    [inlineMenu addItem:[NSMenuItem separatorItem]];
+    [inlineMenu addItemWithTitle:@"Test 10" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 11" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 12" action:nil keyEquivalent:@""];
+    [inlineMenu addItem:[NSMenuItem separatorItem]];
+    [inlineMenu addItemWithTitle:@"Test 13" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 14" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 15" action:nil keyEquivalent:@""];
+    [inlineMenu addItem:[NSMenuItem separatorItem]];
+    [inlineMenu addItemWithTitle:@"Test 16" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 17" action:nil keyEquivalent:@""];
+    [inlineMenu addItemWithTitle:@"Test 18" action:nil keyEquivalent:@""];
+
     [menu addItemWithTitle:@"Test 1" action:nil keyEquivalent:@""];
 
     NSMenuItem *item = [menu addItemWithTitle:@"Test X" action:nil keyEquivalent:@""];
     [item setKeyEquivalentModifierMask:NSShiftKeyMask];
     [item setAlternate:YES];
+    [menu addItem:[NSMenuItem separatorItem]];
 
-    [menu addItemWithTitle:@"Test 2" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 3" action:nil keyEquivalent:@""];
-    [menu addItem:[NSMenuItem separatorItem]];
-    [menu addItemWithTitle:@"Test 4" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 5" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 6" action:nil keyEquivalent:@""];
-    [menu addItem:[NSMenuItem separatorItem]];
-    [menu addItemWithTitle:@"Test 7" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 8" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 9" action:nil keyEquivalent:@""];
-    [menu addItem:[NSMenuItem separatorItem]];
-    [menu addItemWithTitle:@"Test 10" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 11" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 12" action:nil keyEquivalent:@""];
-    [menu addItem:[NSMenuItem separatorItem]];
-    [menu addItemWithTitle:@"Test 13" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 14" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 15" action:nil keyEquivalent:@""];
-    [menu addItem:[NSMenuItem separatorItem]];
-    [menu addItemWithTitle:@"Test 16" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 17" action:nil keyEquivalent:@""];
-    [menu addItemWithTitle:@"Test 18" action:nil keyEquivalent:@""];
-    [menu setMinimumWidth:500];
+    OEInlineMenuItem *inlineMenuItem = [[OEInlineMenuItem alloc] init];
+    [inlineMenuItem setSubmenu:inlineMenu];
+    [menu addItem:inlineMenuItem];
 
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
                              [NSNumber numberWithUnsignedInteger:OEMaxYEdge], OEMenuOptionsArrowEdgeKey,

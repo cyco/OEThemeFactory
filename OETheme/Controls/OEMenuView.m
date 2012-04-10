@@ -14,6 +14,7 @@
 #import "OEMenuContentView+OEMenuView.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 #import "OETheme.h"
+#import "OEInlineMenuItem.h"
 #import <Carbon/Carbon.h>
 
 #pragma mark -
@@ -424,19 +425,43 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 {
     __block NSMutableArray *inlineMenus    = nil;
     __block NSMutableArray *itemArray      = [NSMutableArray array];
+    __block NSMutableSet   *scrollMenus    = [NSMutableSet set];
     __block BOOL            containsImages = NO;
 
     if(menu != nil)
     {
         inlineMenus = [NSMutableArray array];
-        [inlineMenus addObject:[NSMutableArray array]];
+        __block NSMutableArray *lastInlineMenu = nil;
 
         [[menu itemArray] enumerateObjectsUsingBlock:
          ^ (NSMenuItem *obj, NSUInteger idx, BOOL *stop)
          {
-             [[inlineMenus lastObject] addObject:obj];
-             [itemArray addObject:obj];
-             containsImages = containsImages && ([obj image] != nil);
+             if([obj isKindOfClass:[OEInlineMenuItem class]])
+             {
+                 lastInlineMenu = [NSMutableArray array];
+                 [inlineMenus addObject:lastInlineMenu];
+
+                 [[[obj submenu] itemArray] enumerateObjectsUsingBlock:
+                  ^ (id obj, NSUInteger idx, BOOL *stop)
+                  {
+                      [lastInlineMenu addObject:obj];
+                      [itemArray addObject:obj];
+                      containsImages = containsImages && ([obj image] != nil);
+                  }];
+                 [scrollMenus addObject:lastInlineMenu];
+                 lastInlineMenu = nil;
+             }
+             else
+             {
+                 if(lastInlineMenu == nil)
+                 {
+                     lastInlineMenu = [NSMutableArray array];
+                     [inlineMenus addObject:lastInlineMenu];
+                 }
+                 [lastInlineMenu addObject:obj];
+                 [itemArray addObject:obj];
+                 containsImages = containsImages && ([obj image] != nil);
+             }
          }];
     }
 
@@ -447,6 +472,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
      ^(NSArray *itemArray, NSUInteger idx, BOOL *stop)
      {
          OEMenuScrollView *scrollView = [[OEMenuScrollView alloc] initWithFrame:NSZeroRect];
+         [scrollView setScrollable:[scrollMenus containsObject:itemArray]];
          [scrollView setItemArray:itemArray];
          [scrollView setContainImages:containsImages];
          [scrollView setStyle:[self style]];
@@ -718,16 +744,44 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     else if([subviews count] > 1)
     {
         // TODO: Fix this
-        CGFloat intrinsicHeight = [self intrinsicSize].height - _backgroundEdgeInsets.top - _backgroundEdgeInsets.bottom;
+        __block CGFloat contentHeight   = NSHeight(contentBounds);
+        __block CGFloat intrinsicHeight = [self intrinsicSize].height - _backgroundEdgeInsets.top - _backgroundEdgeInsets.bottom - OEMenuContentEdgeInsets.top - OEMenuContentEdgeInsets.bottom;
+        NSArray *subviews = [self subviews];
+        NSMutableSet *scrollableMenus = [NSMutableSet set];
+        [subviews enumerateObjectsUsingBlock:^(OEMenuScrollView *obj, NSUInteger idx, BOOL *stop) {
+            if([obj isScrollable])
+            {
+                [scrollableMenus addObject:obj];
+            }
+            else
+            {
+                intrinsicHeight -= [obj intrinsicSize].height;
+                contentHeight   -= [obj intrinsicSize].height;
+            }
+        }];
+
+         __block CGFloat y = 0;
         [[self subviews] enumerateObjectsUsingBlock:
          ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
          {
-             const CGFloat ratio = [obj intrinsicSize].height / intrinsicHeight;
-             NSRect        frame = [obj frame];
-             frame.size.height   = NSHeight(contentBounds) * ratio;
+             const CGFloat height = [obj intrinsicSize].height;
+             NSRect frame = [obj frame];
+             if([obj isScrollable])
+             {
+                 frame.size.height = contentHeight * (height / intrinsicHeight);
+             }
+             else
+             {
+                 frame.size.height = height;
+             }
+             frame.size.width     = NSWidth(contentBounds);
+             frame.origin.x       = NSMinX(contentBounds);
+             frame.origin.y       = NSMaxY(contentBounds) - NSHeight(frame) - y;
 
              [obj setFrame:NSIntegralRect(frame)];
              [obj OE_layoutIfNeeded];
+
+             y += NSHeight(frame);
          }];
     }
 }

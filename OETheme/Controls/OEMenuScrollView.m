@@ -16,6 +16,7 @@
 @end
 
 @implementation OEMenuScrollView
+@synthesize scrollable = _scrollable;
 
 - (id)initWithFrame:(NSRect)frame
 {
