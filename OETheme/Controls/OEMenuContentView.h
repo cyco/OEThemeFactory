@@ -29,8 +29,6 @@
     OEThemeImage          *_submenuArrow;
 }
 
-- (NSMenuItem *)itemAtPoint:(NSPoint)point;
-
 @property(nonatomic, assign)   OEMenuStyle style;
 @property(nonatomic, readonly) NSSize       intrinsicSize;
 @property(nonatomic, retain)   NSArray     *itemArray;

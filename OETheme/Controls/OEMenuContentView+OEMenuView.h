@@ -11,5 +11,6 @@
 @interface OEMenuContentView (OEMenuView)
 
 - (void)OE_layoutIfNeeded;
+- (NSMenuItem *)OE_itemAtPoint:(NSPoint)point;
 
 @end

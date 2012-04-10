@@ -201,7 +201,7 @@ static NSMutableArray *__sharedMenuStack;
     [self setContentSize:[self size]];
     [_view OE_layoutIfNeeded];
 
-    NSView             *containerView    = [_view viewThatContainsItem:[self highlightedItem]];
+    NSView             *containerView    = [_view OE_viewThatContainsItem:[self highlightedItem]];
     const NSRect        selectedItemRect = [self convertRectToScreen:[containerView convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
     const NSRect        screenFrame      = [self OE_confinementRectForScreen:([self screen] ?: [[button window] screen])];
     const NSEdgeInsets  edgeInsets       = [_view backgroundEdgeInsets];
@@ -334,7 +334,7 @@ static NSMutableArray *__sharedMenuStack;
 
 - (void)OE_updateFrameForSubmenu
 {
-    NSView             *containerView = [_view viewThatContainsItem:[self highlightedItem]];
+    NSView             *containerView = [_view OE_viewThatContainsItem:[self highlightedItem]];
     const NSRect        rectInScreen  = [self convertRectToScreen:[containerView convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
     const NSRect        screenFrame   = [self OE_confinementRectForScreen:[self screen]];
     const NSEdgeInsets  edgeInsets    = [_view backgroundEdgeInsets];

@@ -12,5 +12,6 @@
 
 + (NSEdgeInsets)OE_backgroundEdgeInsetsForEdge:(OERectEdge)Edge;
 - (void)OE_layoutIfNeeded;
+- (NSView *)OE_viewThatContainsItem:(NSMenuItem *)item;
 
 @end

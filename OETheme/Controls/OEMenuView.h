@@ -35,8 +35,6 @@
     NSUInteger  _lasKeyModifierMask;
 }
 
-- (NSView *)viewThatContainsItem:(NSMenuItem *)item;
-
 @property(nonatomic, assign)   OEMenuStyle  style;
 @property(nonatomic, assign)   OERectEdge   arrowEdge;
 @property(nonatomic, assign)   NSPoint      attachedPoint;

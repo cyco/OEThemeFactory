@@ -62,16 +62,6 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     [self setItemArray:nil];
 }
 
-- (NSMenuItem *)itemAtPoint:(NSPoint)point
-{
-    for(NSMenuItem *item in _itemArray)
-    {
-        if(NSPointInRect(point, [[item extraData] frame])) return [item isSeparatorItem] ? nil : ([[item extraData] primaryItem] ?: item);
-    }
-
-    return nil;
-}
-
 - (void)drawRect:(NSRect)dirtyRect
 {
     [self OE_layoutIfNeeded];
@@ -343,6 +333,16 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 {
     if(!_needsLayout) return;
     [self OE_layout];
+}
+
+- (NSMenuItem *)OE_itemAtPoint:(NSPoint)point
+{
+    for(NSMenuItem *item in _itemArray)
+    {
+        if(NSPointInRect(point, [[item extraData] frame])) return [item isSeparatorItem] ? nil : ([[item extraData] primaryItem] ?: item);
+    }
+
+    return nil;
 }
 
 @end

@@ -122,22 +122,6 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     }
 }
 
-- (NSView *)viewThatContainsItem:(NSMenuItem *)item
-{
-    __block NSView *results = nil;
-    [[self subviews] enumerateObjectsUsingBlock:
-     ^ (OEMenuContentView *obj, NSUInteger idx, BOOL *stop)
-     {
-         if ([[obj itemArray] containsObject:item])
-         {
-             *stop = YES;
-             results = obj;
-         }
-     }];
-
-    return results;
-}
-
 - (void)updateTrackingAreas
 {
     if(_trackingArea) [self removeTrackingArea:_trackingArea];
@@ -425,7 +409,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 - (NSMenuItem *)itemAtPoint:(NSPoint)point
 {
     NSView *view = [self hitTest:point];
-    if((view != nil) && (view != self) && [view isKindOfClass:[OEMenuContentView class]]) return [(OEMenuContentView *)view itemAtPoint:[self convertPoint:point toView:view]];
+    if((view != nil) && (view != self) && [view isKindOfClass:[OEMenuContentView class]]) return [(OEMenuContentView *)view OE_itemAtPoint:[self convertPoint:point toView:view]];
     return nil;
 }
 
@@ -744,6 +728,22 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
              [obj OE_layoutIfNeeded];
          }];
     }
+}
+
+- (NSView *)OE_viewThatContainsItem:(NSMenuItem *)item
+{
+    __block NSView *results = nil;
+    [[self subviews] enumerateObjectsUsingBlock:
+     ^ (OEMenuContentView *obj, NSUInteger idx, BOOL *stop)
+     {
+         if ([[obj itemArray] containsObject:item])
+         {
+             *stop = YES;
+             results = obj;
+         }
+     }];
+
+    return results;
 }
 
 @end
