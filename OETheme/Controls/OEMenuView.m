@@ -9,6 +9,7 @@
 #import "OEMenuView.h"
 #import "OEMenuView+OEMenuAdditions.h"
 #import "OEMenu+OEMenuViewAdditions.h"
+#import "OEMenuScrollView.h"
 #import "OEMenuContentView.h"
 #import "OEMenuContentView+OEMenuView.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
@@ -147,11 +148,6 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
-- (void)mouseDown:(NSEvent *)theEvent
-{
-    NSLog(@"Mouse Down");
-}
-
 - (void)mouseUp:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
@@ -184,7 +180,12 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 {
     if([[self OE_menu] OE_closing]) return;
     _lasKeyModifierMask = [theEvent modifierFlags];
-    [[self subviews] makeObjectsPerformSelector:@selector(flagsChanged:) withObject:theEvent];
+
+    [[self subviews] enumerateObjectsUsingBlock:
+     ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
+     {
+         [[obj documentView] flagsChanged:theEvent];
+     }];
 }
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent
@@ -445,11 +446,11 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     [inlineMenus enumerateObjectsUsingBlock:
      ^(NSArray *itemArray, NSUInteger idx, BOOL *stop)
      {
-         OEMenuContentView *contentView = [[OEMenuContentView alloc] initWithFrame:NSZeroRect];
-         [contentView setItemArray:itemArray];
-         [contentView setContainImages:containsImages];
-         [contentView setStyle:[self style]];
-         [self addSubview:contentView];
+         OEMenuScrollView *scrollView = [[OEMenuScrollView alloc] initWithFrame:NSZeroRect];
+         [scrollView setItemArray:itemArray];
+         [scrollView setContainImages:containsImages];
+         [scrollView setStyle:[self style]];
+         [self addSubview:scrollView];
      }];
 
     [super setMenu:menu];
@@ -494,7 +495,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     __block CGFloat height = 0.0;
 
     [[self subviews] enumerateObjectsUsingBlock:
-     ^(OEMenuContentView *obj, NSUInteger idx, BOOL *stop) {
+     ^(OEMenuScrollView *obj, NSUInteger idx, BOOL *stop) {
          NSSize intrinsicSize = [obj intrinsicSize];
          width   = MAX(width, intrinsicSize.width);
          height += intrinsicSize.height;
@@ -718,7 +719,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
         // TODO: Fix this
         CGFloat intrinsicHeight = [self intrinsicSize].height - _backgroundEdgeInsets.top - _backgroundEdgeInsets.bottom;
         [[self subviews] enumerateObjectsUsingBlock:
-         ^ (OEMenuContentView *obj, NSUInteger idx, BOOL *stop)
+         ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
          {
              const CGFloat ratio = [obj intrinsicSize].height / intrinsicHeight;
              NSRect        frame = [obj frame];
@@ -732,9 +733,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 
 - (NSView *)OE_viewThatContainsItem:(NSMenuItem *)item
 {
-    __block NSView *results = nil;
+    __block OEMenuScrollView *results = nil;
     [[self subviews] enumerateObjectsUsingBlock:
-     ^ (OEMenuContentView *obj, NSUInteger idx, BOOL *stop)
+     ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
      {
          if ([[obj itemArray] containsObject:item])
          {
@@ -743,7 +744,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
          }
      }];
 
-    return results;
+    return [results documentView];
 }
 
 @end

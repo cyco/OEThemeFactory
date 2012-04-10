@@ -35,6 +35,8 @@
     NSUInteger  _lasKeyModifierMask;
 }
 
+- (void)highlightItemAtPoint:(NSPoint)point;
+
 @property(nonatomic, assign)   OEMenuStyle  style;
 @property(nonatomic, assign)   OERectEdge   arrowEdge;
 @property(nonatomic, assign)   NSPoint      attachedPoint;

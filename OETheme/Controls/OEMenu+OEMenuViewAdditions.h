@@ -7,6 +7,7 @@
 //
 
 #import "OEMenu.h"
+#import "OEMenuView.h"
 
 extern const NSEdgeInsets OEMenuContentEdgeInsets;
 extern const NSEdgeInsets OEMenuItemInsets;

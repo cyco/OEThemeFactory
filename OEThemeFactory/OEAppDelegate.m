@@ -72,6 +72,7 @@
     NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
                              [NSNumber numberWithUnsignedInteger:OEMaxYEdge], OEMenuOptionsArrowEdgeKey,
                              [NSNumber numberWithUnsignedInteger:OEMenuStyleDark], OEMenuOptionsStyleKey,
+                             [NSValue valueWithSize:NSMakeSize(2000, 200)], OEMenuOptionsMaximumSizeKey,
                              nil];
     NSRect rectInScreen = [[self window] convertRectToScreen:[sender convertRect:[sender bounds] toView:nil]];
     [OEMenu popUpContextMenu:menu forScreenRect:rectInScreen withEvent:nil options:options];

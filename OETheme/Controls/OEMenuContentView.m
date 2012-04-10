@@ -9,6 +9,7 @@
 #import "OEMenuContentView.h"
 #import "OEMenuContentView+OEMenuView.h"
 #import "OEMenu.h"
+#import "OEMenu+OEMenuViewAdditions.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 
 #pragma mark -
@@ -159,6 +160,26 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
     return nil;
+}
+
+- (void)scrollBy:(float)yDelta
+{
+    NSScrollView *scrollView = [self enclosingScrollView];
+
+    NSPoint point = [[scrollView contentView] bounds].origin;
+    point.y += yDelta;
+
+    [[scrollView documentView] scrollPoint:point];
+
+    OEMenuView *view = [(OEMenu *)[self window] OE_view];
+    [view highlightItemAtPoint:[view convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
+}
+
+- (void)scrollWheel:(NSEvent *)theEvent
+{
+    OEMenu *menu = (OEMenu *)[self window];
+    if([menu OE_closing]) return;
+    [self scrollBy:[theEvent deltaY]];
 }
 
 - (void)flagsChanged:(NSEvent *)theEvent
