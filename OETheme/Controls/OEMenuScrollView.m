@@ -57,12 +57,12 @@
 
 - (void)setFrameSize:(NSSize)newSize
 {
-    OEMenuContentView *contentView = [self documentView];
+    OEMenuContentView *documentView = [self documentView];
 
-    NSSize contentSize = { newSize.width, [contentView frame].size.height };
+    NSSize contentSize = { newSize.width, [documentView frame].size.height };
 
     [super setFrameSize:newSize];
-    [contentView setFrameSize:contentSize];
+    [documentView setFrameSize:contentSize];
 
     // Scroll the content to th upper left corner
     if(contentSize.height > newSize.height) [[self contentView] scrollToPoint:NSMakePoint(0.0, contentSize.height - newSize.height)];
