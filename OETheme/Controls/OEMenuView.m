@@ -522,9 +522,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 
     [[self subviews] enumerateObjectsUsingBlock:
      ^(OEMenuScrollView *obj, NSUInteger idx, BOOL *stop) {
-         NSSize intrinsicSize = [obj intrinsicSize];
-         width   = MAX(width, intrinsicSize.width);
-         height += intrinsicSize.height;
+         NSSize size  = [obj intrinsicSize];
+         width        = MAX(width, size.width);
+         height      += size.height;
      }];
 
     return NSMakeSize(width + _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right, height + _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom);
@@ -670,8 +670,8 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
                 {
                     arrowRect.size     = OEMaxXEdgeArrowSize;
                     arrowRect.origin.x = attachedPoint.x - _backgroundEdgeInsets.right;
-                    v1                     = NSMinX(arrowRect);
-                    v2                     = NSMaxX(arrowRect);
+                    v1                 = NSMinX(arrowRect);
+                    v2                 = NSMaxX(arrowRect);
                 }
                 arrowRect.origin.y = attachedPoint.y - floor((abs(_backgroundEdgeInsets.top - _backgroundEdgeInsets.bottom) + arrowRect.size.height) / 2.0);
 
@@ -692,8 +692,8 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
                 {
                     arrowRect.size     = OEMinYEdgeArrowSize;
                     arrowRect.origin.y = attachedPoint.y - _backgroundEdgeInsets.top;
-                    v1                     = NSMinY(arrowRect);
-                    v2                     = NSMaxY(arrowRect);
+                    v1                 = NSMinY(arrowRect);
+                    v2                 = NSMaxY(arrowRect);
                 }
                 arrowRect.origin.x = attachedPoint.x - floor((abs(_backgroundEdgeInsets.left - _backgroundEdgeInsets.right) + arrowRect.size.width) / 2.0);
 
