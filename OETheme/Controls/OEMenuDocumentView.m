@@ -1,13 +1,13 @@
 //
-//  OEMenuContentView.m
+//  OEMenuDocumentView.m
 //  OEThemeFactory
 //
 //  Created by Faustino Osuna on 4/10/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "OEMenuContentView.h"
-#import "OEMenuContentView+OEMenuView.h"
+#import "OEMenuDocumentView.h"
+#import "OEMenuDocumentView+OEMenuView.h"
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
@@ -35,7 +35,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 
 #pragma mark -
 
-@implementation OEMenuContentView
+@implementation OEMenuDocumentView
 @synthesize style = _style;
 @synthesize itemArray = _itemArray;
 @synthesize containImages = _containImages;
@@ -332,7 +332,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 
 @end
 
-@implementation OEMenuContentView (OEMenuView)
+@implementation OEMenuDocumentView (OEMenuView)
 
 - (void)OE_layoutIfNeeded
 {

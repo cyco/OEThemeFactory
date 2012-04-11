@@ -7,8 +7,8 @@
 //
 
 #import "OEMenuScrollView.h"
-#import "OEMenuContentView.h"
-#import "OEMenuContentView+OEMenuView.h"
+#import "OEMenuDocumentView.h"
+#import "OEMenuDocumentView+OEMenuView.h"
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
 
@@ -28,36 +28,36 @@
         [self setHasVerticalScroller:YES];
         [self setVerticalScroller:[[_OEMenuScroller alloc] init]];
         [self setVerticalScrollElasticity:NSScrollElasticityNone];
-        [self setDocumentView:[[OEMenuContentView alloc] initWithFrame:[self bounds]]];
+        [self setDocumentView:[[OEMenuDocumentView alloc] initWithFrame:[self bounds]]];
     }
     return self;
 }
 
 - (void)setStyle:(OEMenuStyle)style
 {
-    [(OEMenuContentView *)[self documentView] setStyle:style];
+    [(OEMenuDocumentView *)[self documentView] setStyle:style];
 }
 
 - (OEMenuStyle)style
 {
-    return [(OEMenuContentView *)[self documentView] style];
+    return [(OEMenuDocumentView *)[self documentView] style];
 }
 
 - (NSSize)intrinsicSize
 {
-    return [(OEMenuContentView *)[self documentView] intrinsicSize];
+    return [(OEMenuDocumentView *)[self documentView] intrinsicSize];
 }
 
 - (void)setItemArray:(NSArray *)itemArray
 {
-    OEMenuContentView *contentView = (OEMenuContentView *)[self documentView];
+    OEMenuDocumentView *contentView = (OEMenuDocumentView *)[self documentView];
     [contentView setItemArray:itemArray];
     [[self documentView] setFrameSize:[contentView intrinsicSize]];
 }
 
 - (void)setFrameSize:(NSSize)newSize
 {
-    OEMenuContentView *documentView = [self documentView];
+    OEMenuDocumentView *documentView = [self documentView];
 
     NSSize contentSize = { newSize.width, [documentView frame].size.height };
 
@@ -70,17 +70,17 @@
 
 - (NSArray *)itemArray
 {
-    return [(OEMenuContentView *)[self documentView] itemArray];
+    return [(OEMenuDocumentView *)[self documentView] itemArray];
 }
 
 - (void)setContainImages:(BOOL)containImages
 {
-    [(OEMenuContentView *)[self documentView] setContainImages:containImages];
+    [(OEMenuDocumentView *)[self documentView] setContainImages:containImages];
 }
 
 - (BOOL)doesMenuContainImages
 {
-    return [(OEMenuContentView *)[self documentView] doesMenuContainImages];
+    return [(OEMenuDocumentView *)[self documentView] doesMenuContainImages];
 }
 
 @end

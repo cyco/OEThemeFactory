@@ -10,8 +10,8 @@
 #import "OEMenuView+OEMenuAdditions.h"
 #import "OEMenu+OEMenuViewAdditions.h"
 #import "OEMenuScrollView.h"
-#import "OEMenuContentView.h"
-#import "OEMenuContentView+OEMenuView.h"
+#import "OEMenuDocumentView.h"
+#import "OEMenuDocumentView+OEMenuView.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 #import "OETheme.h"
 #import "OEInlineMenuItem.h"
@@ -417,7 +417,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 - (NSMenuItem *)itemAtPoint:(NSPoint)point
 {
     NSView *view = [self hitTest:point];
-    if((view != nil) && (view != self) && [view isKindOfClass:[OEMenuContentView class]]) return [(OEMenuContentView *)view OE_itemAtPoint:[self convertPoint:point toView:view]];
+    if((view != nil) && (view != self) && [view isKindOfClass:[OEMenuDocumentView class]]) return [(OEMenuDocumentView *)view OE_itemAtPoint:[self convertPoint:point toView:view]];
     return nil;
 }
 

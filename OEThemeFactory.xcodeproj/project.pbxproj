@@ -24,7 +24,7 @@
 		EF3B0F361534C56F0096D358 /* OEInlineMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = EF3B0F351534C56F0096D358 /* OEInlineMenuItem.m */; };
 		EF4A20AB153412680055B37B /* OEMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = EF4A20A815340E290055B37B /* OEMenu.m */; };
 		EF4A20AE153412730055B37B /* OEMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF4A20AD153412730055B37B /* OEMenuView.m */; };
-		EF4A20B4153439900055B37B /* OEMenuContentView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF4A20B3153439900055B37B /* OEMenuContentView.m */; };
+		EF4A20B4153439900055B37B /* OEMenuDocumentView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF4A20B3153439900055B37B /* OEMenuDocumentView.m */; };
 		EF910A27150240580071A0A8 /* OEThemeGradient.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A26150240580071A0A8 /* OEThemeGradient.m */; };
 		EF910A6215025CA00071A0A8 /* OEButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EF910A6115025CA00071A0A8 /* OEButton.m */; };
 		EF910A68150266C90071A0A8 /* toolbar_view_buttons.png in Resources */ = {isa = PBXBuildFile; fileRef = EF910A67150266C90071A0A8 /* toolbar_view_buttons.png */; };
@@ -75,7 +75,7 @@
 		EF37DA4014FC3F110098A077 /* OEThemeImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeImage.m; sourceTree = "<group>"; };
 		EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSImage+OEDrawingAdditions.h"; sourceTree = "<group>"; };
 		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
-		EF3B0EF9153492E80096D358 /* OEMenuContentView+OEMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OEMenuContentView+OEMenuView.h"; sourceTree = "<group>"; };
+		EF3B0EF9153492E80096D358 /* OEMenuDocumentView+OEMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OEMenuDocumentView+OEMenuView.h"; sourceTree = "<group>"; };
 		EF3B0F061534B0170096D358 /* OEMenuScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenuScrollView.h; sourceTree = "<group>"; };
 		EF3B0F071534B0180096D358 /* OEMenuScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuScrollView.m; sourceTree = "<group>"; };
 		EF3B0F341534C56E0096D358 /* OEInlineMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEInlineMenuItem.h; sourceTree = "<group>"; };
@@ -85,8 +85,8 @@
 		EF4A20AC153412730055B37B /* OEMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenuView.h; sourceTree = "<group>"; };
 		EF4A20AD153412730055B37B /* OEMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuView.m; sourceTree = "<group>"; };
 		EF4A20AF1534334A0055B37B /* OEMenuView+OEMenuAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OEMenuView+OEMenuAdditions.h"; sourceTree = "<group>"; };
-		EF4A20B2153439900055B37B /* OEMenuContentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenuContentView.h; sourceTree = "<group>"; };
-		EF4A20B3153439900055B37B /* OEMenuContentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuContentView.m; sourceTree = "<group>"; };
+		EF4A20B2153439900055B37B /* OEMenuDocumentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenuDocumentView.h; sourceTree = "<group>"; };
+		EF4A20B3153439900055B37B /* OEMenuDocumentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuDocumentView.m; sourceTree = "<group>"; };
 		EF910A25150240580071A0A8 /* OEThemeGradient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEThemeGradient.h; sourceTree = "<group>"; };
 		EF910A26150240580071A0A8 /* OEThemeGradient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEThemeGradient.m; sourceTree = "<group>"; };
 		EF910A6015025CA00071A0A8 /* OEButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEButton.h; sourceTree = "<group>"; };
@@ -186,11 +186,11 @@
 				EF4A20AD153412730055B37B /* OEMenuView.m */,
 				EF3B0F061534B0170096D358 /* OEMenuScrollView.h */,
 				EF3B0F071534B0180096D358 /* OEMenuScrollView.m */,
-				EF4A20B2153439900055B37B /* OEMenuContentView.h */,
-				EF4A20B3153439900055B37B /* OEMenuContentView.m */,
+				EF4A20B2153439900055B37B /* OEMenuDocumentView.h */,
+				EF4A20B3153439900055B37B /* OEMenuDocumentView.m */,
 				EF34773B153472F900C947E9 /* OEMenu+OEMenuViewAdditions.h */,
 				EF4A20AF1534334A0055B37B /* OEMenuView+OEMenuAdditions.h */,
-				EF3B0EF9153492E80096D358 /* OEMenuContentView+OEMenuView.h */,
+				EF3B0EF9153492E80096D358 /* OEMenuDocumentView+OEMenuView.h */,
 				EF3B0F341534C56E0096D358 /* OEInlineMenuItem.h */,
 				EF3B0F351534C56F0096D358 /* OEInlineMenuItem.m */,
 				EFEBDB6B151079C2004DDC8C /* OEMenuItemExtraData.h */,
@@ -453,7 +453,7 @@
 				EFEBDB71151079E1004DDC8C /* NSMenuItem+OEMenuItemExtraDataAdditions.m in Sources */,
 				EF4A20AB153412680055B37B /* OEMenu.m in Sources */,
 				EF4A20AE153412730055B37B /* OEMenuView.m in Sources */,
-				EF4A20B4153439900055B37B /* OEMenuContentView.m in Sources */,
+				EF4A20B4153439900055B37B /* OEMenuDocumentView.m in Sources */,
 				EF3B0EFD153496E40096D358 /* OEMenuItemExtraData.m in Sources */,
 				EF3B0F081534B0180096D358 /* OEMenuScrollView.m in Sources */,
 				EF3B0F361534C56F0096D358 /* OEInlineMenuItem.m in Sources */,

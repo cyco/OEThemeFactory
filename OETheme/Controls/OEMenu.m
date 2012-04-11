@@ -10,7 +10,7 @@
 #import "OEMenu+OEMenuViewAdditions.h"
 #import "OEMenuView.h"
 #import "OEMenuView+OEMenuAdditions.h"
-#import "OEMenuContentView.h"
+#import "OEMenuDocumentView.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 #import "OEPopUpButton.h"
 

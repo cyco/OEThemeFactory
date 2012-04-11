@@ -1,5 +1,5 @@
 //
-//  OEMenuContentView.h
+//  OEMenuDocumentView.h
 //  OEThemeFactory
 //
 //  Created by Faustino Osuna on 4/10/12.
@@ -10,7 +10,7 @@
 #import "OEMenu.h"
 #import "OETheme.h"
 
-@interface OEMenuContentView : NSView
+@interface OEMenuDocumentView : NSView
 {
 @private
     NSArray *_itemArray;                        // Array of NSMenu items
@@ -27,7 +27,7 @@
     OEThemeImage          *_submenuArrowImage;
 }
 
-@property(nonatomic, assign)   OEMenuStyle style;
+@property(nonatomic, assign)   OEMenuStyle  style;
 @property(nonatomic, readonly) NSSize       intrinsicSize;
 @property(nonatomic, retain)   NSArray     *itemArray;
 

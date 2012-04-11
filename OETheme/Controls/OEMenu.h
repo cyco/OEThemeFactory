@@ -41,7 +41,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 }
 
 @class OEMenuView;
-@class OEMenuContentView;
+@class OEMenuDocumentView;
 
 @interface OEMenu : NSWindow
 {
