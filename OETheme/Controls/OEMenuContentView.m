@@ -181,7 +181,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;     // Delay before show
 
 - (OEThemeState)OE_currentStateFromMenuItem:(NSMenuItem *)item
 {
-    return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:([self highlightedItem] == item) enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
+    return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:([(OEMenu *)[self window] highlightedItem] == item) enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
 }
 
 - (NSDictionary *)OE_textAttributes:(OEThemeTextAttributes *)themeTextAttributes forState:(OEThemeState)state
@@ -257,11 +257,6 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;     // Delay before show
     const CGFloat minimumWidthPadding  = OEMenuItemTickMarkWidth + ([self doesMenuContainImages] ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + OEMenuItemInsets.left + OEMenuItemInsets.right;
     const CGFloat minimumHeightPadding = OEMenuItemInsets.top + OEMenuItemInsets.bottom;
     _intrinsicSize = NSMakeSize(ceil(width + minimumWidthPadding), ceil(y + minimumHeightPadding));
-}
-
-- (NSMenuItem *)highlightedItem
-{
-    return [(OEMenu *)[self window] highlightedItem];
 }
 
 - (void)setFrameSize:(NSSize)newSize
