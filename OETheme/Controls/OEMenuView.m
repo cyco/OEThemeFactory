@@ -633,6 +633,10 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
         // If the attached point is not visible, then effectively hide the arrow
         _effectiveArrowEdge = OENoEdge;
     }
+    else
+    {
+        _effectiveArrowEdge = _arrowEdge;
+    }
 
     // Recalculate border path
     const BOOL isSubmenu          = [[self OE_menu] isSubmenu];
