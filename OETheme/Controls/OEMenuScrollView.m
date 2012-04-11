@@ -33,11 +33,6 @@
     return self;
 }
 
-- (void)OE_layoutIfNeeded
-{
-    [(OEMenuContentView *)[self documentView] OE_layoutIfNeeded];
-}
-
 - (void)setStyle:(OEMenuStyle)style
 {
     [(OEMenuContentView *)[self documentView] setStyle:style];

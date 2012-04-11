@@ -11,8 +11,6 @@
 
 @interface OEMenuScrollView : NSScrollView
 
-- (void)OE_layoutIfNeeded;
-
 @property(nonatomic, assign)   OEMenuStyle style;
 @property(nonatomic, readonly) NSSize       intrinsicSize;
 @property(nonatomic, retain)   NSArray     *itemArray;
