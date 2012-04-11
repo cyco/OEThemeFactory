@@ -82,8 +82,7 @@
                              [NSNumber numberWithUnsignedInteger:OEMenuStyleDark], OEMenuOptionsStyleKey,
                              [NSValue valueWithSize:NSMakeSize(2000, 200)], OEMenuOptionsMaximumSizeKey,
                              nil];
-    NSRect rectInScreen = [[self window] convertRectToScreen:[sender convertRect:[sender bounds] toView:nil]];
-    [OEMenu popUpContextMenu:menu forScreenRect:rectInScreen withEvent:nil options:options];
+    [OEMenu popUpContextMenu:menu withEvent:nil forView:sender options:options];
 }
 
 @end

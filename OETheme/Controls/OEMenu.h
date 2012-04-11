@@ -29,6 +29,7 @@ extern NSString * const OEMenuOptionsStyleKey;
 extern NSString * const OEMenuOptionsArrowEdgeKey;
 extern NSString * const OEMenuOptionsMaximumSizeKey;
 extern NSString * const OEMenuOptionsHighlightedItemKey;
+extern NSString * const OEMenuOptionsScreenRectKey;
 
 // Returns an NSRect inset using the specified edge insets
 static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
@@ -52,7 +53,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 }
 
 + (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event options:(NSDictionary *)options;
-+ (void)popUpContextMenu:(NSMenu *)menu forScreenRect:(NSRect)rect withEvent:(NSEvent *)event options:(NSDictionary *)options;
++ (void)popUpContextMenu:(NSMenu *)menu withEvent:(NSEvent *)event forView:(NSView *)view options:(NSDictionary *)options;
 
 - (void)cancelTracking;
 - (void)cancelTrackingWithoutAnimation;

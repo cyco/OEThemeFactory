@@ -18,6 +18,7 @@ NSString * const OEMenuOptionsStyleKey           = @"OEMenuOptionsStyle";
 NSString * const OEMenuOptionsArrowEdgeKey       = @"OEMenuOptionsArrowEdge";
 NSString * const OEMenuOptionsMaximumSizeKey     = @"OEMenuOptionsMaximumSize";
 NSString * const OEMenuOptionsHighlightedItemKey = @"OEMenuOptionsHighlightedItem";
+NSString * const OEMenuOptionsScreenRectKey      = @"OEMenuOptionsScreenRect";
 
 static const CGFloat OEMenuFadeOutDuration = 0.075; // Animation duration to fade the menu out
 static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before menu interprets a mouse down event between a click or drag operation
@@ -33,9 +34,9 @@ static NSMutableArray *__sharedMenuStack;
 @implementation OEMenu
 @synthesize highlightedItem = _highlightedItem;
 
-+ (OEMenu *)OE_popUpContextMenuWithMenu:(NSMenu *)menu options:(NSDictionary *)options
++ (OEMenu *)OE_popUpContextMenuWithMenu:(NSMenu *)menu forScreen:(NSScreen *)screen options:(NSDictionary *)options
 {
-    OEMenu *result = [[self alloc] initWithContentRect:NSZeroRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:[NSScreen mainScreen]];
+    OEMenu *result = [[self alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 10.0, 10.0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:screen];
     NSAssert(result != nil, @"out of memory");
     [result setMenu:menu];
     [result OE_parseOptions:options];
@@ -54,16 +55,21 @@ static NSMutableArray *__sharedMenuStack;
     [newOptions setValue:[NSNumber numberWithUnsignedInteger:OENoEdge] forKey:OEMenuOptionsArrowEdgeKey];
     [newOptions setValue:[button selectedItem] forKey:OEMenuOptionsHighlightedItemKey];
 
-    OEMenu *result = [self OE_popUpContextMenuWithMenu:[button menu] options:newOptions];
+    OEMenu *result = [self OE_popUpContextMenuWithMenu:[button menu] forScreen:[[button window] screen] options:newOptions];
     [result OE_updateFrameAttachedToPopupButton:button alignSelectedItemWithRect:titleRectInScreen];
     [result OE_showMenuAttachedToWindow:[button window] withEvent:event];
 }
 
-+ (void)popUpContextMenu:(NSMenu *)menu forScreenRect:(NSRect)rect withEvent:(NSEvent *)event options:(NSDictionary *)options
++ (void)popUpContextMenu:(NSMenu *)menu withEvent:(NSEvent *)event forView:(NSView *)view options:(NSDictionary *)options
 {
     // Calculate the frame for the popup menu so that the menu appears to be attached to the specified view
-    OEMenu *result = [self OE_popUpContextMenuWithMenu:menu options:options];
-    [[NSApp keyWindow] addChildWindow:result ordered:NSWindowAbove];
+    OEMenu *result = [self OE_popUpContextMenuWithMenu:menu forScreen:[[view window] screen] options:options];
+
+    NSRect   rect = NSZeroRect;
+    NSValue *rectValue = [options objectForKey:OEMenuOptionsScreenRectKey];
+    if(rectValue) rect = [rectValue rectValue];
+    else          rect = [[view window] convertRectToScreen:[view convertRect:[view bounds] toView:nil]];
+
     [result OE_updateFrameAttachedToScreenRect:rect];
     [result OE_showMenuAttachedToWindow:[event window] withEvent:event];
 }
@@ -203,7 +209,7 @@ static NSMutableArray *__sharedMenuStack;
 
     NSView             *containerView    = [_view OE_viewThatContainsItem:[self highlightedItem]];
     const NSRect        selectedItemRect = [self convertRectToScreen:[containerView convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
-    const NSRect        screenFrame      = [self OE_confinementRectForScreen:([self screen] ?: [[button window] screen])];
+    const NSRect        screenFrame      = [self OE_confinementRectForScreen:[self screen]];
     const NSEdgeInsets  edgeInsets       = [_view backgroundEdgeInsets];
     const NSRect        buttonFrame      = [button bounds];
 
@@ -228,7 +234,7 @@ static NSMutableArray *__sharedMenuStack;
 // Updates the frame's position and dimensions as it relates to the rect specified on the screen
 - (void)OE_updateFrameAttachedToScreenRect:(NSRect)rect
 {
-    const NSRect screenFrame = [self OE_confinementRectForScreen:([self screen] ?: [NSScreen mainScreen])];
+    const NSRect screenFrame = [self OE_confinementRectForScreen:[self screen]];
 
     // Figure out the size and position of the frame, as well as the anchor point.
     OERectEdge edge          = [_view arrowEdge];
@@ -635,7 +641,7 @@ static NSMutableArray *__sharedMenuStack;
         return;
     }
 
-    _submenu = [isa OE_popUpContextMenuWithMenu:submenu options:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedInteger:[_view style]] forKey:OEMenuOptionsStyleKey]];
+    _submenu = [isa OE_popUpContextMenuWithMenu:submenu forScreen:[self screen] options:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedInteger:[_view style]] forKey:OEMenuOptionsStyleKey]];
     _submenu->_supermenu = self;
     [self OE_updateFrameForSubmenu];
     [_submenu OE_showMenuAttachedToWindow:[_view window]];
