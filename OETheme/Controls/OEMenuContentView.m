@@ -26,7 +26,7 @@ static const CGFloat OEMenuItemSeparatorOffset    =  3.0;
 #pragma mark -
 #pragma mark Menu Item Insets
 
-const NSEdgeInsets OEMenuItemInsets        = { 0.0, 5.0, 0.0, 5.0 };
+const NSEdgeInsets OEMenuItemInsets = { 0.0, 5.0, 0.0, 5.0 };
 
 #pragma mark -
 #pragma mark Menu Item Default Mask
@@ -36,9 +36,9 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 #pragma mark -
 #pragma mark Animation Timing
 
-static const CGFloat OEMenuItemFlashDelay       = 0.075;
-static const CGFloat OEMenuItemHighlightDelay   = 1.0;
-static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
+static const CGFloat OEMenuItemFlashDelay       = 0.075;    // Duration to flash an item on and off, after user wants to perform a menu item action
+static const CGFloat OEMenuItemHighlightDelay   = 1.0;      // Delay before changing the highlight of an item with a submenu
+static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;     // Delay before showing an item's submenu
 
 #pragma mark -
 
@@ -59,7 +59,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 
 - (void)dealloc
 {
-    // TODO: May not need following statement
+    // -setItemArray is responsible for attaching an instance of OEMenuItemExtraData when the menu is first set, following operation makes sure we clear out that extra data
     [self setItemArray:nil];
 }
 
@@ -67,16 +67,25 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 {
     [self OE_layoutIfNeeded];
 
-    NSArray *items         = _itemArray;
-    const NSUInteger count = [items count];
-
+    const NSUInteger count = [_itemArray count];
     if(count == 0) return;
 
-    NSSize separatorSize  = [_menuItemSeparatorImage size];
+    const NSSize separatorSize = [_separatorImage size];
 
+    // Setup positioning frames
+    NSRect tickMarkFrame = NSMakeRect(0.0, 0.0, NSWidth([self bounds]), ([self doesMenuContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage));
+    NSRect imageFrame;
+    NSRect textFrame;
+    NSRect submenuArrowFrame;
+
+    NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                                   NSMinXEdge);
+    NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  ([self doesMenuContainImages] ? OEMenuItemImageWidth : 0), NSMinXEdge);
+    NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                               NSMaxXEdge);
+
+    // Retrieve UI objects from the themed items
     for(NSUInteger i = 0; i < count; i++)
     {
-        NSMenuItem *item = [items objectAtIndex:i];
+        NSMenuItem *item = [_itemArray objectAtIndex:i];
         if(![item isHidden])
         {
             // Figure out if an alternate item should be rendered
@@ -89,39 +98,28 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
             {
                 menuItemFrame.origin.y    = NSMaxY(menuItemFrame) - OEMenuItemSeparatorOffset;
                 menuItemFrame.size.height = separatorSize.height;
-                [_menuItemSeparatorImage drawInRect:menuItemFrame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                [_separatorImage drawInRect:menuItemFrame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
             }
             else
             {
-                // Set up positioning frames
-                NSRect tickMarkFrame = menuItemFrame;
-                NSRect imageFrame;
-                NSRect textFrame;
-                NSRect submenuArrowFrame;
-
-                NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                                   NSMinXEdge);
-                NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  ([self doesMenuContainImages] ? OEMenuItemImageWidth : 0), NSMinXEdge);
-                NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                               NSMaxXEdge);
-
-                // Retrieve UI objects from the themed items
                 OEThemeState  menuItemState     = [self OE_currentStateFromMenuItem:item];
-                NSImage      *tickMarkImage     = [_menuItemTick imageForState:menuItemState];
-                NSImage      *submenuArrowImage = [_submenuArrow imageForState:menuItemState];
-                NSDictionary *textAttributes    = [self OE_textAttributes:_menuItemAttributes forState:menuItemState];
+                NSImage      *tickMarkImage     = [_tickImage imageForState:menuItemState];
+                NSImage      *submenuArrowImage = [_submenuArrowImage imageForState:menuItemState];
+                NSDictionary *textAttributes    = [self OE_textAttributes:_textAttributes forState:menuItemState];
 
                 // Retrieve the item's image and title
                 NSImage  *menuItemImage = [item image];
                 NSString *title         = [item title];
 
                 // Draw the item's background
-                [[_menuItemGradient gradientForState:menuItemState] drawInRect:menuItemFrame];
+                [[_backgroundGradient gradientForState:menuItemState] drawInRect:menuItemFrame];
 
                 // Draw the item's tick mark
                 if(tickMarkImage)
                 {
                     NSRect tickMarkRect   = { .size = [tickMarkImage size] };
-                    tickMarkRect.origin.x = tickMarkFrame.origin.x + (NSWidth(tickMarkFrame) - NSWidth(tickMarkRect)) / 2.0;
-                    tickMarkRect.origin.y = menuItemFrame.origin.y + (NSHeight(tickMarkFrame) - NSHeight(tickMarkRect)) / 2.0;
+                    tickMarkRect.origin.x = tickMarkFrame.origin.x + ((NSWidth(tickMarkFrame) - NSWidth(tickMarkRect)) / 2.0);
+                    tickMarkRect.origin.y = menuItemFrame.origin.y + ((NSHeight(tickMarkFrame) - NSHeight(tickMarkRect)) / 2.0);
 
                     [tickMarkImage drawInRect:NSIntegralRect(tickMarkRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
                 }
@@ -131,7 +129,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
                 {
                     NSRect imageRect   = { .size = [menuItemImage size] };
                     imageRect.origin.x = imageFrame.origin.x + 2.0;
-                    imageRect.origin.y = menuItemFrame.origin.y + (NSHeight(imageFrame) - NSHeight(imageRect)) / 2.0;
+                    imageRect.origin.y = menuItemFrame.origin.y + ((NSHeight(imageFrame) - NSHeight(imageRect)) / 2.0);
 
                     [menuItemImage drawInRect:NSIntegralRect(imageRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
                 }
@@ -141,7 +139,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
                 {
                     NSRect arrowRect   = { .size = [submenuArrowImage size] };
                     arrowRect.origin.x = submenuArrowFrame.origin.x;
-                    arrowRect.origin.y = menuItemFrame.origin.y + (NSHeight(submenuArrowFrame) - NSHeight(arrowRect)) / 2.0;
+                    arrowRect.origin.y = menuItemFrame.origin.y + ((NSHeight(submenuArrowFrame) - NSHeight(arrowRect)) / 2.0);
 
                     [submenuArrowImage drawInRect:NSIntegralRect(arrowRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
                 }
@@ -149,7 +147,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
                 // Draw Item Title
                 NSRect textRect   = { .size = [title sizeWithAttributes:textAttributes] };
                 textRect.origin.x = textFrame.origin.x;
-                textRect.origin.y = menuItemFrame.origin.y + (NSHeight(textFrame) - NSHeight(textRect)) / 2.0;
+                textRect.origin.y = menuItemFrame.origin.y + ((NSHeight(textFrame) - NSHeight(textRect)) / 2.0);
 
                 [title drawInRect:textRect withAttributes:textAttributes];
             }
@@ -227,7 +225,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     const NSRect bounds      = [self bounds];
     const NSRect contentRect = OENSInsetRectWithEdgeInsets(bounds, OEMenuItemInsets);
 
-    NSDictionary       *attributes    = [_menuItemAttributes textAttributesForState:OEThemeStateDefault];
+    NSDictionary       *attributes    = [_textAttributes textAttributesForState:OEThemeStateDefault];
     const CGFloat       itemHeight    = [self doesMenuContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
     __block CGFloat     y             = 0.0;
     __block CGFloat     width         = 0.0;
@@ -324,11 +322,11 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 - (void)OE_recacheTheme
 {
     NSString *styleKeyPrefix = (_style == OEMenuStyleDark ? @"dark_menu_" : @"light_menu_");
-    _menuItemSeparatorImage  = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"separator_item"] forState:OEThemeStateDefault];
-    _menuItemGradient        = [[OETheme sharedTheme] themeGradientForKey:[styleKeyPrefix stringByAppendingString:@"item_background"]];
-    _menuItemTick            = [[OETheme sharedTheme] themeImageForKey:[styleKeyPrefix stringByAppendingString:@"item_tick"]];
-    _menuItemAttributes      = [[OETheme sharedTheme] themeTextAttributesForKey:[styleKeyPrefix stringByAppendingString:@"item"]];
-    _submenuArrow            = [[OETheme sharedTheme] themeImageForKey:[styleKeyPrefix stringByAppendingString:@"submenu_arrow"]];
+    _separatorImage  = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"separator_item"] forState:OEThemeStateDefault];
+    _backgroundGradient        = [[OETheme sharedTheme] themeGradientForKey:[styleKeyPrefix stringByAppendingString:@"item_background"]];
+    _tickImage            = [[OETheme sharedTheme] themeImageForKey:[styleKeyPrefix stringByAppendingString:@"item_tick"]];
+    _textAttributes      = [[OETheme sharedTheme] themeTextAttributesForKey:[styleKeyPrefix stringByAppendingString:@"item"]];
+    _submenuArrowImage            = [[OETheme sharedTheme] themeImageForKey:[styleKeyPrefix stringByAppendingString:@"submenu_arrow"]];
 
     [self setNeedsDisplay:YES];
 }

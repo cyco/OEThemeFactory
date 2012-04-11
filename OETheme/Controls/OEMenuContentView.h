@@ -13,20 +13,18 @@
 @interface OEMenuContentView : NSView
 {
 @private
-    NSArray *_itemArray;
+    NSArray *_itemArray;                        // Array of NSMenu items
+    BOOL     _needsLayout;                      // Flag used to notify that the menu item's frames should be invalidated
+    NSSize   _intrinsicSize;                    // Full size of the component, does not account for min / max sizes
 
-    BOOL _needsLayout;                  // Flag used to notify that the menu item's frames should be invalidated
+    NSUInteger _keyModifierMask;                // Aggregate mask of all the key modifiers used within the menu item (used to trim NSEvent's modifierFlags)
+    NSUInteger _lasKeyModifierMask;             // Last NSEvent's modifierFlags
 
-    NSSize _intrinsicSize;
-
-    NSUInteger _keyModifierMask;        // Aggregate mask of all the key modifiers used within the menu item (used to trim NSEvent's modifierFlags)
-    NSUInteger _lasKeyModifierMask;     // Las NSEvent's modifierFlags
-
-    NSImage               *_menuItemSeparatorImage;
-    OEThemeGradient       *_menuItemGradient;
-    OEThemeImage          *_menuItemTick;
-    OEThemeTextAttributes *_menuItemAttributes;
-    OEThemeImage          *_submenuArrow;
+    NSImage               *_separatorImage;
+    OEThemeGradient       *_backgroundGradient;
+    OEThemeImage          *_tickImage;
+    OEThemeTextAttributes *_textAttributes;
+    OEThemeImage          *_submenuArrowImage;
 }
 
 @property(nonatomic, assign)   OEMenuStyle style;
