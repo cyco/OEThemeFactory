@@ -12,6 +12,7 @@
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
 
+// Fake menu scroller (doesn't render anything)
 @interface _OEMenuScroller : NSScroller
 @end
 
@@ -63,12 +64,13 @@
 {
     OEMenuContentView *contentView = [self documentView];
 
-    NSSize size = [contentView frame].size;
-    size.width = newSize.width;
-    [super setFrameSize:newSize];
-    [contentView setFrameSize:size];
+    NSSize contentSize = { newSize.width, [contentView frame].size.height };
 
-    if(size.height > newSize.height) [[self contentView] scrollToPoint:NSMakePoint(0.0, size.height - newSize.height)];
+    [super setFrameSize:newSize];
+    [contentView setFrameSize:contentSize];
+
+    // Scroll the content to th upper left corner
+    if(contentSize.height > newSize.height) [[self contentView] scrollToPoint:NSMakePoint(0.0, contentSize.height - newSize.height)];
 }
 
 - (NSArray *)itemArray
@@ -98,8 +100,10 @@
 - (void)setDoubleValue:(double)aDouble
 {
     [super setDoubleValue:aDouble];
+
     if([[self window] isVisible])
     {
+        // Update the highlighted item to be the item underneath the mouse
         OEMenuView *view = [(OEMenu *)[self window] OE_view];
         [view highlightItemAtPoint:[view convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
     }

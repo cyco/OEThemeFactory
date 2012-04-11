@@ -18,7 +18,7 @@
     NSSize   _intrinsicSize;                    // Full size of the component, does not account for min / max sizes
 
     NSUInteger _keyModifierMask;                // Aggregate mask of all the key modifiers used within the menu item (used to trim NSEvent's modifierFlags)
-    NSUInteger _lasKeyModifierMask;             // Last NSEvent's modifierFlags
+    NSUInteger _lastKeyModifierMask;            // Last NSEvent's modifierFlags
 
     NSImage               *_separatorImage;
     OEThemeGradient       *_backgroundGradient;

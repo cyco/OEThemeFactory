@@ -29,7 +29,7 @@ static const NSEdgeInsets OEMenuBackgroundMaxYEdgeInsets = {14.0,  5.0,  5.0,  5
 #pragma mark -
 #pragma mark Content Insets
 
-const NSEdgeInsets OEMenuContentEdgeInsets = { 7.0,  0.0,  7.0,  0.0};
+const NSEdgeInsets OEMenuContentEdgeInsets = { 7.0,  0.0,  7.0,  0.0}; // Value is extern, used by OEMenu.m to calculate menu placement
 
 #pragma mark -
 #pragma mark Edge Arrow Sizes
@@ -42,9 +42,9 @@ static const NSSize OEMaxYEdgeArrowSize = (NSSize){15.0, 10.0};
 #pragma mark -
 #pragma mark Animation Timing
 
-static const CGFloat OEMenuItemFlashDelay       = 0.075;
-static const CGFloat OEMenuItemHighlightDelay   = 1.0;
-static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
+static const CGFloat OEMenuItemFlashDelay       = 0.075; // Duration to flash an item on and off, after user wants to perform a menu item action
+static const CGFloat OEMenuItemHighlightDelay   = 1.0;   // Delay before changing the highlight of an item with a submenu
+static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing an item's submenu
 
 #pragma mark -
 
@@ -140,6 +140,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 
 - (BOOL)acceptsFirstResponder
 {
+    // Return yes, we want to capture key board events to send to the various views as necessary
     return YES;
 }
 
@@ -180,23 +181,28 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 - (void)flagsChanged:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
-    _lasKeyModifierMask = [theEvent modifierFlags];
 
-    [[self subviews] enumerateObjectsUsingBlock:
-     ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
-     {
-         [[obj documentView] flagsChanged:theEvent];
-     }];
+    // Figure out if any of the modifier flags that we are interested have changed
+    NSUInteger modiferFlags = [theEvent modifierFlags] & _keyModifierMask;
+    if(_lastKeyModifierMask != modiferFlags)
+    {
+        _lastKeyModifierMask = modiferFlags;
+        [[self subviews] enumerateObjectsUsingBlock:
+         ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
+         {
+             [[obj documentView] flagsChanged:theEvent];
+         }];
+    }
 }
 
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return YES;
 
-    // I couldn't find an NSResponder method that was tied to the Reeturn and Space key, therefore, we capture these two key codes separate from the other keyboard navigation methods
+    // I couldn't find an NSResponder method that was tied to the Return and Space key
     if([theEvent keyCode] == kVK_Return || [theEvent keyCode] == kVK_Space)
     {
-        // If return key or space is key is invoked, it will either open the associated submenu or perform the associated action
+        // Open the associated submenu or perform the associated action
         if([[[self OE_menu] highlightedItem] hasSubmenu]) [self moveRight:nil];
         else                                              [self OE_performAction];
 
@@ -211,7 +217,6 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     OEMenu *menu = [self OE_menu];
     if([menu OE_closing]) return;
 
-    // There is nothing to do if there are no items
     const NSInteger count = [_itemArray count];
     if(count == 0) return;
 
@@ -223,7 +228,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     // If no item is highlighted then we begin from the bottom of the list, if an item is highlighted we go to the next preceeding valid item (not seperator, not disabled, and not hidden)
     for(NSInteger i = (item == nil ? count : index) - 1; i >= 0; i--)
     {
-        NSMenuItem *obj = [[[_itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lasKeyModifierMask];
+        NSMenuItem *obj = [[[_itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lastKeyModifierMask];
         if(![obj isHidden] && ![obj isSeparatorItem] && [obj isEnabled] && ![obj isAlternate])
         {
             item = obj;
@@ -239,7 +244,6 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     OEMenu *menu = [self OE_menu];
     if([menu OE_closing]) return;
 
-    // There is nothing to do if there are no items
     const NSInteger count = [_itemArray count];
     if(count == 0) return;
 
@@ -251,7 +255,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     // If no item is highlighted then we begin from the top of the list, if an item is highlighted we go to the next proceeding valid item (not seperator, not disabled, and not hidden)
     for(NSInteger i = (item == nil ? -1 : index) + 1; i < count; i++)
     {
-        NSMenuItem *obj = [[[_itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lasKeyModifierMask];
+        NSMenuItem *obj = [[[_itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lastKeyModifierMask];
         if(![obj isHidden] && ![obj isSeparatorItem] && [obj isEnabled] && ![obj isAlternate])
         {
             item = obj;
@@ -266,6 +270,8 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 {
     OEMenu *menu = [self OE_menu];
     if([menu OE_closing]) return;
+
+    // Hide the menu, if this is a submenu
     if([menu isSubmenu]) [menu OE_hideWindowWithoutAnimation];
 }
 
@@ -304,7 +310,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 
 - (void)OE_performAction
 {
-    OEMenu    *menu            = [self OE_menu];
+    OEMenu     *menu            = [self OE_menu];
     NSMenuItem *highlightedItem = [menu highlightedItem];
 
     if([menu OE_closing] || [highlightedItem hasSubmenu]) return;
@@ -345,7 +351,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 - (void)OE_delayedSetHighlightedItem:(NSTimer *)timer
 {
     NSMenuItem *highlightedItem = [timer userInfo];
-    _delayedHighlightTimer = nil;
+    _delayedHighlightTimer      = nil;
 
     // If the mouse is hovering over one of the descendent menus, then ignore the request to highlight a new item and expand it's menu.  Figuring out if the mouse is over a descendent
     // menu is done backwards, we start with the menu that is under the mouse and keep comparing it's supermenu to our view's associated menu. If they ever match, then the focusedMenu
@@ -373,7 +379,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
             return;
         }
 
-        // No we intend on highlighting a different item now
+        // We intend on highlighting a different item now
         [_delayedHighlightTimer invalidate];
         _delayedHighlightTimer = nil;
     }
@@ -423,49 +429,55 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 
 - (void)setMenu:(NSMenu *)menu
 {
-    __block NSMutableArray *inlineMenus    = nil;
-    __block NSMutableArray *itemArray      = [NSMutableArray array];
-    __block NSMutableSet   *scrollMenus    = [NSMutableSet set];
-    __block BOOL            containsImages = NO;
+    __block NSMutableArray *inlineMenus     = nil;
+    __block NSMutableArray *itemArray       = [NSMutableArray array];
+    __block NSMutableSet   *scrollMenus     = [NSMutableSet set];
+    __block NSMutableArray *lastInlineMenu  = nil;
+    __block BOOL            containsImages  = NO;
+    __block NSUInteger      keyModifierMask = 0;
 
     if(menu != nil)
     {
         inlineMenus = [NSMutableArray array];
-        __block NSMutableArray *lastInlineMenu = nil;
 
         [[menu itemArray] enumerateObjectsUsingBlock:
          ^ (NSMenuItem *obj, NSUInteger idx, BOOL *stop)
          {
-             if([obj isKindOfClass:[OEInlineMenuItem class]])
+             if(![obj isHidden])
              {
-                 lastInlineMenu = [NSMutableArray array];
-                 [inlineMenus addObject:lastInlineMenu];
-
-                 [[[obj submenu] itemArray] enumerateObjectsUsingBlock:
-                  ^ (id obj, NSUInteger idx, BOOL *stop)
-                  {
-                      [lastInlineMenu addObject:obj];
-                      [itemArray addObject:obj];
-                      containsImages = containsImages && ([obj image] != nil);
-                  }];
-                 [scrollMenus addObject:lastInlineMenu];
-                 lastInlineMenu = nil;
-             }
-             else
-             {
-                 if(lastInlineMenu == nil)
+                 keyModifierMask |= [obj keyEquivalentModifierMask];
+                 if([obj isKindOfClass:[OEInlineMenuItem class]])
                  {
                      lastInlineMenu = [NSMutableArray array];
                      [inlineMenus addObject:lastInlineMenu];
+
+                     [[[obj submenu] itemArray] enumerateObjectsUsingBlock:
+                      ^ (id obj, NSUInteger idx, BOOL *stop)
+                      {
+                          [lastInlineMenu addObject:obj];
+                          [itemArray addObject:obj];
+                          containsImages = containsImages && ([obj image] != nil);
+                      }];
+                     [scrollMenus addObject:lastInlineMenu];
+                     lastInlineMenu = nil;
                  }
-                 [lastInlineMenu addObject:obj];
-                 [itemArray addObject:obj];
-                 containsImages = containsImages && ([obj image] != nil);
+                 else
+                 {
+                     if(lastInlineMenu == nil)
+                     {
+                         lastInlineMenu = [NSMutableArray array];
+                         [inlineMenus addObject:lastInlineMenu];
+                     }
+                     [lastInlineMenu addObject:obj];
+                     [itemArray addObject:obj];
+                     containsImages = containsImages && ([obj image] != nil);
+                 }
              }
          }];
     }
 
-    _itemArray = [itemArray copy];
+    _itemArray       = [itemArray copy];
+    _keyModifierMask = keyModifierMask;
 
     [[self subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [inlineMenus enumerateObjectsUsingBlock:
@@ -517,6 +529,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
 {
     [self OE_layoutIfNeeded];
 
+    // Go through each item and calculate the maximum width and the sum of the height
     __block CGFloat width  = 0.0;
     __block CGFloat height = 0.0;
 
@@ -527,6 +540,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
          height      += size.height;
      }];
 
+    // Return a size with the appropriate padding
     return NSMakeSize(width + _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right, height + _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom);
 }
 
@@ -590,7 +604,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
         case OEMinYEdge: return OEMenuBackgroundMinYEdgeInsets;
         case OEMaxYEdge: return OEMenuBackgroundMaxYEdgeInsets;
         case OENoEdge:
-        default:          return OEMenuBackgroundNoEdgeInsets;
+        default:         return OEMenuBackgroundNoEdgeInsets;
     }
 }
 
@@ -599,6 +613,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     if(!_needsLayout) return;
     _needsLayout = NO;
 
+    const BOOL isSubmenu  = [[self OE_menu] isSubmenu];
     const NSRect bounds   = [self bounds];
     NSPoint attachedPoint = _attachedPoint;
 
@@ -635,11 +650,11 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
     }
     else
     {
+        // There are no problems...so the effective arrow edge is the edge that was requested
         _effectiveArrowEdge = _arrowEdge;
     }
 
     // Recalculate border path
-    const BOOL isSubmenu          = [[self OE_menu] isSubmenu];
     _backgroundEdgeInsets         = [OEMenuView OE_backgroundEdgeInsetsForEdge:(isSubmenu ? OENoEdge : _effectiveArrowEdge)];
     const NSRect backgroundBounds = OENSInsetRectWithEdgeInsets([self bounds], _backgroundEdgeInsets);
 
@@ -737,8 +752,8 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
         _rectForArrow = NSIntegralRect(_rectForArrow);
     }
 
-    const NSRect contentBounds = OENSInsetRectWithEdgeInsets(backgroundBounds, OEMenuContentEdgeInsets);
-    NSArray *subviews = [self subviews];
+    const NSRect  contentBounds = OENSInsetRectWithEdgeInsets(backgroundBounds, OEMenuContentEdgeInsets);
+    NSArray      *subviews      = [self subviews];
     if([subviews count] == 1)
     {
         OEMenuScrollView *view = [subviews lastObject];
@@ -750,37 +765,35 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;
         // TODO: Fix this
         __block CGFloat contentHeight   = NSHeight(contentBounds);
         __block CGFloat intrinsicHeight = [self intrinsicSize].height - _backgroundEdgeInsets.top - _backgroundEdgeInsets.bottom - OEMenuContentEdgeInsets.top - OEMenuContentEdgeInsets.bottom;
-        NSArray *subviews = [self subviews];
+
+        NSArray      *subviews        = [self subviews];
         NSMutableSet *scrollableMenus = [NSMutableSet set];
-        [subviews enumerateObjectsUsingBlock:^(OEMenuScrollView *obj, NSUInteger idx, BOOL *stop) {
+
+        [subviews enumerateObjectsUsingBlock:
+         ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
+         {
             if([obj isScrollable])
             {
                 [scrollableMenus addObject:obj];
             }
             else
             {
-                intrinsicHeight -= [obj intrinsicSize].height;
                 contentHeight   -= [obj intrinsicSize].height;
+                intrinsicHeight -= [obj intrinsicSize].height;
             }
         }];
 
-         __block CGFloat y = 0;
+        __block CGFloat y = 0;
         [[self subviews] enumerateObjectsUsingBlock:
          ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
          {
              const CGFloat height = [obj intrinsicSize].height;
-             NSRect frame = [obj frame];
-             if([obj isScrollable])
-             {
-                 frame.size.height = contentHeight * (height / intrinsicHeight);
-             }
-             else
-             {
-                 frame.size.height = height;
-             }
-             frame.size.width     = NSWidth(contentBounds);
-             frame.origin.x       = NSMinX(contentBounds);
-             frame.origin.y       = NSMaxY(contentBounds) - NSHeight(frame) - y;
+
+             NSRect frame      = NSZeroRect;
+             frame.size.height = ([obj isScrollable] ? contentHeight * (height / intrinsicHeight) : height);
+             frame.size.width  = NSWidth(contentBounds);
+             frame.origin.x    = NSMinX(contentBounds);
+             frame.origin.y    = NSMaxY(contentBounds) - NSHeight(frame) - y;
 
              [obj setFrame:NSIntegralRect(frame)];
              [obj OE_layoutIfNeeded];

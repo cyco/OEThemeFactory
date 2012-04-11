@@ -36,6 +36,7 @@ static NSMutableArray *__sharedMenuStack;
 
 + (OEMenu *)OE_popUpContextMenuWithMenu:(NSMenu *)menu forScreen:(NSScreen *)screen options:(NSDictionary *)options
 {
+    // When instantiating a new window, we have to establish an initial content rect size, otherwise, it will never been associated with the specified NSScreen
     OEMenu *result = [[self alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 10.0, 10.0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:screen];
     NSAssert(result != nil, @"out of memory");
     [result setMenu:menu];
@@ -50,10 +51,10 @@ static NSMutableArray *__sharedMenuStack;
     const NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
     const NSRect titleRectInScreen = [[button window] convertRectToScreen:[button convertRect:titleRectInButton toView:nil]];
 
-    // Create a popup using the style specified by the button
+    // Override the arrow edge and highlighted item options
     NSMutableDictionary *newOptions = (options ? [options mutableCopy] : [NSMutableDictionary dictionary]);
     [newOptions setValue:[NSNumber numberWithUnsignedInteger:OENoEdge] forKey:OEMenuOptionsArrowEdgeKey];
-    [newOptions setValue:[button selectedItem] forKey:OEMenuOptionsHighlightedItemKey];
+    [newOptions setValue:[button selectedItem]                         forKey:OEMenuOptionsHighlightedItemKey];
 
     OEMenu *result = [self OE_popUpContextMenuWithMenu:[button menu] forScreen:[[button window] screen] options:newOptions];
     [result OE_updateFrameAttachedToPopupButton:button alignSelectedItemWithRect:titleRectInScreen];
@@ -65,6 +66,7 @@ static NSMutableArray *__sharedMenuStack;
     // Calculate the frame for the popup menu so that the menu appears to be attached to the specified view
     OEMenu *result = [self OE_popUpContextMenuWithMenu:menu forScreen:[[view window] screen] options:options];
 
+    // If a reference rect has not been specified, use the specified view as a reference point
     NSRect   rect = NSZeroRect;
     NSValue *rectValue = [options objectForKey:OEMenuOptionsScreenRectKey];
     if(rectValue) rect = [rectValue rectValue];
@@ -110,6 +112,7 @@ static NSMutableArray *__sharedMenuStack;
 
 - (void)removeChildWindow:(NSWindow *)childWin
 {
+    // Make sure we nullify the _submenu reference if its one of the windows that we are trying to remove from the heirarchy
     if(childWin == _submenu) _submenu = nil;
     [super removeChildWindow:childWin];
 }
@@ -118,6 +121,7 @@ static NSMutableArray *__sharedMenuStack;
 {
     if(![self isVisible] || [self alphaValue] == 0.0) return;
 
+    // Create a collection of menus that include this menu and all of its descendents
     NSUInteger  index = [__sharedMenuStack indexOfObject:self];
     NSUInteger  len   = [__sharedMenuStack count] - index;
     NSArray    *menus = [__sharedMenuStack objectsAtIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index, len)]];
@@ -125,6 +129,7 @@ static NSMutableArray *__sharedMenuStack;
     void (^changes)(NSAnimationContext *context) =
     ^ (NSAnimationContext *context)
     {
+        // Set hide all the menus in one
         [context setDuration:duration];
         [menus enumerateObjectsUsingBlock:
          ^ (OEMenu *obj, NSUInteger idx, BOOL *stop)
@@ -152,14 +157,8 @@ static NSMutableArray *__sharedMenuStack;
     if(_cancelTracking) return;
     _cancelTracking = YES;
 
-    if(self != [__sharedMenuStack objectAtIndex:0])
-    {
-        [[__sharedMenuStack objectAtIndex:0] OE_cancelTrackingWithFadeDuration:duration completionHandler:completionHandler];
-    }
-    else
-    {
-        [self OE_hideWindowWithFadeDuration:duration completionHandler:completionHandler];
-    }
+    if(self != [__sharedMenuStack objectAtIndex:0]) [[__sharedMenuStack objectAtIndex:0] OE_cancelTrackingWithFadeDuration:duration completionHandler:completionHandler];
+    else                                            [self OE_hideWindowWithFadeDuration:duration completionHandler:completionHandler];
 }
 
 - (void)cancelTracking
@@ -276,7 +275,7 @@ static NSMutableArray *__sharedMenuStack;
                 OERectEdge newEdge = ((edge == OEMinXEdge) ? OEMaxXEdge : OEMinXEdge);
                 frame.origin       = originForEdge(newEdge);
 
-                if(NSMinX(frame) < NSMinX(screenFrame) || NSMaxX(frame) > NSMaxX(screenFrame))
+                if((NSMinX(frame) < NSMinX(screenFrame)) || (NSMaxX(frame) > NSMaxX(screenFrame)))
                 {
                     // TODO: Make view smaller
                     NSLog(@"Make view smaller");
@@ -303,7 +302,7 @@ static NSMutableArray *__sharedMenuStack;
                 OERectEdge newEdge = ((edge == OEMinYEdge) ? OEMaxYEdge : OEMinYEdge);
                 frame.origin       = originForEdge(newEdge);
 
-                if(NSMinY(frame) < NSMinY(screenFrame) || NSMaxY(frame) > NSMaxY(screenFrame))
+                if((NSMinY(frame) < NSMinY(screenFrame)) || (NSMaxY(frame) > NSMaxY(screenFrame)))
                 {
                     // TODO: Make view smaller
                     NSLog(@"Make view smaller");
@@ -365,6 +364,7 @@ static NSMutableArray *__sharedMenuStack;
     // Adjust the frame's dimensions not to be bigger than the screen
     frame.size.height = MIN(NSHeight(frame), NSHeight(screenFrame));
     frame.size.width  = MIN(NSWidth(frame), NSWidth(screenFrame));
+    frame.origin.y    = MIN(MAX(NSMinY(frame), NSMinY(screenFrame)), NSMaxY(screenFrame) - NSHeight(frame));
 
     // Adjust the frame's position to make the menu completely visible
     if(NSMinX(frame) < NSMinX(screenFrame))
@@ -380,9 +380,6 @@ static NSMutableArray *__sharedMenuStack;
         edge           = OEMinXEdge;
     }
     [_submenu->_view setArrowEdge:edge];
-
-    frame.origin.y = MIN(MAX(NSMinY(frame), NSMinY(screenFrame)), NSMaxY(screenFrame) - NSHeight(frame));
-
     [_submenu setFrame:frame display:[self isVisible]];
 }
 
@@ -467,7 +464,7 @@ static NSMutableArray *__sharedMenuStack;
     [[NSNotificationCenter defaultCenter] postNotificationName:NSMenuDidBeginTrackingNotification object:[self menu]];
 
     OEMenu *menuWithMouseFocus = self; // Tracks menu that is currently under the cursor
-    BOOL     dragged            = NO;   // Identifies if the mouse has seen a drag operation
+    BOOL    dragged            = NO;   // Identifies if the mouse has seen a drag operation
 
     NSEvent *event;
     while(!_closing && !_cancelTracking && (event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantFuture] inMode:NSDefaultRunLoopMode dequeue:YES]))
@@ -575,10 +572,10 @@ static NSMutableArray *__sharedMenuStack;
     NSSize maxSize = [self maxSize];
 
     // Make sure width is not smaller than the menu's minimumWidth
-    results.width = MAX(results.width, [[self menu] minimumWidth]);
+    results.width  = MAX(results.width, [[self menu] minimumWidth]);
 
     // Make sure that the size is not larger than the max size
-    results.width = MIN(results.width, maxSize.width);
+    results.width  = MIN(results.width, maxSize.width);
     results.height = MIN(results.height, maxSize.height);
 
     return results;
@@ -671,4 +668,5 @@ static NSMutableArray *__sharedMenuStack;
 {
     [self OE_cancelTrackingWithFadeDuration:OEMenuFadeOutDuration completionHandler:completionHandler];
 }
+
 @end

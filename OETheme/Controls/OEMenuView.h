@@ -25,14 +25,14 @@
     NSColor    *_backgroundColor;
     NSGradient *_backgroundGradient;
 
-    BOOL _needsLayout;
-
     NSTimer *_delayedHighlightTimer;
-    BOOL     _dragging;
     NSPoint  _lastMousePoint;
+    BOOL     _dragging;
 
     NSArray    *_itemArray;
-    NSUInteger  _lasKeyModifierMask;
+    NSUInteger  _keyModifierMask;
+    NSUInteger  _lastKeyModifierMask;
+    BOOL        _needsLayout;
 }
 
 - (void)highlightItemAtPoint:(NSPoint)point;

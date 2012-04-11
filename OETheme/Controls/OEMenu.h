@@ -25,11 +25,14 @@ typedef enum
     OEMaxXEdge
 } OERectEdge;
 
-extern NSString * const OEMenuOptionsStyleKey;
-extern NSString * const OEMenuOptionsArrowEdgeKey;
-extern NSString * const OEMenuOptionsMaximumSizeKey;
-extern NSString * const OEMenuOptionsHighlightedItemKey;
-extern NSString * const OEMenuOptionsScreenRectKey;
+#pragma mark -
+#pragma mark Menu options
+
+extern NSString * const OEMenuOptionsStyleKey;           // Defines the menu style (dark or light), OEMenuStyle encapsulated in an -[NSNumber numberWithUnsignedInteger:]
+extern NSString * const OEMenuOptionsArrowEdgeKey;       // Defines the edge that the arrow is on, OERectEdge encapsulated in an -[NSNumber numberWithUnsignedInteger:]
+extern NSString * const OEMenuOptionsMaximumSizeKey;     // Maximum size of the menu, NSSize encapsulated in an NSValue
+extern NSString * const OEMenuOptionsHighlightedItemKey; // Initial item to be highlighted, NSMenuItem
+extern NSString * const OEMenuOptionsScreenRectKey;      // Reference screen rect to attach the menu to, NSRect encapsulated in an NSValue
 
 // Returns an NSRect inset using the specified edge insets
 static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset)
@@ -43,10 +46,10 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
 @interface OEMenu : NSWindow
 {
 @private
-    OEMenuView *_view;
+    OEMenuView *_view;    // Menu's actual view
 
-    BOOL _cancelTracking;                   // Event tracking loop canceled
-    BOOL _closing;                          // Menu is closing
+    BOOL _cancelTracking; // Event tracking loop canceled
+    BOOL _closing;        // Menu is closing
 
     __unsafe_unretained OEMenu *_supermenu;
     OEMenu                     *_submenu;
