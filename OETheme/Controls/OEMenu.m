@@ -185,16 +185,16 @@ static NSMutableArray *__sharedMenuStack;
     if(highlightedItem) [self setHighlightedItem:highlightedItem];
 }
 
-- (NSRect)OE_confinementRectForScreen:(NSScreen *)screen
+- (NSRect)OE_confinementRectForScreen
 {
     NSRect results = NSZeroRect;
 
     // Invoked to allow the delegate to specify a display location for the menu.
     id<NSMenuDelegate> delegate = [[self menu] delegate];
-    if([delegate respondsToSelector:@selector(confinementRectForMenu:onScreen:)]) results = [delegate confinementRectForMenu:[self menu] onScreen:screen];
+    if([delegate respondsToSelector:@selector(confinementRectForMenu:onScreen:)]) results = [delegate confinementRectForMenu:[self menu] onScreen:[self screen]];
 
     // If delegate is not implemented or it returns NSZeroRect then return the screen's visible frame
-    NSRect visibleFrame = [screen visibleFrame];
+    NSRect visibleFrame = [[self screen] visibleFrame];
     if(NSEqualRects(results, NSZeroRect)) results = visibleFrame;
     else                                  results = NSIntersectionRect(visibleFrame, results);
 
@@ -209,7 +209,7 @@ static NSMutableArray *__sharedMenuStack;
 
     NSView             *containerView    = [_view OE_viewThatContainsItem:[self highlightedItem]];
     const NSRect        selectedItemRect = [self convertRectToScreen:[containerView convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
-    const NSRect        screenFrame      = [self OE_confinementRectForScreen:[self screen]];
+    const NSRect        screenFrame      = [self OE_confinementRectForScreen];
     const NSEdgeInsets  edgeInsets       = [_view backgroundEdgeInsets];
     const NSRect        buttonFrame      = [button bounds];
 
@@ -234,7 +234,7 @@ static NSMutableArray *__sharedMenuStack;
 // Updates the frame's position and dimensions as it relates to the rect specified on the screen
 - (void)OE_updateFrameAttachedToScreenRect:(NSRect)rect
 {
-    const NSRect screenFrame = [self OE_confinementRectForScreen:[self screen]];
+    const NSRect screenFrame = [self OE_confinementRectForScreen];
 
     // Figure out the size and position of the frame, as well as the anchor point.
     OERectEdge edge          = [_view arrowEdge];
@@ -342,7 +342,7 @@ static NSMutableArray *__sharedMenuStack;
 {
     NSView             *containerView = [_view OE_viewThatContainsItem:[self highlightedItem]];
     const NSRect        rectInScreen  = [self convertRectToScreen:[containerView convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
-    const NSRect        screenFrame   = [self OE_confinementRectForScreen:[self screen]];
+    const NSRect        screenFrame   = [self OE_confinementRectForScreen];
     const NSEdgeInsets  edgeInsets    = [_view backgroundEdgeInsets];
     const NSSize        size          = [_submenu size];
 
