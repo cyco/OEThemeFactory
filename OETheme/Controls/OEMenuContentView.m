@@ -184,9 +184,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;     // Delay before show
     return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:([(OEMenu *)[self window] highlightedItem] == item) enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
 }
 
-- (NSDictionary *)OE_textAttributes:(OEThemeTextAttributes *)themeTextAttributes forState:(OEThemeState)state
+- (NSDictionary *)OE_textAttributesForState:(OEThemeState)state
 {
-    if(!themeTextAttributes) return nil;
+    if(!_textAttributes) return nil;
 
     // This is a convenience method for creating the attributes for an NSAttributedString
     static NSParagraphStyle *paragraphStyle = nil;
@@ -198,7 +198,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;     // Delay before show
     }
 
     // Implicitly set the paragraph style if it's not explicitly set
-    NSDictionary *attributes = [themeTextAttributes textAttributesForState:state];
+    NSDictionary *attributes = [_textAttributes textAttributesForState:state];
     if(![attributes objectForKey:NSParagraphStyleAttributeName])
     {
         NSMutableDictionary *newAttributes = [attributes mutableCopy];
