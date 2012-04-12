@@ -778,7 +778,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
         }];
 
         __block CGFloat y = 0;
-        [[self subviews] enumerateObjectsUsingBlock:
+        [subviews enumerateObjectsUsingBlock:
          ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
          {
              const CGFloat height = [obj intrinsicSize].height;
