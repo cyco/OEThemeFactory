@@ -70,9 +70,9 @@
 
 - (void)setItemArray:(NSArray *)itemArray
 {
-    OEMenuDocumentView *contentView = (OEMenuDocumentView *)[self documentView];
-    [contentView setItemArray:itemArray];
-    [[self documentView] setFrameSize:[contentView intrinsicSize]];
+    OEMenuDocumentView *documentView = (OEMenuDocumentView *)[self documentView];
+    [documentView setItemArray:itemArray];
+    [documentView setFrameSize:NSMakeSize(NSWidth([self bounds]), [documentView intrinsicSize].height)];
 }
 
 - (void)setFrameSize:(NSSize)newSize
