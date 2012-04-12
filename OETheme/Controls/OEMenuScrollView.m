@@ -77,12 +77,9 @@
 
 - (void)setFrameSize:(NSSize)newSize
 {
-    OEMenuDocumentView *documentView = [self documentView];
-
-    NSSize contentSize = { newSize.width, [documentView frame].size.height };
-
+    NSView *documentView = [self documentView];
     [super setFrameSize:newSize];
-    [documentView setFrameSize:contentSize];
+    [documentView setFrameSize:NSMakeSize(NSWidth([self bounds]), NSHeight([documentView frame]))];
 }
 
 - (NSArray *)itemArray
