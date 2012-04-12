@@ -28,9 +28,29 @@
         [self setHasVerticalScroller:YES];
         [self setVerticalScroller:[[_OEMenuScroller alloc] init]];
         [self setVerticalScrollElasticity:NSScrollElasticityNone];
-        [self setDocumentView:[[OEMenuDocumentView alloc] initWithFrame:[self bounds]]];
+
+        // Add an observer to the frame and bounds of the document view as it will determine if / when / what scroll up and scroll down bottoms would be displayed and changes to the highlighted item
+        OEMenuDocumentView *documentView = [[OEMenuDocumentView alloc] initWithFrame:[self bounds]];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentViewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:[self contentView]];
+
+        [self setDocumentView:documentView];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)documentViewBoundsDidChange:(NSNotification *)notification
+{
+    if([[self window] isVisible])
+    {
+        // Update the highlighted item to be the item underneath the mouse
+        OEMenuView *view = [(OEMenu *)[self window] OE_view];
+        [view highlightItemAtPoint:[view convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
+    }
 }
 
 - (void)setStyle:(OEMenuStyle)style
@@ -87,18 +107,6 @@
 + (BOOL)isCompatibleWithOverlayScrollers
 {
     return YES;
-}
-
-- (void)setDoubleValue:(double)aDouble
-{
-    [super setDoubleValue:aDouble];
-
-    if([[self window] isVisible])
-    {
-        // Update the highlighted item to be the item underneath the mouse
-        OEMenuView *view = [(OEMenu *)[self window] OE_view];
-        [view highlightItemAtPoint:[view convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
-    }
 }
 
 - (void)drawKnob
