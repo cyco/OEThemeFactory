@@ -765,17 +765,12 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
         __block CGFloat contentHeight   = NSHeight(contentBounds);
         __block CGFloat intrinsicHeight = [self intrinsicSize].height - _backgroundEdgeInsets.top - _backgroundEdgeInsets.bottom - OEMenuContentEdgeInsets.top - OEMenuContentEdgeInsets.bottom;
 
-        NSArray      *subviews        = [self subviews];
-        NSMutableSet *scrollableMenus = [NSMutableSet set];
+        NSArray *subviews = [self subviews];
 
         [subviews enumerateObjectsUsingBlock:
          ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
          {
-            if([obj shouldScroll])
-            {
-                [scrollableMenus addObject:obj];
-            }
-            else
+            if(![obj shouldScroll])
             {
                 contentHeight   -= [obj intrinsicSize].height;
                 intrinsicHeight -= [obj intrinsicSize].height;
