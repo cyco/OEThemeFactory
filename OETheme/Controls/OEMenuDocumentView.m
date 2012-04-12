@@ -64,13 +64,13 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
     if(count == 0) return;
 
     // Setup positioning frames
-    NSRect tickMarkFrame = NSMakeRect(0.0, 0.0, NSWidth([self bounds]), ([self doesMenuContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage));
+    NSRect tickMarkFrame = NSMakeRect(0.0, 0.0, NSWidth([self bounds]), ([self doesContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage));
     NSRect imageFrame;
     NSRect textFrame;
     NSRect submenuArrowFrame;
 
     NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                                   NSMinXEdge);
-    NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  ([self doesMenuContainImages] ? OEMenuItemImageWidth : 0), NSMinXEdge);
+    NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  ([self doesContainImages] ? OEMenuItemImageWidth : 0), NSMinXEdge);
     NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                               NSMaxXEdge);
 
     // Cache for future use
@@ -227,7 +227,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
     const NSRect   bounds      = [self bounds];
     const NSRect   contentRect = OENSInsetRectWithEdgeInsets(bounds, OEMenuItemInsets);
     NSDictionary  *attributes  = [_textAttributes textAttributesForState:OEThemeStateDefault];
-    const CGFloat  itemHeight  = [self doesMenuContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
+    const CGFloat  itemHeight  = [self doesContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
 
     __block CGFloat y     = 0.0;
     __block CGFloat width = 0.0;
@@ -254,7 +254,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
          }
      }];
 
-    const CGFloat minimumWidthPadding  = OEMenuItemTickMarkWidth + ([self doesMenuContainImages] ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + OEMenuItemInsets.left + OEMenuItemInsets.right;
+    const CGFloat minimumWidthPadding  = OEMenuItemTickMarkWidth + ([self doesContainImages] ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + OEMenuItemInsets.left + OEMenuItemInsets.right;
     const CGFloat minimumHeightPadding = OEMenuItemInsets.top + OEMenuItemInsets.bottom;
 
     _intrinsicSize = NSMakeSize(ceil(width + minimumWidthPadding), ceil(y + minimumHeightPadding));

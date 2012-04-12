@@ -78,9 +78,9 @@
     [(OEMenuDocumentView *)[self documentView] setContainImages:containImages];
 }
 
-- (BOOL)doesMenuContainImages
+- (BOOL)doesContainImages
 {
-    return [(OEMenuDocumentView *)[self documentView] doesMenuContainImages];
+    return [(OEMenuDocumentView *)[self documentView] doesContainImages];
 }
 
 @end
