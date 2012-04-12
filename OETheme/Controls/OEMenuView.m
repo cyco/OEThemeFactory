@@ -758,6 +758,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     {
         OEMenuScrollView *view = [subviews lastObject];
         [view setFrame:contentBounds];
+
+        // Scroll view to top left corner
+        [[view contentView] scrollToPoint:NSMakePoint(0.0, NSHeight([[view documentView] frame]) - NSHeight([view frame]))];
     }
     else if([subviews count] > 1)
     {
@@ -789,6 +792,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
              frame.origin.x    = NSMinX(contentBounds);
              frame.origin.y    = NSMaxY(contentBounds) - NSHeight(frame) - y;
              [obj setFrame:NSIntegralRect(frame)];
+
+             // Scroll view to top left corner
+             [[obj contentView] scrollToPoint:NSMakePoint(0.0, NSHeight([[obj documentView] frame]) - NSHeight([obj frame]))];
 
              y += NSHeight(frame);
          }];

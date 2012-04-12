@@ -63,9 +63,6 @@
 
     [super setFrameSize:newSize];
     [documentView setFrameSize:contentSize];
-
-    // Scroll the content to th upper left corner
-    if(contentSize.height > newSize.height) [[self contentView] scrollToPoint:NSMakePoint(0.0, contentSize.height - newSize.height)];
 }
 
 - (NSArray *)itemArray
