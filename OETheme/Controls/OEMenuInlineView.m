@@ -12,6 +12,8 @@
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
 
+static const CGFloat OEMenuScrollArrowHeight = 19.0;
+
 // Fake menu scroller (doesn't render anything)
 @interface _OEMenuScroller : NSScroller
 @end
@@ -130,8 +132,8 @@
         NSRect upFrame;
         NSRect downFrame;
 
-        NSDivideRect(contentFrame, &upFrame,   &contentFrame, 20.0, NSMaxYEdge);
-        NSDivideRect(contentFrame, &downFrame, &contentFrame, 20.0, NSMinYEdge);
+        NSDivideRect(contentFrame, &upFrame,   &contentFrame, OEMenuScrollArrowHeight, NSMaxYEdge);
+        NSDivideRect(contentFrame, &downFrame, &contentFrame, OEMenuScrollArrowHeight, NSMinYEdge);
 
         [_scrollUpButton setFrame:upFrame];
         [_scrollDownButton setFrame:downFrame];
