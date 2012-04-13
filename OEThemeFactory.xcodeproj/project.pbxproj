@@ -11,6 +11,7 @@
 		EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		EF1027E21503B708003BC6C0 /* gloss_button.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E11503B708003BC6C0 /* gloss_button.png */; };
 		EF1027E7150403A8003BC6C0 /* open_weblink_arrow.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */; };
+		EF26190D1538DC4A0032B7EB /* dark_menu_scroll_arrows.png in Resources */ = {isa = PBXBuildFile; fileRef = EF26190C1538DC4A0032B7EB /* dark_menu_scroll_arrows.png */; };
 		EF33D80C150B5A3E00B93D87 /* dark_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */; };
 		EF33D80E150B5FAF00B93D87 /* gloss_checkbox.png in Resources */ = {isa = PBXBuildFile; fileRef = EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */; };
 		EF33D811150B6F2B00B93D87 /* OEPopUpButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EF33D810150B6F2A00B93D87 /* OEPopUpButton.m */; };
@@ -20,7 +21,7 @@
 		EF37DA3E14FC3E860098A077 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EF37DA3D14FC3E850098A077 /* QuartzCore.framework */; };
 		EF37DA4114FC3F110098A077 /* OEThemeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA4014FC3F110098A077 /* OEThemeImage.m */; };
 		EF3B0EFD153496E40096D358 /* OEMenuItemExtraData.m in Sources */ = {isa = PBXBuildFile; fileRef = EFEBDB6C151079C2004DDC8C /* OEMenuItemExtraData.m */; };
-		EF3B0F081534B0180096D358 /* OEMenuScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF3B0F071534B0180096D358 /* OEMenuScrollView.m */; };
+		EF3B0F081534B0180096D358 /* OEMenuInlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF3B0F071534B0180096D358 /* OEMenuInlineView.m */; };
 		EF3B0F361534C56F0096D358 /* OEInlineMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = EF3B0F351534C56F0096D358 /* OEInlineMenuItem.m */; };
 		EF4A20AB153412680055B37B /* OEMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = EF4A20A815340E290055B37B /* OEMenu.m */; };
 		EF4A20AE153412730055B37B /* OEMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = EF4A20AD153412730055B37B /* OEMenuView.m */; };
@@ -58,6 +59,7 @@
 		EF0D7E4015131B9500070DBE /* hud_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hud_button.png; sourceTree = "<group>"; };
 		EF1027E11503B708003BC6C0 /* gloss_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_button.png; sourceTree = "<group>"; };
 		EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = open_weblink_arrow.png; sourceTree = "<group>"; };
+		EF26190C1538DC4A0032B7EB /* dark_menu_scroll_arrows.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = dark_menu_scroll_arrows.png; path = "../../OpenEmu/Interface Graphics/Menu/dark_menu_scroll_arrows.png"; sourceTree = "<group>"; };
 		EF33D80B150B5A3E00B93D87 /* dark_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dark_checkbox.png; sourceTree = "<group>"; };
 		EF33D80D150B5FAF00B93D87 /* gloss_checkbox.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_checkbox.png; sourceTree = "<group>"; };
 		EF33D80F150B6F2A00B93D87 /* OEPopUpButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEPopUpButton.h; sourceTree = "<group>"; };
@@ -76,8 +78,8 @@
 		EF37DA4214FC41A50098A077 /* NSImage+OEDrawingAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSImage+OEDrawingAdditions.h"; sourceTree = "<group>"; };
 		EF37DA4314FC41A50098A077 /* NSImage+OEDrawingAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSImage+OEDrawingAdditions.m"; sourceTree = "<group>"; };
 		EF3B0EF9153492E80096D358 /* OEMenuDocumentView+OEMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OEMenuDocumentView+OEMenuView.h"; sourceTree = "<group>"; };
-		EF3B0F061534B0170096D358 /* OEMenuScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenuScrollView.h; sourceTree = "<group>"; };
-		EF3B0F071534B0180096D358 /* OEMenuScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuScrollView.m; sourceTree = "<group>"; };
+		EF3B0F061534B0170096D358 /* OEMenuInlineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenuInlineView.h; sourceTree = "<group>"; };
+		EF3B0F071534B0180096D358 /* OEMenuInlineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEMenuInlineView.m; sourceTree = "<group>"; };
 		EF3B0F341534C56E0096D358 /* OEInlineMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEInlineMenuItem.h; sourceTree = "<group>"; };
 		EF3B0F351534C56F0096D358 /* OEInlineMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEInlineMenuItem.m; sourceTree = "<group>"; };
 		EF4A20A715340E290055B37B /* OEMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEMenu.h; sourceTree = "<group>"; };
@@ -184,8 +186,8 @@
 				EF4A20A815340E290055B37B /* OEMenu.m */,
 				EF4A20AC153412730055B37B /* OEMenuView.h */,
 				EF4A20AD153412730055B37B /* OEMenuView.m */,
-				EF3B0F061534B0170096D358 /* OEMenuScrollView.h */,
-				EF3B0F071534B0180096D358 /* OEMenuScrollView.m */,
+				EF3B0F061534B0170096D358 /* OEMenuInlineView.h */,
+				EF3B0F071534B0180096D358 /* OEMenuInlineView.m */,
 				EF4A20B2153439900055B37B /* OEMenuDocumentView.h */,
 				EF4A20B3153439900055B37B /* OEMenuDocumentView.m */,
 				EF34773B153472F900C947E9 /* OEMenu+OEMenuViewAdditions.h */,
@@ -216,6 +218,7 @@
 		EFA53823150BC828003D07A1 /* Dark Style */ = {
 			isa = PBXGroup;
 			children = (
+				EF26190C1538DC4A0032B7EB /* dark_menu_scroll_arrows.png */,
 				EFA53815150BC814003D07A1 /* dark_menu_body.png */,
 				EFA53814150BC814003D07A1 /* dark_menu_arrows_body.png */,
 				EFA53817150BC814003D07A1 /* dark_submenu_body.png */,
@@ -426,6 +429,7 @@
 				EFE98C52150D0458006010F4 /* menu_item_tick_mark.png in Resources */,
 				EFE98C55150D0491006010F4 /* menu_item_mixed_state.png in Resources */,
 				EF0D7E4115131B9500070DBE /* hud_button.png in Resources */,
+				EF26190D1538DC4A0032B7EB /* dark_menu_scroll_arrows.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -455,7 +459,7 @@
 				EF4A20AE153412730055B37B /* OEMenuView.m in Sources */,
 				EF4A20B4153439900055B37B /* OEMenuDocumentView.m in Sources */,
 				EF3B0EFD153496E40096D358 /* OEMenuItemExtraData.m in Sources */,
-				EF3B0F081534B0180096D358 /* OEMenuScrollView.m in Sources */,
+				EF3B0F081534B0180096D358 /* OEMenuInlineView.m in Sources */,
 				EF3B0F361534C56F0096D358 /* OEInlineMenuItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

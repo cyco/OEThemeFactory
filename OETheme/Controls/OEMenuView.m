@@ -9,7 +9,7 @@
 #import "OEMenuView.h"
 #import "OEMenuView+OEMenuAdditions.h"
 #import "OEMenu+OEMenuViewAdditions.h"
-#import "OEMenuScrollView.h"
+#import "OEMenuInlineView.h"
 #import "OEMenuDocumentView.h"
 #import "OEMenuDocumentView+OEMenuView.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
@@ -188,7 +188,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     {
         _lastKeyModifierMask = modiferFlags;
         [[self subviews] enumerateObjectsUsingBlock:
-         ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
+         ^ (OEMenuInlineView *obj, NSUInteger idx, BOOL *stop)
          {
              [[obj documentView] flagsChanged:theEvent];
          }];
@@ -431,7 +431,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 {
     __block NSMutableArray *inlineMenus     = nil;
     __block NSMutableArray *itemArray       = [NSMutableArray array];
-    __block NSMutableSet   *scrollMenus     = [NSMutableSet set];
+    __block NSMutableSet   *scrollableMenus = [NSMutableSet set];
     __block NSMutableArray *lastInlineMenu  = nil;
     __block BOOL            containsImages  = NO;
     __block NSUInteger      keyModifierMask = 0;
@@ -458,7 +458,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
                           [itemArray addObject:obj];
                           containsImages = containsImages && ([obj image] != nil);
                       }];
-                     [scrollMenus addObject:lastInlineMenu];
+                     [scrollableMenus addObject:lastInlineMenu];
                      lastInlineMenu = nil;
                  }
                  else
@@ -483,12 +483,12 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     [inlineMenus enumerateObjectsUsingBlock:
      ^(NSArray *itemArray, NSUInteger idx, BOOL *stop)
      {
-         OEMenuScrollView *scrollView = [[OEMenuScrollView alloc] initWithFrame:NSZeroRect];
-         [scrollView setScrollable:[scrollMenus containsObject:itemArray]];
-         [scrollView setItemArray:itemArray];
-         [scrollView setContainImages:containsImages];
-         [scrollView setStyle:[self style]];
-         [self addSubview:scrollView];
+         OEMenuInlineView *inlineView = [[OEMenuInlineView alloc] initWithFrame:NSZeroRect];
+         [inlineView setScrollable:[scrollableMenus containsObject:itemArray]];
+         [inlineView setItemArray:itemArray];
+         [inlineView setContainImages:containsImages];
+         [inlineView setStyle:[self style]];
+         [self addSubview:inlineView];
      }];
 
     [super setMenu:menu];
@@ -534,7 +534,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     __block CGFloat height = 0.0;
 
     [[self subviews] enumerateObjectsUsingBlock:
-     ^(OEMenuScrollView *obj, NSUInteger idx, BOOL *stop) {
+     ^(OEMenuInlineView *obj, NSUInteger idx, BOOL *stop) {
          NSSize size  = [obj intrinsicSize];
          width        = MAX(width, size.width);
          height      += size.height;
@@ -756,11 +756,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     NSArray      *subviews      = [self subviews];
     if([subviews count] == 1)
     {
-        OEMenuScrollView *view = [subviews lastObject];
+        OEMenuInlineView *view = [subviews lastObject];
         [view setFrame:contentBounds];
-
-        // Scroll view to top left corner
-        [[view contentView] scrollToPoint:NSMakePoint(0.0, NSHeight([[view documentView] frame]) - NSHeight([view frame]))];
+        [view scrollToBeginningOfDocument:nil];
     }
     else if([subviews count] > 1)
     {
@@ -771,7 +769,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
         NSArray *subviews = [self subviews];
 
         [subviews enumerateObjectsUsingBlock:
-         ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
+         ^ (OEMenuInlineView *obj, NSUInteger idx, BOOL *stop)
          {
             if(![obj shouldScroll])
             {
@@ -782,7 +780,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 
         __block CGFloat y = 0;
         [subviews enumerateObjectsUsingBlock:
-         ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
+         ^ (OEMenuInlineView *obj, NSUInteger idx, BOOL *stop)
          {
              const CGFloat height = [obj intrinsicSize].height;
 
@@ -792,9 +790,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
              frame.origin.x    = NSMinX(contentBounds);
              frame.origin.y    = NSMaxY(contentBounds) - NSHeight(frame) - y;
              [obj setFrame:NSIntegralRect(frame)];
-
-             // Scroll view to top left corner
-             [[obj contentView] scrollToPoint:NSMakePoint(0.0, NSHeight([[obj documentView] frame]) - NSHeight([obj frame]))];
+             [obj scrollToBeginningOfDocument:nil];
 
              y += NSHeight(frame);
          }];
@@ -803,9 +799,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 
 - (NSView *)OE_viewThatContainsItem:(NSMenuItem *)item
 {
-    __block OEMenuScrollView *results = nil;
+    __block OEMenuInlineView *results = nil;
     [[self subviews] enumerateObjectsUsingBlock:
-     ^ (OEMenuScrollView *obj, NSUInteger idx, BOOL *stop)
+     ^ (OEMenuInlineView *obj, NSUInteger idx, BOOL *stop)
      {
          if ([[obj itemArray] containsObject:item])
          {

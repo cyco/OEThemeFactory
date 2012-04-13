@@ -11,6 +11,7 @@
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
+#import "OEMenuInlineView.h"
 
 #pragma mark -
 #pragma mark Menu Item Spacing
@@ -59,6 +60,10 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 - (void)drawRect:(NSRect)dirtyRect
 {
     [self OE_layoutIfNeeded];
+
+    // TODO: only draw dirty rect!
+    OEMenuInlineView *scrollView = (OEMenuInlineView *)[[self enclosingScrollView] superview];
+    NSRectClip([scrollView convertRect:[scrollView clippingRect] toView:self]);
 
     const NSUInteger count = [_itemArray count];
     if(count == 0) return;
@@ -181,6 +186,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 // Returns an OEThemeState with the window and mouse activity excluded (see OEMenuItemStateMask)
 - (OEThemeState)OE_currentStateFromMenuItem:(NSMenuItem *)item
 {
+    // TODO: Fix regression bug when highlighting alternate items
     return [OEThemeObject themeStateWithWindowActive:NO buttonState:[item state] selected:([(OEMenu *)[self window] highlightedItem] == item) enabled:[item isEnabled] focused:[item isAlternate] houseHover:NO] & OEMenuItemStateMask;
 }
 

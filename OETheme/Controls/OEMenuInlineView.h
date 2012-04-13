@@ -1,5 +1,5 @@
 //
-//  OEMenuScrollView.h
+//  OEMenuInlineView.h
 //  OEThemeFactory
 //
 //  Created by Faustino Osuna on 4/10/12.
@@ -9,7 +9,16 @@
 #import <Cocoa/Cocoa.h>
 #import "OEMenu.h"
 
-@interface OEMenuScrollView : NSScrollView
+@interface OEMenuInlineView : NSView
+{
+@package
+    NSView *_scrollUpButton;
+    NSView *_scrollDownButton;
+    NSScrollView *_scrollView;
+}
+
+@property(nonatomic, readonly) NSRect clippingRect;
+@property(nonatomic, readonly) OEMenuDocumentView *documentView;
 
 @property(nonatomic, assign)   OEMenuStyle style;
 @property(nonatomic, readonly) NSSize       intrinsicSize;

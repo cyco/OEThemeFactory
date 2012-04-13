@@ -393,6 +393,26 @@
 				<string>{{0,8},{7,8}}</string>
 			</dict>
 		</dict>
+		<key>dark_menu_scroll_up_arrow</key>
+		<dict>
+			<key>Resource</key>
+			<string>dark_menu_scroll_arrows</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<string>{{0,0},{9,7}}</string>
+			</dict>
+		</dict>
+		<key>dark_menu_scroll_down_arrow</key>
+		<dict>
+			<key>Resource</key>
+			<string>dark_menu_scroll_arrows</string>
+			<key>States</key>
+			<dict>
+				<key>Default</key>
+				<string>{{9,0},{9,7}}</string>
+			</dict>
+		</dict>
 		<key>dark_menu_background</key>
 		<dict>
 			<key>Resource</key>
