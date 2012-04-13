@@ -241,7 +241,7 @@ static const CGFloat OEMenuScrollArrowHeight = 19.0;
 {
     // TODO: Should be a themed view that draws based on state changes (if various states are provided)
     const NSSize arrowSize = [_arrow size];
-    const NSPoint point = { NSMidX([self bounds]) - (arrowSize.width / 2.0), NSMidY([self bounds]) - (arrowSize.height / 2.0)};
+    const NSPoint point = { ceil(NSMidX([self bounds]) - (arrowSize.width / 2.0)), ceil(NSMidY([self bounds]) - (arrowSize.height / 2.0))};
     [_arrow drawAtPoint:point fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 }
 
