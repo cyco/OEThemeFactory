@@ -50,7 +50,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 
 @interface OEMenuView ()
 
-- (void)OE_recacheTheme;
+- (void)OE_updateTheme;
 - (void)OE_setNeedsLayout;
 - (OEMenu *)OE_menu;
 
@@ -66,7 +66,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 {
     if((self = [super initWithFrame:frame]))
     {
-        [self OE_recacheTheme];
+        [self OE_updateTheme];
         [self OE_setNeedsLayout];
     }
 
@@ -503,7 +503,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 
         NSNumber *styleValue = [NSNumber numberWithUnsignedInteger:_style];
         [[self subviews] makeObjectsPerformSelector:@selector(setStyle:) withObject:styleValue];
-        [self OE_recacheTheme];
+        [self OE_updateTheme];
     }
 }
 
@@ -512,7 +512,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     if(_arrowEdge != arrowEdge)
     {
         _arrowEdge = arrowEdge;
-        [self OE_recacheTheme];
+        [self OE_updateTheme];
     }
 }
 
@@ -555,7 +555,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     return (OEMenu *)[self window];
 }
 
-- (void)OE_recacheTheme
+- (void)OE_updateTheme
 {
     NSString *styleKeyPrefix = (_style == OEMenuStyleDark ? @"dark_menu_" : @"light_menu_");
     _backgroundImage         = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];

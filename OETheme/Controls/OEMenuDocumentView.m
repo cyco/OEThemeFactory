@@ -45,7 +45,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 {
     if ((self = [super initWithFrame:frame]))
     {
-        [self OE_recacheTheme];
+        [self OE_updateTheme];
     }
 
     return self;
@@ -320,7 +320,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
     if(_style != style)
     {
         _style = style;
-        [self OE_recacheTheme];
+        [self OE_updateTheme];
     }
 }
 
@@ -330,7 +330,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
     return _intrinsicSize;
 }
 
-- (void)OE_recacheTheme
+- (void)OE_updateTheme
 {
     NSString *styleKeyPrefix = (_style == OEMenuStyleDark ? @"dark_menu_" : @"light_menu_");
     _separatorImage          = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"separator_item"] forState:OEThemeStateDefault];
