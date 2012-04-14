@@ -61,12 +61,16 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 {
     [self OE_layoutIfNeeded];
 
-    // TODO: only draw dirty rect!
-    OEMenuInlineView *scrollView = (OEMenuInlineView *)[[self enclosingScrollView] superview];
-    NSRectClip([scrollView convertRect:[scrollView clippingRect] toView:self]);
-
     const NSUInteger count = [_itemArray count];
     if(count == 0) return;
+
+    // Constrain the clipped path to that of the dirtyRect and the OEMenuInlineView's clippingRect
+    OEMenuInlineView *scrollView = (OEMenuInlineView *)[[self enclosingScrollView] superview];
+    dirtyRect = NSIntersectionRect(dirtyRect, [scrollView convertRect:[scrollView clippingRect] toView:self]);
+
+    // If there is nothing to draw then return
+    if(NSIsEmptyRect(dirtyRect)) return;
+    NSRectClip(dirtyRect);
 
     // Setup positioning frames
     NSRect tickMarkFrame = NSMakeRect(0.0, 0.0, NSWidth([self bounds]), ([self doesContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage));
