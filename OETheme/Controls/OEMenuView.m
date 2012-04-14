@@ -164,6 +164,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 {
     if([[self OE_menu] OE_closing]) return;
     [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
+    _dragging = YES;
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent
