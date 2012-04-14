@@ -29,8 +29,10 @@
     NSTimer *_delayedHighlightTimer;
     NSPoint  _lastMousePoint;
 
+    NSEvent          *_lastDragEvent;
     OEMenuInlineView *_draggingView;
     BOOL              _dragging;
+    NSTimer          *_autoDragTimer;
 
     NSArray    *_itemArray;
     NSUInteger  _keyModifierMask;

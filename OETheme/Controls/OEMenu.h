@@ -51,7 +51,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     BOOL _cancelTracking; // Event tracking loop canceled
     BOOL _closing;        // Menu is closing
 
-    __unsafe_unretained OEMenu *_supermenu;
+    __unsafe_unretained OEMenu *_supermenu; // NSWindow does not support a weak reference
     OEMenu                     *_submenu;
 }
 

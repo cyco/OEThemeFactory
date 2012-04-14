@@ -73,6 +73,12 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     return self;
 }
 
+- (void)dealloc
+{
+    [_autoDragTimer invalidate];
+    _autoDragTimer = nil;
+}
+
 - (void)drawRect:(NSRect)dirtyRect
 {
     [self OE_layoutIfNeeded];
@@ -153,6 +159,8 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 - (void)mouseUp:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
+    [_autoDragTimer invalidate];
+    _autoDragTimer = nil;
 
     // If we are recovering from a mouse drag operation and the selected menu item has a submenu, then cancel our tracking
     OEMenu *menu = [self OE_menu];
@@ -160,13 +168,18 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     else                                                  [self OE_performAction];
 }
 
-- (void)mouseDragged:(NSEvent *)theEvent
+- (void)OE_autoMouseDragged:(NSTimer *)timer
 {
-    if([[self OE_menu] OE_closing]) return;
-    _dragging = YES;
+    if(!_autoDragTimer && timer)
+    {
+        [timer invalidate];
+        return;
+    }
+
+    NSLog(@"Dragging...");
 
     const NSPoint locationInView = [self convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]];
-    if([_draggingView shouldKeepAutoscroll:theEvent])
+    if([_draggingView shouldKeepAutoscroll:_lastDragEvent])
     {
         [self highlightItemAtPoint:locationInView];
     }
@@ -180,6 +193,25 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     {
         _draggingView = (OEMenuInlineView *)[[[self OE_viewThatContainsItem:[[self OE_menu] highlightedItem]] enclosingScrollView] superview];
         if(NSHeight([[_draggingView documentView] frame]) <= NSHeight([_draggingView frame])) _draggingView = nil;
+    }
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+    if([[self OE_menu] OE_closing]) return;
+    _dragging = YES;
+    _lastDragEvent = theEvent;
+
+    const NSPoint locationInView = [self convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]];
+    if((locationInView.y < NSMinY([self bounds])) || (locationInView.y > NSMaxY([self bounds])))
+    {
+        if(!_autoDragTimer) _autoDragTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(OE_autoMouseDragged:) userInfo:nil repeats:YES];
+    }
+    else
+    {
+        [_autoDragTimer invalidate];
+        _autoDragTimer = nil;
+        [self OE_autoMouseDragged:nil];
     }
 }
 
