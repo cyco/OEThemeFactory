@@ -585,8 +585,13 @@ static NSMutableArray *__sharedMenuStack;
 {
     if(_highlightedItem != highlightedItem)
     {
+        NSView *oldView = [_view OE_viewThatContainsItem:_highlightedItem];
+        NSView *newView = [_view OE_viewThatContainsItem:highlightedItem];
+
+        [oldView setNeedsDisplayInRect:[[_highlightedItem extraData] frame]];
+        [newView setNeedsDisplayInRect:[[highlightedItem extraData] frame]];
+
         _highlightedItem = highlightedItem;
-        [_view setNeedsDisplay:YES];
     }
 }
 
