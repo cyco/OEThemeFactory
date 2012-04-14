@@ -78,9 +78,9 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
     NSRect textFrame;
     NSRect submenuArrowFrame;
 
-    NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                                   NSMinXEdge);
+    NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                               NSMinXEdge);
     NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  ([self doesContainImages] ? OEMenuItemImageWidth : 0), NSMinXEdge);
-    NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                               NSMaxXEdge);
+    NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                           NSMaxXEdge);
 
     // Cache for future use
     const NSSize separatorSize = [_separatorImage size];
@@ -165,12 +165,13 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
+    // This call prevents the right click / context menu from appearing
     return nil;
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent
 {
-    // Forward the event, only if we are not in the middle of closing the menu
+    // Forward the event only if we are not in the middle of closing the menu
     OEMenu *menu = (OEMenu *)[self window];
     if([menu OE_closing]) return;
     [super scrollWheel:theEvent];
