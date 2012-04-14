@@ -89,75 +89,76 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
     for(NSUInteger i = 0; i < count; i++)
     {
         // Figure out if an alternate item should be rendered
-        NSMenuItem          *item      = [_itemArray objectAtIndex:i];
-        OEMenuItemExtraData *extraData = [item extraData];
-        item = [extraData itemWithModifierMask:_lastKeyModifierMask];
+        NSMenuItem          *item          = [_itemArray objectAtIndex:i];
+        OEMenuItemExtraData *extraData     = [item extraData];
+        NSRect               menuItemFrame = [extraData frame];
 
         // Skip over any alternate items
-        i += [[extraData alternateItems] count];
+        item  = [extraData itemWithModifierMask:_lastKeyModifierMask];
+        i    += [[extraData alternateItems] count];
 
-        if(![item isHidden])
+        // Continue to the next iteration if the menu item is hidden or it's frame is above the clipping rect
+        if([item isHidden] || (NSMinY(menuItemFrame) > NSMaxY(dirtyRect))) continue;
+
+        // Break the loop if the menu item's frame is beyond the clipping rect
+        if(NSMaxY(menuItemFrame) < NSMinY(dirtyRect)) break;
+
+        // This item should be within the clipping rect, lets draw it
+        if([item isSeparatorItem])
         {
-            NSRect menuItemFrame = [extraData frame];
-            if([item isSeparatorItem])
+            menuItemFrame.origin.y    = NSMaxY(menuItemFrame) - OEMenuItemSeparatorOffset;
+            menuItemFrame.size.height = separatorSize.height;
+            [_separatorImage drawInRect:menuItemFrame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        }
+        else
+        {
+            // Retreive theme based attributes
+            OEThemeState  menuItemState     = [self OE_currentStateFromMenuItem:item];
+            NSDictionary *textAttributes    = [self OE_textAttributesForState:menuItemState];
+            NSImage      *tickMarkImage     = [_tickImage imageForState:menuItemState];
+            NSImage      *submenuArrowImage = [_submenuArrowImage imageForState:menuItemState];
+
+            // Retrieve the static attributes
+            NSImage  *menuItemImage = [item image];
+            NSString *title         = [item title];
+
+            // Lets put it all together
+            [[_backgroundGradient gradientForState:menuItemState] drawInRect:menuItemFrame];
+
+            if(tickMarkImage)
             {
-                menuItemFrame.origin.y    = NSMaxY(menuItemFrame) - OEMenuItemSeparatorOffset;
-                menuItemFrame.size.height = separatorSize.height;
-                [_separatorImage drawInRect:menuItemFrame fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                // TODO: We should scale the tick mark if it's too wide
+                NSRect tickMarkRect   = { .size = [tickMarkImage size] };
+                tickMarkRect.origin.x = tickMarkFrame.origin.x + ((NSWidth(tickMarkFrame) - NSWidth(tickMarkRect)) / 2.0);
+                tickMarkRect.origin.y = menuItemFrame.origin.y + ((NSHeight(tickMarkFrame) - NSHeight(tickMarkRect)) / 2.0);
+
+                [tickMarkImage drawInRect:NSIntegralRect(tickMarkRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
             }
-            else
+
+            if(menuItemImage)
             {
-                OEThemeState  menuItemState     = [self OE_currentStateFromMenuItem:item];
-                NSImage      *tickMarkImage     = [_tickImage imageForState:menuItemState];
-                NSImage      *submenuArrowImage = [_submenuArrowImage imageForState:menuItemState];
-                NSDictionary *textAttributes    = [self OE_textAttributesForState:menuItemState];
+                // TODO: We should scale the item's image if it's too wide
+                NSRect imageRect   = { .size = [menuItemImage size] };
+                imageRect.origin.x = imageFrame.origin.x + 2.0;
+                imageRect.origin.y = menuItemFrame.origin.y + ((NSHeight(imageFrame) - NSHeight(imageRect)) / 2.0);
 
-                NSImage  *menuItemImage = [item image];
-                NSString *title         = [item title];
-
-                [[_backgroundGradient gradientForState:menuItemState] drawInRect:menuItemFrame];
-
-                // Draw the item's tick mark
-                if(tickMarkImage)
-                {
-                    // TODO: We should scale the tick mark if it's too wide
-                    NSRect tickMarkRect   = { .size = [tickMarkImage size] };
-                    tickMarkRect.origin.x = tickMarkFrame.origin.x + ((NSWidth(tickMarkFrame) - NSWidth(tickMarkRect)) / 2.0);
-                    tickMarkRect.origin.y = menuItemFrame.origin.y + ((NSHeight(tickMarkFrame) - NSHeight(tickMarkRect)) / 2.0);
-
-                    [tickMarkImage drawInRect:NSIntegralRect(tickMarkRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                }
-
-                // Draw the item's image (if it has one)
-                if(menuItemImage)
-                {
-                    // TODO: We should scale the item's image if it's too wide
-                    NSRect imageRect   = { .size = [menuItemImage size] };
-                    imageRect.origin.x = imageFrame.origin.x + 2.0;
-                    imageRect.origin.y = menuItemFrame.origin.y + ((NSHeight(imageFrame) - NSHeight(imageRect)) / 2.0);
-
-                    [menuItemImage drawInRect:NSIntegralRect(imageRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                }
-
-                // Draw submenu arrow if the item has a submenu
-                if([item hasSubmenu] && submenuArrowImage)
-                {
-                    // TODO: We should scale the submenuArrowImage image if it's too wide
-                    NSRect arrowRect   = { .size = [submenuArrowImage size] };
-                    arrowRect.origin.x = submenuArrowFrame.origin.x;
-                    arrowRect.origin.y = menuItemFrame.origin.y + ((NSHeight(submenuArrowFrame) - NSHeight(arrowRect)) / 2.0);
-
-                    [submenuArrowImage drawInRect:NSIntegralRect(arrowRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                }
-
-                // Draw Item Title
-                // TODO: We should truncate the title with ellipse if it's too long
-                NSRect textRect   = { .size = [title sizeWithAttributes:textAttributes] };
-                textRect.origin.x = textFrame.origin.x;
-                textRect.origin.y = menuItemFrame.origin.y + ((NSHeight(textFrame) - NSHeight(textRect)) / 2.0);
-
-                [title drawInRect:textRect withAttributes:textAttributes];
+                [menuItemImage drawInRect:NSIntegralRect(imageRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
             }
+
+            if([item hasSubmenu] && submenuArrowImage)
+            {
+                // TODO: We should scale the submenuArrowImage image if it's too wide
+                NSRect arrowRect   = { .size = [submenuArrowImage size] };
+                arrowRect.origin.x = submenuArrowFrame.origin.x;
+                arrowRect.origin.y = menuItemFrame.origin.y + ((NSHeight(submenuArrowFrame) - NSHeight(arrowRect)) / 2.0);
+
+                [submenuArrowImage drawInRect:NSIntegralRect(arrowRect) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+            }
+
+            NSRect textRect   = { .size = [title sizeWithAttributes:textAttributes] };
+            textRect.origin.x = textFrame.origin.x;
+            textRect.origin.y = menuItemFrame.origin.y + ((NSHeight(textFrame) - NSHeight(textRect)) / 2.0);
+            [title drawInRect:textRect withAttributes:textAttributes];
         }
     }
 }
