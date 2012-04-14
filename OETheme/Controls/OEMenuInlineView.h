@@ -19,6 +19,7 @@
 }
 
 - (void)scrollItemToVisible:(NSMenuItem *)item;
+- (BOOL)shouldKeepAutoscroll:(NSEvent *)theEvent;
 
 @property(nonatomic, readonly) NSRect clippingRect;
 @property(nonatomic, readonly) OEMenuDocumentView *documentView;

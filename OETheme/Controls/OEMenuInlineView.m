@@ -132,6 +132,29 @@ static const CGFloat OEMenuScrollAutoDelay   = 0.1;
     }
 }
 
+- (BOOL)shouldKeepAutoscroll:(NSEvent *)theEvent
+{
+    const NSPoint locationInView = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    if(![_scrollUpButton isHidden]   && NSPointInRect(locationInView, [_scrollUpButton frame]))
+    {
+        [self OE_autoScrollUp:nil];
+        return ![_scrollUpButton isHidden];
+    }
+    else if(![_scrollDownButton isHidden] && NSPointInRect(locationInView, [_scrollDownButton frame]))
+    {
+        [self OE_autoScrollDown:nil];
+        return ![_scrollDownButton isHidden];
+    }
+
+    if([[_scrollView contentView] autoscroll:theEvent])
+    {
+        if (locationInView.y < NSMinY([self bounds])) return ![_scrollDownButton isHidden];
+        if (locationInView.y > NSMaxY([self bounds])) return ![_scrollUpButton isHidden];
+    }
+
+    return YES;
+}
+
 - (void)scrollToBeginningOfDocument:(id)sender
 {
     [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY([_documentView frame]))];
@@ -151,7 +174,7 @@ static const CGFloat OEMenuScrollAutoDelay   = 0.1;
 
 - (void)OE_autoScrollUp:(NSTimer *)timer
 {
-    if(!_automaticScrollTimer)
+    if(!_automaticScrollTimer && timer)
     {
         [timer invalidate];
         return;
@@ -169,7 +192,7 @@ static const CGFloat OEMenuScrollAutoDelay   = 0.1;
 
 - (void)OE_autoScrollDown:(NSTimer *)timer
 {
-    if(!_automaticScrollTimer)
+    if(!_automaticScrollTimer && timer)
     {
         [timer invalidate];
         return;

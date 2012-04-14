@@ -163,8 +163,24 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 - (void)mouseDragged:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
-    [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
     _dragging = YES;
+
+    const NSPoint locationInView = [self convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]];
+    if([_draggingView shouldKeepAutoscroll:theEvent])
+    {
+        [self highlightItemAtPoint:locationInView];
+    }
+    else
+    {
+        _draggingView = nil;
+    }
+
+    [self highlightItemAtPoint:[self convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
+    if(!_draggingView)
+    {
+        _draggingView = (OEMenuInlineView *)[[[self OE_viewThatContainsItem:[[self OE_menu] highlightedItem]] enclosingScrollView] superview];
+        if(NSHeight([[_draggingView documentView] frame]) <= NSHeight([_draggingView frame])) _draggingView = nil;
+    }
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent

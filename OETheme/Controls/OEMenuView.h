@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "OEMenu.h"
+#import "OEMenuInlineView.h"
 
 @class OEMenuDocumentView;
 
@@ -27,7 +28,9 @@
 
     NSTimer *_delayedHighlightTimer;
     NSPoint  _lastMousePoint;
-    BOOL     _dragging;
+
+    OEMenuInlineView *_draggingView;
+    BOOL              _dragging;
 
     NSArray    *_itemArray;
     NSUInteger  _keyModifierMask;

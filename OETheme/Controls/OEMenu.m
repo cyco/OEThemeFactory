@@ -488,8 +488,8 @@ static NSMutableArray *__sharedMenuStack;
                 // up event is reached.  Mouse drag events are only sent in between a mouse down and mouse up operation, therefore, [event window] does
                 // not have the information we really need.
                 const NSPoint  locationInScreen = [OEMenu OE_locationInScreenForEvent:event];
-                OEMenu       *newMenuFocus     = [OEMenu OE_menuAtPoint:locationInScreen];
-                if(menuWithMouseFocus != newMenuFocus)
+                OEMenu        *newMenuFocus     = [OEMenu OE_menuAtPoint:locationInScreen];
+                if((newMenuFocus != nil) && (menuWithMouseFocus != newMenuFocus))
                 {
                     // If the menu with the focus has changed, let the old menu know that the mouse has exited it's view
                     if(menuWithMouseFocus) [menuWithMouseFocus->_view mouseExited:[menuWithMouseFocus OE_mockMouseEvent:event]];
