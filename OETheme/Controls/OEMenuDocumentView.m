@@ -65,8 +65,8 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
     if(count == 0) return;
 
     // Constrain the clipped path to that of the dirtyRect and the OEMenuInlineView's clippingRect
-    OEMenuInlineView *scrollView = (OEMenuInlineView *)[[self enclosingScrollView] superview];
-    dirtyRect = NSIntersectionRect(dirtyRect, [scrollView convertRect:[scrollView clippingRect] toView:self]);
+    NSView *scrollView = [[self enclosingScrollView] superview];
+    dirtyRect          = NSIntersectionRect(dirtyRect, [scrollView convertRect:[(OEMenuInlineView *)scrollView clippingRect] toView:self]);
 
     // If there is nothing to draw then return
     if(NSIsEmptyRect(dirtyRect)) return;

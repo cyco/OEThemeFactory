@@ -212,6 +212,12 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     return NO;
 }
 
+- (void)OE_setHighlightedItemByKeyboard:(NSMenuItem *)item
+{
+    [[self OE_menu] setHighlightedItem:item];
+    [(OEMenuInlineView *)[[[self OE_viewThatContainsItem:item] enclosingScrollView] superview] scrollItemToVisible:item];
+}
+
 - (void)moveUp:(id)sender
 {
     OEMenu *menu = [self OE_menu];
@@ -236,7 +242,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
         }
     }
 
-    [menu setHighlightedItem:item];
+    [self OE_setHighlightedItemByKeyboard:item];
 }
 
 - (void)moveDown:(id)sender
@@ -263,7 +269,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
         }
     }
 
-    [menu setHighlightedItem:item];
+    [self OE_setHighlightedItemByKeyboard:item];
 }
 
 - (void)moveLeft:(id)sender
@@ -339,7 +345,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     [self performSelector:@selector(OE_immediatelyExpandHighlightedItemSubmenu) withObject:nil afterDelay:OEMenuItemShowSubmenuDelay];
 }
 
-- (void)OE_setHighlightedItem:(NSMenuItem *)highlightedItem
+- (void)OE_setHighlightedItemByMouse:(NSMenuItem *)highlightedItem
 {
     // Go ahead and switch the highlighted item (and expand the submenu as appropriate)
     OEMenu *menu = [self OE_menu];
@@ -363,7 +369,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
         focusedMenu = [focusedMenu OE_supermenu];
     }
 
-    [self OE_setHighlightedItem:highlightedItem];
+    [self OE_setHighlightedItemByMouse:highlightedItem];
 }
 
 - (void)highlightItemAtPoint:(NSPoint)point
@@ -409,7 +415,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     }
     else
     {
-        [self OE_setHighlightedItem:highlightedItem];
+        [self OE_setHighlightedItemByMouse:highlightedItem];
     }
     _lastMousePoint = point;
 }

@@ -11,8 +11,11 @@
 #import "OEMenuDocumentView+OEMenuView.h"
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
+#import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 
 static const CGFloat OEMenuScrollArrowHeight = 19.0;
+static const CGFloat OEMenuScrollAutoStep    = 8.0;
+static const CGFloat OEMenuScrollAutoDelay   = 0.1;
 
 // Fake menu scroller (doesn't render anything)
 @interface _OEMenuScroller : NSScroller
@@ -59,37 +62,127 @@ static const CGFloat OEMenuScrollArrowHeight = 19.0;
 
 - (void)dealloc
 {
+    // -invalidate appears to have no affect
+    [_automaticScrollTimer invalidate];
+    _automaticScrollTimer = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)updateTrackingAreas
+{
+    [[self trackingAreas] enumerateObjectsUsingBlock:
+     ^ (NSTrackingArea *obj, NSUInteger idx, BOOL *stop)
+     {
+         [self removeTrackingArea:obj];
+     }];
+
+    if(![_scrollUpButton isHidden])   [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[_scrollUpButton frame] options:NSTrackingMouseEnteredAndExited | NSTrackingActiveInActiveApp owner:self userInfo:nil]];
+    if(![_scrollDownButton isHidden]) [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:[_scrollDownButton frame] options:NSTrackingMouseEnteredAndExited | NSTrackingActiveInActiveApp owner:self userInfo:nil]];
+}
+
+- (void)mouseEntered:(NSEvent *)theEvent
+{
+    [_automaticScrollTimer invalidate];
+
+    const NSPoint locationInView = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    SEL scrollSelector           = NSPointInRect(locationInView, [_scrollUpButton frame]) ? @selector(OE_autoScrollUp:) : @selector(OE_autoScrollDown:);
+    _automaticScrollTimer        = [NSTimer scheduledTimerWithTimeInterval:OEMenuScrollAutoDelay target:self selector:scrollSelector userInfo:nil repeats:YES];
+
+    [(OEMenu *)[self window] setHighlightedItem:nil];
+}
+
+- (void)mouseExited:(NSEvent *)theEvent
+{
+    [_automaticScrollTimer invalidate];
+    _automaticScrollTimer = nil;
+}
+
+- (void)OE_scrollToPoint:(NSPoint)point
+{
+    const CGFloat minY                 = 0.0;
+    const CGFloat maxY                 = NSHeight([[_scrollView documentView] frame]) - NSHeight([_scrollView frame]);
+
+    if(point.y <= minY)
+    {
+        point.y              = minY;
+    }
+
+    if(point.y >= maxY)
+    {
+        point.y              = maxY;
+    }
+
+    [[_scrollView contentView] scrollToPoint:point];
+}
+
+- (void)scrollItemToVisible:(NSMenuItem *)item
+{
+    if(!item || ![[_documentView itemArray] containsObject:item]) return;
+
+    const NSRect visibleRect   = [self convertRect:_clippingRect toView:_documentView];
+    const NSRect menuItemFrame = [[item extraData] frame];
+
+    if(NSMaxY(menuItemFrame) > NSMaxY(visibleRect))
+    {
+        [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY(menuItemFrame) - NSHeight(visibleRect) - OEMenuScrollArrowHeight)];
+    }
+    else if(NSMinY(menuItemFrame) < NSMinY(visibleRect))
+    {
+        [self OE_scrollToPoint:NSMakePoint(0.0, NSMinY(menuItemFrame) - OEMenuScrollArrowHeight)];
+    }
 }
 
 - (void)scrollToBeginningOfDocument:(id)sender
 {
-    [[_scrollView contentView] scrollToPoint:NSMakePoint(0.0, NSHeight([[_scrollView documentView] frame]) - NSHeight([_scrollView frame]))];
+    [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY([_documentView frame]))];
 }
 
 - (void)scrollToEndOfDocument:(id)sender
 {
-    [[_scrollView contentView] scrollToPoint:NSZeroPoint];
+    [self OE_scrollToPoint:NSZeroPoint];
 }
 
-- (void)scrollLineUp:(id)sender
+- (void)OE_highlightItemUnderMouse
 {
-    // TODO: Implement
+    // Update the highlighted item to be the item underneath the mouse (only if the last event was the scroll wheel)
+    OEMenuView *view = [(OEMenu *)[self window] OE_view];
+    [view highlightItemAtPoint:[view convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
 }
 
-- (void)scrollLineDown:(id)sender
+- (void)OE_autoScrollUp:(NSTimer *)timer
 {
-    // TODO: Implement
+    if(!_automaticScrollTimer)
+    {
+        [timer invalidate];
+        return;
+    }
+
+    [self OE_scrollToPoint:NSMakePoint(0.0, NSMinY([[_scrollView contentView] bounds]) + OEMenuScrollAutoStep)];
+
+    if([_scrollUpButton isHidden])
+    {
+        [_automaticScrollTimer invalidate];
+        _automaticScrollTimer = nil;
+        [self OE_highlightItemUnderMouse];
+    }
 }
 
-- (void)scrollPageUp:(id)sender
+- (void)OE_autoScrollDown:(NSTimer *)timer
 {
-    // TODO: Implement
-}
+    if(!_automaticScrollTimer)
+    {
+        [timer invalidate];
+        return;
+    }
 
-- (void)scrollPageDown:(id)sender
-{
-    // TODO: Implement
+    [self OE_scrollToPoint:NSMakePoint(0.0, NSMinY([[_scrollView contentView] bounds]) - OEMenuScrollAutoStep)];
+
+    if([_scrollDownButton isHidden])
+    {
+        [_automaticScrollTimer invalidate];
+        _automaticScrollTimer = nil;
+        [self OE_highlightItemUnderMouse];
+    }
 }
 
 - (void)OE_updateTheme
@@ -143,10 +236,6 @@ static const CGFloat OEMenuScrollArrowHeight = 19.0;
 
 - (void)OE_updateScrollerVisibility
 {
-    static BOOL updating = NO;
-    if(updating) return;
-    updating = YES;
-
     if(NSIsEmptyRect([self bounds])) return;
 
     const NSRect bounds  = [self bounds];
@@ -155,19 +244,20 @@ static const CGFloat OEMenuScrollArrowHeight = 19.0;
 
     if(NSHeight(bounds) < NSHeight(documentFrame))
     {
-        const NSRect contentBounds = [[_scrollView contentView] bounds];
-        const BOOL   hideDown      = NSMinY(contentBounds) == 0.0;
-        const BOOL   hideUp        = NSMaxY(contentBounds) == NSHeight(documentFrame);
+        const NSRect contentBounds    = [[_scrollView contentView] bounds];
+        const BOOL   hideDown         = NSMinY(contentBounds) <= 0.0;
+        const BOOL   hideUp           = NSMaxY(contentBounds) >= NSHeight(documentFrame);
+        const BOOL   updateVisibility = ([_scrollUpButton isHidden] != hideUp) || ([_scrollDownButton isHidden] != hideDown);
 
         [_scrollUpButton setHidden:hideUp];
         [_scrollDownButton setHidden:hideDown];
 
         if(!hideDown) _clippingRect.origin.y = NSMaxY([_scrollDownButton frame]);
-        _clippingRect.size.height           = (hideUp ? NSHeight(bounds) : NSMinY([_scrollUpButton frame])) - NSMinY(_clippingRect);
+        _clippingRect.size.height            = (hideUp ? NSHeight(bounds) : NSMinY([_scrollUpButton frame])) - NSMinY(_clippingRect);
+
+        if(updateVisibility) [self updateTrackingAreas];
     }
     [_scrollView setFrame:bounds];
-
-    updating = NO;
 }
 
 - (void)documentViewBoundsDidChange:(NSNotification *)notification
@@ -175,12 +265,8 @@ static const CGFloat OEMenuScrollArrowHeight = 19.0;
     if(NSIsEmptyRect([self bounds])) return;
 
     [self OE_updateScrollerVisibility];
-    if([[self window] isVisible])
-    {
-        // Update the highlighted item to be the item underneath the mouse
-        OEMenuView *view = [(OEMenu *)[self window] OE_view];
-        [view highlightItemAtPoint:[view convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
-    }
+
+    if([[[self window] currentEvent] type] == NSScrollWheel) [self OE_highlightItemUnderMouse];
 }
 
 - (void)setFrameSize:(NSSize)newSize

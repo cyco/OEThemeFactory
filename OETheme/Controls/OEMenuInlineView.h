@@ -12,10 +12,13 @@
 @interface OEMenuInlineView : NSView
 {
 @package
-    NSView *_scrollUpButton;
-    NSView *_scrollDownButton;
-    NSScrollView *_scrollView;
+    NSView         *_scrollUpButton;
+    NSView         *_scrollDownButton;
+    NSScrollView   *_scrollView;
+    NSTimer        *_automaticScrollTimer;
 }
+
+- (void)scrollItemToVisible:(NSMenuItem *)item;
 
 @property(nonatomic, readonly) NSRect clippingRect;
 @property(nonatomic, readonly) OEMenuDocumentView *documentView;
