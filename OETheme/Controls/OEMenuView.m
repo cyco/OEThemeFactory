@@ -825,8 +825,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
                 {
                     arrowRect.size     = OEMinXEdgeArrowSize;
                     arrowRect.origin.x = attachedPoint.x +_backgroundEdgeInsets.left - arrowRect.size.width;
-                    v1 = NSMaxX(arrowRect);
-                    v2 = NSMaxX(arrowRect);
+                    v1                 = NSMaxX(arrowRect);
+                    v2                 = NSMinX(arrowRect);
                 }
                 else
                 {
