@@ -31,7 +31,6 @@
 @interface OEMenuDocumentView : NSView
 {
 @private
-    BOOL   _containImages;           // Flag used to determine menu item height, if there are no images we use a smaller height
     BOOL   _needsLayout;             // Flag used to notify that the menu item's frames should be invalidated
     NSSize _intrinsicSize;           // Natural size of the menu items
 
@@ -45,6 +44,8 @@
     OEThemeTextAttributes *_textAttributes;
     OEThemeImage          *_submenuArrowImage;
 }
+
+@property(nonatomic, readonly, getter = doesContainImages) BOOL containImages;
 
 @property(nonatomic, retain)   NSArray     *itemArray;
 @property(nonatomic, assign)   OEMenuStyle  style;

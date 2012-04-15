@@ -34,7 +34,7 @@
 #pragma mark Menu Item Spacing
 
 const CGFloat        OEMenuItemTickMarkWidth      = 19.0; // Value is extern, used by OEMenu.m to calculate popup button menu placement
-static const CGFloat OEMenuItemImageWidth         = 22.0;
+const CGFloat        OEMenuItemImageWidth         = 22.0; // Value is extern, used by OEMenu.m to calculate popup button menu placement
 static const CGFloat OEMenuItemSubmenuArrowWidth  = 10.0;
 static const CGFloat OEMenuItemHeightWithImage    = 20.0;
 static const CGFloat OEMenuItemHeightWithoutImage = 17.0;
@@ -54,6 +54,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 #pragma mark -
 
 @implementation OEMenuDocumentView
+@synthesize containImages = _containImages;
 @synthesize itemArray = _itemArray;
 @synthesize style = _style;
 

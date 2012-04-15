@@ -33,6 +33,7 @@
 extern const NSEdgeInsets OEMenuContentEdgeInsets;
 extern const NSEdgeInsets OEMenuItemInsets;
 extern const CGFloat      OEMenuItemTickMarkWidth;
+extern const CGFloat      OEMenuItemImageWidth;
 
 #pragma mark -
 #pragma mark Implementation

@@ -225,16 +225,17 @@ static NSMutableArray *__sharedMenuStack; // Array of all the open instances of 
     [_view OE_layoutIfNeeded];
 
     // Calculate the positioning frames
-    const NSRect        selectedItemRect = [self convertRectToScreen:[[_view documentView] convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
-    const NSRect        screenFrame      = [self OE_confinementRectForScreen];
-    const NSEdgeInsets  edgeInsets       = [_view backgroundEdgeInsets];
-    const NSRect        buttonFrame      = [button bounds];
+    const NSRect        selectedItemRect  = [self convertRectToScreen:[[_view documentView] convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
+    const NSRect        screenFrame       = [self OE_confinementRectForScreen];
+    const NSEdgeInsets  edgeInsets        = [_view backgroundEdgeInsets];
+    const NSRect        buttonFrame       = [button bounds];
+    const BOOL          doesContainImages = [[_view documentView] doesContainImages];
 
     NSRect frame = {  .origin = rect.origin, .size = [self size] };
 
     // TODO: Adjust origin based on the button's and menu item's shadows
-    frame.origin.x   -= edgeInsets.left - 1.0 + OEMenuItemTickMarkWidth;
-    frame.origin.y   -= NSMinY(selectedItemRect) + 2.0;
+    frame.origin.x   -= edgeInsets.left + OEMenuItemTickMarkWidth + (doesContainImages ? OEMenuItemImageWidth : 0.0);
+    frame.origin.y   -= NSMinY(selectedItemRect) + 2.0 + (doesContainImages ? 1.0 : 0.0);
     frame.size.width  = buttonFrame.size.width  + edgeInsets.left + edgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right + OEMenuItemInsets.left + OEMenuItemInsets.right;
 
     // Adjust the frame's dimensions not to be bigger than the screen
