@@ -31,7 +31,7 @@
 
 + (id)parseWithDefinition:(NSDictionary *)definition
 {
-    return NSColorFromString([definition valueForKey:OEThemeObjectValueAttributeName]);
+    return OENSColorFromString([definition valueForKey:OEThemeObjectValueAttributeName]);
 }
 
 - (NSColor *)colorForState:(OEThemeState)state

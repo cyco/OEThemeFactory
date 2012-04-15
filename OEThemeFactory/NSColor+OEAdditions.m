@@ -88,7 +88,7 @@ NSColor *_NSColorFromHSLA(NSArray *parameters)
     return [NSColor colorWithCalibratedHue:hue saturation:saturation brightness:brightness alpha:alpha];
 }
 
-NSColor *_NSColorFromString(NSString *colorString)
+NSColor *_OENSColorFromString(NSString *colorString)
 {
     if(colorString == nil) return nil;
 
@@ -159,7 +159,7 @@ NSColor *_NSColorFromString(NSString *colorString)
 }
 
 // Inspired by http://www.w3.org/TR/css3-color/ and https://github.com/kballard/uicolor-utilities/blob/master/UIColor-Expanded.m
-NSColor *NSColorFromString(NSString *colorString)
+NSColor *OENSColorFromString(NSString *colorString)
 {
     static NSDictionary    *namedColors = nil;
     static dispatch_once_t  onceToken;
@@ -255,7 +255,7 @@ NSColor *NSColorFromString(NSString *colorString)
                     if(name != NULL && value != NULL)
                     {
                         colorName  = [[NSString stringWithCString:name encoding:NSUTF8StringEncoding] lowercaseString];
-                        colorValue = _NSColorFromString([NSString stringWithCString:value encoding:NSUTF8StringEncoding]);
+                        colorValue = _OENSColorFromString([NSString stringWithCString:value encoding:NSUTF8StringEncoding]);
 
                         if(colorName != nil && colorValue != nil) [namedColors setValue:colorValue forKey:colorName];
                     }
@@ -271,5 +271,5 @@ NSColor *NSColorFromString(NSString *colorString)
     if(!colorString) return nil;
 
     NSColor *result = [namedColors valueForKey:[[colorString lowercaseString] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-    return (result ?: _NSColorFromString(colorString));
+    return (result ?: _OENSColorFromString(colorString));
 }
