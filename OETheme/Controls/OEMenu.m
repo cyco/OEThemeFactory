@@ -440,6 +440,7 @@ static NSMutableArray *__sharedMenuStack; // Array of all the open instances of 
     }
 #endif
 
+    [_view scrollToBeginningOfDocument:nil];
     [parentWindow addChildWindow:self ordered:NSWindowAbove];
     if(![parentWindow isKindOfClass:[OEMenu class]] || [parentWindow isVisible]) [self orderFrontRegardless];
 }

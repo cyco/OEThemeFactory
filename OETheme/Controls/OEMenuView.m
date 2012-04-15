@@ -348,7 +348,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
 - (void)OE_scrollToPoint:(NSPoint)point
 {
-    const CGFloat maxY = NSHeight([[_scrollView documentView] frame]) - NSHeight([_scrollView frame]);
+    const CGFloat maxY = NSHeight([_documentView frame]) - NSHeight([_scrollView frame]);
     [_documentView scrollPoint:NSMakePoint(0.0, MIN(MAX(point.y, 0.0), maxY))];
 }
 
@@ -450,11 +450,13 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
 - (void)scrollToBeginningOfDocument:(id)sender
 {
+    [self OE_layoutIfNeeded];
     [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY([_documentView frame]))];
 }
 
 - (void)scrollToEndOfDocument:(id)sender
 {
+    [self OE_layoutIfNeeded];
     [self OE_scrollToPoint:NSZeroPoint];
 }
 
@@ -623,7 +625,6 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 {
     [super setMenu:menu];
     [_documentView setItemArray:[menu itemArray]];
-    [self scrollToBeginningOfDocument:nil];
 }
 
 - (void)setStyle:(OEMenuStyle)style
