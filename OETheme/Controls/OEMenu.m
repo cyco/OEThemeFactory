@@ -361,7 +361,7 @@ static NSMutableArray *__sharedMenuStack; // Array of all the open instances of 
     // Calculate the positioning frames
     const NSRect        rectInScreen  = [self convertRectToScreen:[[_view documentView] convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
     const NSRect        screenFrame   = [self OE_confinementRectForScreen];
-    const NSEdgeInsets  edgeInsets    = [_view backgroundEdgeInsets];
+    const NSEdgeInsets  edgeInsets    = [OEMenuView OE_backgroundEdgeInsetsForEdge:OENoEdge];
     const NSSize        size          = [_submenu size];
 
     // Calculates the origin for the specified edge
@@ -370,14 +370,15 @@ static NSMutableArray *__sharedMenuStack; // Array of all the open instances of 
     {
         switch(edge)
         {
-            case OEMinXEdge: return NSMinX(rectInScreen) - size.width + edgeInsets.left - 1.0;
-            case OEMaxXEdge: return NSMaxX(rectInScreen) - edgeInsets.right + 1.0;
+            case OEMinXEdge: return NSMinX(rectInScreen) - size.width + edgeInsets.right - 1.0;
+            case OEMaxXEdge: return NSMaxX(rectInScreen) - edgeInsets.left
+                + 1.0;
             default:          break;
         }
         return 0.0;
     };
 
-    OERectEdge edge  = ([_view arrowEdge] == OENoEdge ? OEMaxXEdge : [_view arrowEdge]);
+    OERectEdge edge  = (![self isSubmenu] || [_view arrowEdge] == OENoEdge ? OEMaxXEdge : [_view arrowEdge]);
     NSRect     frame = { .origin = { .x = xForEdge(edge), .y = NSMaxY(rectInScreen) - size.height + edgeInsets.top + OEMenuContentEdgeInsets.top + OEMenuItemInsets.top }, .size = size };
 
     // Adjust the frame's dimensions not to be bigger than the screen
