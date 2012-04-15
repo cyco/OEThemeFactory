@@ -54,16 +54,21 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
 // Fake menu scroller (doesn't render anything)
 @interface _OEMenuScroller : NSScroller
+
 @end
 
-@interface _OEMenuScrollArrowView : NSView
+@interface _OEMenuScrollIndicatorView : NSView
+
 @property(nonatomic, retain) NSImage *arrow;
+
 @end
 
 @interface OEMenuView ()
+
 - (void)OE_updateTheme;
 - (void)OE_setNeedsLayout;
 - (OEMenu *)OE_menu;
+
 @end
 
 @implementation OEMenuView
@@ -79,10 +84,10 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 {
     if((self = [super initWithFrame:frame]))
     {
-        _scrollView       = [[NSScrollView alloc] initWithFrame:[self bounds]];
-        _documentView     = [[OEMenuDocumentView alloc] initWithFrame:[self bounds]];
-        _scrollUpButton   = [[_OEMenuScrollArrowView alloc] initWithFrame:NSZeroRect];
-        _scrollDownButton = [[_OEMenuScrollArrowView alloc] initWithFrame:NSZeroRect];
+        _scrollView              = [[NSScrollView alloc] initWithFrame:[self bounds]];
+        _documentView            = [[OEMenuDocumentView alloc] initWithFrame:[self bounds]];
+        _scrollUpIndicatorView   = [[_OEMenuScrollIndicatorView alloc] initWithFrame:NSZeroRect];
+        _scrollDownIndicatorView = [[_OEMenuScrollIndicatorView alloc] initWithFrame:NSZeroRect];
 
         [_scrollView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
         [_scrollView setDrawsBackground:NO];
@@ -95,8 +100,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
         [_documentView setStyle:_style];
 
         [self addSubview:_scrollView];
-        [self addSubview:_scrollUpButton];
-        [self addSubview:_scrollDownButton];
+        [self addSubview:_scrollUpIndicatorView];
+        [self addSubview:_scrollDownIndicatorView];
 
         [self OE_updateTheme];
         [self OE_setNeedsLayout];
@@ -195,10 +200,10 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 - (void)OE_autoScroll:(NSTimer *)timer
 {
     id scrollIndicator = [timer userInfo];
-    if([scrollIndicator isKindOfClass:[_OEMenuScrollArrowView class]])
+    if([scrollIndicator isKindOfClass:[_OEMenuScrollIndicatorView class]])
     {
         NSPoint newPoint  = [[_scrollView contentView] bounds].origin;
-        newPoint.y       -= OEMenuScrollAutoStep * (scrollIndicator == _scrollUpButton ? -1 : 1);
+        newPoint.y       -= OEMenuScrollAutoStep * (scrollIndicator == _scrollUpIndicatorView ? -1 : 1);
         [self OE_scrollToPoint:newPoint];
 
         if([scrollIndicator isHidden])
@@ -236,13 +241,13 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
     // Check to see if we are hovering over the scroll up or down indicators
     id userInfo = nil;
-    if(![_scrollUpButton isHidden] && NSPointInRect(point, [_scrollUpButton frame]))
+    if(![_scrollUpIndicatorView isHidden] && NSPointInRect(point, [_scrollUpIndicatorView frame]))
     {
-        userInfo = _scrollUpButton;
+        userInfo = _scrollUpIndicatorView;
     }
-    else if(![_scrollDownButton isHidden] && NSPointInRect(point, [_scrollDownButton frame]))
+    else if(![_scrollDownIndicatorView isHidden] && NSPointInRect(point, [_scrollDownIndicatorView frame]))
     {
-        userInfo = _scrollDownButton;
+        userInfo = _scrollDownIndicatorView;
     }
     else if((_lastDragEvent != nil) && ((point.y < NSMinY([_scrollView frame])) || (point.y > NSMaxY([_scrollView frame]))))
     {
@@ -588,13 +593,13 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
         const NSRect contentBounds    = [[_scrollView contentView] bounds];
         const BOOL   hideDown         = NSMinY(contentBounds) <= 0.0;
         const BOOL   hideUp           = NSMaxY(contentBounds) >= NSHeight(documentFrame);
-        const BOOL   updateVisibility = ([_scrollUpButton isHidden] != hideUp) || ([_scrollDownButton isHidden] != hideDown);
+        const BOOL   updateVisibility = ([_scrollUpIndicatorView isHidden] != hideUp) || ([_scrollDownIndicatorView isHidden] != hideDown);
 
-        [_scrollUpButton setHidden:hideUp];
-        [_scrollDownButton setHidden:hideDown];
+        [_scrollUpIndicatorView setHidden:hideUp];
+        [_scrollDownIndicatorView setHidden:hideDown];
 
-        if(!hideDown) _clippingRect.origin.y = NSMaxY([_scrollDownButton frame]);
-        _clippingRect.size.height            = (hideUp ? NSHeight(bounds) : NSMinY([_scrollUpButton frame])) - NSMinY(_clippingRect);
+        if(!hideDown) _clippingRect.origin.y = NSMaxY([_scrollDownIndicatorView frame]);
+        _clippingRect.size.height            = (hideUp ? NSHeight(bounds) : NSMinY([_scrollUpIndicatorView frame])) - NSMinY(_clippingRect);
 
         if(updateVisibility) [self updateTrackingAreas];
     }
@@ -705,8 +710,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
         _arrowImage = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:edgeComponent] forState:OEThemeStateDefault];
     }
 
-    [(_OEMenuScrollArrowView *)_scrollUpButton setArrow:[[OETheme sharedTheme] imageForKey:@"dark_menu_scroll_up_arrow" forState:OEThemeStateDefault]];
-    [(_OEMenuScrollArrowView *)_scrollDownButton setArrow:[[OETheme sharedTheme] imageForKey:@"dark_menu_scroll_down_arrow" forState:OEThemeStateDefault]];
+    [(_OEMenuScrollIndicatorView *)_scrollUpIndicatorView setArrow:[[OETheme sharedTheme] imageForKey:@"dark_menu_scroll_up_arrow" forState:OEThemeStateDefault]];
+    [(_OEMenuScrollIndicatorView *)_scrollDownIndicatorView setArrow:[[OETheme sharedTheme] imageForKey:@"dark_menu_scroll_down_arrow" forState:OEThemeStateDefault]];
 
     [self OE_setNeedsLayout];
 }
@@ -884,8 +889,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
         NSDivideRect(contentFrame, &upFrame,   &contentFrame, OEMenuScrollArrowHeight, NSMaxYEdge);
         NSDivideRect(contentFrame, &downFrame, &contentFrame, OEMenuScrollArrowHeight, NSMinYEdge);
 
-        [_scrollUpButton setFrame:upFrame];
-        [_scrollDownButton setFrame:downFrame];
+        [_scrollUpIndicatorView setFrame:upFrame];
+        [_scrollDownIndicatorView setFrame:downFrame];
     }
 
     [self OE_updateScrollerVisibility];
@@ -920,7 +925,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
 @end
 
-@implementation _OEMenuScrollArrowView
+@implementation _OEMenuScrollIndicatorView
 @synthesize arrow = _arrow;
 
 - (void)drawRect:(NSRect)dirtyRect

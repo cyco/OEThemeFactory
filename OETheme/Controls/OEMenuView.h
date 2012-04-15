@@ -35,8 +35,8 @@
     NSUInteger  _lastKeyModifierMask;
     BOOL        _needsLayout;
 
-    NSView *_scrollUpButton;
-    NSView *_scrollDownButton;
+    NSView *_scrollUpIndicatorView;
+    NSView *_scrollDownIndicatorView;
 }
 
 - (void)highlightItemAtPoint:(NSPoint)point;
