@@ -88,10 +88,11 @@ static NSMutableArray *__sharedMenuStack; // Array of all the open instances of 
     OEMenu *result = [self OE_menuWithMenu:menu forScreen:[[view window] screen] options:options];
 
     // If a reference rect has not been specified, use the specified view as a reference point
-    NSRect   rect = NSZeroRect;
-    NSValue *rectValue = [options objectForKey:OEMenuOptionsScreenRectKey];
-    if(rectValue) rect = [rectValue rectValue];
-    else          rect = [[view window] convertRectToScreen:[view convertRect:[view bounds] toView:nil]];
+    NSRect   rect       = NSZeroRect;
+    NSValue *rectValue  = [options objectForKey:OEMenuOptionsScreenRectKey];
+    if(rectValue)  rect = [rectValue rectValue];
+    else if(event) rect = (NSRect){ .origin = [[event window] convertBaseToScreen:[event locationInWindow]] };
+    else           rect = [[view window] convertRectToScreen:[view convertRect:[view bounds] toView:nil]];
 
     [result OE_updateFrameAttachedToScreenRect:rect];
     [result OE_showMenuAttachedToWindow:[event window] withEvent:event];
