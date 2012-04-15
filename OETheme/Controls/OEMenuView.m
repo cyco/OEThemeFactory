@@ -361,8 +361,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
         const NSRect visibleRect   = [self convertRect:_clippingRect toView:_documentView];
         const NSRect menuItemFrame = [[item extraData] frame];
 
-        if(NSMaxY(menuItemFrame) > NSMaxY(visibleRect))      [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY(menuItemFrame) - NSHeight(visibleRect) - OEMenuScrollArrowHeight)];
-        else if(NSMinY(menuItemFrame) < NSMinY(visibleRect)) [self OE_scrollToPoint:NSMakePoint(0.0, NSMinY(menuItemFrame) - OEMenuScrollArrowHeight)];
+        if(NSMaxY(menuItemFrame) > NSMaxY(visibleRect))      [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY(menuItemFrame) - NSHeight(visibleRect) - (NSMinY(_clippingRect) - NSMinY([_scrollView frame])))];
+        else if(NSMinY(menuItemFrame) < NSMinY(visibleRect)) [self OE_scrollToPoint:NSMakePoint(0.0, NSMinY(menuItemFrame) - (NSMinY(_clippingRect) - NSMinY([_scrollView frame])))];
     }
 }
 
