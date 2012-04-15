@@ -312,6 +312,23 @@
 				<string>{{26,29},{10,10}}</string>
 			</array>
 		</dict>
+		<key>light_menu_submenu_background</key>
+		<dict>
+			<key>Resource</key>
+			<string>light_submenu_body</string>
+			<key>Parts</key>
+			<array>
+				<string>{{0,0},{10,10}}</string>
+				<string>{{10,0},{16,10}}</string>
+				<string>{{26,0},{10,10}}</string>
+				<string>{{0,10},{10,18}}</string>
+				<string>{{10,10},{16,18}}</string>
+				<string>{{26,10},{10,18}}</string>
+				<string>{{0,29},{10,10}}</string>
+				<string>{{10,29},{16,10}}</string>
+				<string>{{26,29},{10,10}}</string>
+			</array>
+		</dict>
 		<key>light_menu_maxy_arrow_body</key>
 		<dict>
 			<key>Resource</key>
@@ -417,6 +434,23 @@
 		<dict>
 			<key>Resource</key>
 			<string>dark_menu_body</string>
+			<key>Parts</key>
+			<array>
+				<string>{{0,0},{10,10}}</string>
+				<string>{{10,0},{16,10}}</string>
+				<string>{{26,0},{10,10}}</string>
+				<string>{{0,10},{10,18}}</string>
+				<string>{{10,10},{16,18}}</string>
+				<string>{{26,10},{10,18}}</string>
+				<string>{{0,29},{10,10}}</string>
+				<string>{{10,29},{16,10}}</string>
+				<string>{{26,29},{10,10}}</string>
+			</array>
+		</dict>
+		<key>dark_menu_submenu_background</key>
+		<dict>
+			<key>Resource</key>
+			<string>dark_submenu_body</string>
 			<key>Parts</key>
 			<array>
 				<string>{{0,0},{10,10}}</string>

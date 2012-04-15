@@ -680,12 +680,15 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
 - (void)OE_updateTheme
 {
+    const BOOL isSubmenu = [[self OE_menu] isSubmenu];
     NSString *styleKeyPrefix = (_style == OEMenuStyleDark ? @"dark_menu_" : @"light_menu_");
-    _backgroundImage         = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];
+    _backgroundImage         = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:[NSString stringWithFormat:@"%@background", (isSubmenu ? @"submenu_" : @"")]] forState:OEThemeStateDefault];
     _backgroundColor         = [[OETheme sharedTheme] colorForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];
     _backgroundGradient      = [[OETheme sharedTheme] gradientForKey:[styleKeyPrefix stringByAppendingString:@"background"] forState:OEThemeStateDefault];
+    NSImage *upArrow         = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"scroll_up_arrow"] forState:OEThemeStateDefault];
+    NSImage *downArrorw      = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:@"scroll_down_arrow"] forState:OEThemeStateDefault];
 
-    if([[self OE_menu] isSubmenu] || _arrowEdge == OENoEdge)
+    if(isSubmenu || (_arrowEdge == OENoEdge))
     {
         _arrowImage = nil;
     }
@@ -711,8 +714,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
         _arrowImage = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:edgeComponent] forState:OEThemeStateDefault];
     }
 
-    [(_OEMenuScrollIndicatorView *)_scrollUpIndicatorView setArrow:[[OETheme sharedTheme] imageForKey:@"dark_menu_scroll_up_arrow" forState:OEThemeStateDefault]];
-    [(_OEMenuScrollIndicatorView *)_scrollDownIndicatorView setArrow:[[OETheme sharedTheme] imageForKey:@"dark_menu_scroll_down_arrow" forState:OEThemeStateDefault]];
+    [(_OEMenuScrollIndicatorView *)_scrollUpIndicatorView setArrow:upArrow];
+    [(_OEMenuScrollIndicatorView *)_scrollDownIndicatorView setArrow:downArrorw];
 
     [self OE_setNeedsLayout];
 }
