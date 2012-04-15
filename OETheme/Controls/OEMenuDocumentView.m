@@ -314,7 +314,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
              if(![item isHidden])
              {
                  keyModifierMask |= [item keyEquivalentModifierMask];
-                 containsImages   = containsImages && ([item image] != nil);
+                 containsImages   = containsImages || ([item image] != nil);
                  if([item isAlternate] && [[lastValidItem keyEquivalent] isEqualToString:[item keyEquivalent]]) [[lastValidItem extraData] addAlternateItem:item];
                  else                                                                                           lastValidItem = item;
              }
