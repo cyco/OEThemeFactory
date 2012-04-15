@@ -446,7 +446,7 @@ static NSMutableArray *__sharedMenuStack;
 
 - (NSEvent *)OE_mockMouseEvent:(NSEvent *)event
 {
-    if([event window] == self || [[event window] isKindOfClass:[OEMenu class]]) return event;
+    if([event window] == self) return event;
 
     const NSPoint location = [self convertScreenToBase:[OEMenu OE_locationInScreenForEvent:event]];
     return [NSEvent mouseEventWithType:[event type] location:location modifierFlags:[event modifierFlags] timestamp:[event timestamp] windowNumber:[self windowNumber] context:[event context] eventNumber:[event eventNumber] clickCount:[event clickCount] pressure:[event pressure]];
