@@ -118,6 +118,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     // If the superview has been changed, then make sure we invalidate any of the timers that affect the visual feedback
     [_autoScrollTimer invalidate];
     _autoScrollTimer = nil;
+    [_delayedHighlightTimer invalidate];
+    _delayedHighlightTimer = nil;
 }
 
 - (void)drawRect:(NSRect)dirtyRect
@@ -341,16 +343,6 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     }
 }
 
-- (void)scrollToBeginningOfDocument:(id)sender
-{
-    [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY([_documentView frame]))];
-}
-
-- (void)scrollToEndOfDocument:(id)sender
-{
-    [self OE_scrollToPoint:NSZeroPoint];
-}
-
 - (void)moveUp:(id)sender
 {
     OEMenu *menu = [self OE_menu];
@@ -433,6 +425,16 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     [menu cancelTracking];
 }
 
+- (void)scrollToBeginningOfDocument:(id)sender
+{
+    [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY([_documentView frame]))];
+}
+
+- (void)scrollToEndOfDocument:(id)sender
+{
+    [self OE_scrollToPoint:NSZeroPoint];
+}
+
 - (void)OE_flashItem:(NSMenuItem *)highlightedItem
 {
     [[self OE_menu] setHighlightedItem:highlightedItem];
@@ -494,9 +496,9 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     NSMenuItem *highlightedItem = [timer userInfo];
     _delayedHighlightTimer      = nil;
 
-    // If the mouse is hovering over one of the descendent menus, then ignore the request to highlight a new item and expand it's menu.  Figuring out if the mouse is over a descendent
-    // menu is done backwards, we start with the menu that is under the mouse and keep comparing it's supermenu to our view's associated menu. If they ever match, then the focusedMenu
-    // has to be a descendent of this view's associated menu.
+    // FIXME: If we paused over one of the descendents and moved off of it before this timer is fired, the descendent is hidden when it shouldn't be
+
+    // If the mouse is hovering over one of the descendent menus, then ignore the request to highlight a new item and expand it's menu.  Figuring out if the mouse is over a descendent menu is done backwards, we start with the menu that is under the mouse and keep comparing it's supermenu to our view's associated menu. If they ever match, then the focusedMenu has to be a descendent of this view's associated menu.
     OEMenu *focusedMenu = [OEMenu OE_menuAtPoint:[NSEvent mouseLocation]];
     while (focusedMenu)
     {

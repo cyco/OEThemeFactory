@@ -76,7 +76,7 @@
                              [NSNumber numberWithUnsignedInteger:OEMenuStyleDark], OEMenuOptionsStyleKey,
                              [NSValue valueWithSize:NSMakeSize(2000, 200)], OEMenuOptionsMaximumSizeKey,
                              nil];
-    [OEMenu popUpContextMenu:menu withEvent:nil forView:sender options:options];
+    [OEMenu openMenu:menu withEvent:nil forView:sender options:options];
 }
 
 @end

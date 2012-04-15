@@ -14,29 +14,32 @@
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 #import "OEPopUpButton.h"
 
+#pragma mark -
+#pragma mark Menu option keys
+
 NSString * const OEMenuOptionsStyleKey           = @"OEMenuOptionsStyle";
 NSString * const OEMenuOptionsArrowEdgeKey       = @"OEMenuOptionsArrowEdge";
 NSString * const OEMenuOptionsMaximumSizeKey     = @"OEMenuOptionsMaximumSize";
 NSString * const OEMenuOptionsHighlightedItemKey = @"OEMenuOptionsHighlightedItem";
 NSString * const OEMenuOptionsScreenRectKey      = @"OEMenuOptionsScreenRect";
 
+#pragma mark -
+#pragma mark Timing
+
 static const CGFloat OEMenuFadeOutDuration = 0.075; // Animation duration to fade the menu out
 static const CGFloat OEMenuClickDelay      = 0.5;   // Amount of time before menu interprets a mouse down event between a click or drag operation
 
-static NSMutableArray *__sharedMenuStack;
+#pragma mark -
+#pragma Implementation
 
-@interface OEMenu ()
-
-- (void)OE_parseOptions:(NSDictionary *)options;
-
-@end
+static NSMutableArray *__sharedMenuStack; // Array of all the open instances of OEMenu
 
 @implementation OEMenu
 @synthesize highlightedItem = _highlightedItem;
 
-+ (OEMenu *)OE_popUpContextMenuWithMenu:(NSMenu *)menu forScreen:(NSScreen *)screen options:(NSDictionary *)options
++ (OEMenu *)OE_menuWithMenu:(NSMenu *)menu forScreen:(NSScreen *)screen options:(NSDictionary *)options
 {
-    // When instantiating a new window, we have to establish an initial content rect size, otherwise, it will never been associated with the specified NSScreen
+    // When instantiating a new window, we have to establish an initial content rect size, otherwise, it will never be associated with a specific NSScreen
     OEMenu *result = [[self alloc] initWithContentRect:NSMakeRect(0.0, 0.0, 10.0, 10.0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:YES screen:screen];
     NSAssert(result != nil, @"out of memory");
     [result setMenu:menu];
@@ -45,7 +48,7 @@ static NSMutableArray *__sharedMenuStack;
     return result;
 }
 
-+ (void)popUpContextMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event options:(NSDictionary *)options
++ (void)openMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event options:(NSDictionary *)options
 {
     // Calculate the frame for the popup menu so that the popup menu's selected item hovers exactly over the popup button's title
     const NSRect titleRectInButton = [[button cell] titleRectForBounds:[button bounds]];
@@ -56,15 +59,15 @@ static NSMutableArray *__sharedMenuStack;
     [newOptions setValue:[NSNumber numberWithUnsignedInteger:OENoEdge] forKey:OEMenuOptionsArrowEdgeKey];
     [newOptions setValue:[button selectedItem]                         forKey:OEMenuOptionsHighlightedItemKey];
 
-    OEMenu *result = [self OE_popUpContextMenuWithMenu:[button menu] forScreen:[[button window] screen] options:newOptions];
+    OEMenu *result = [self OE_menuWithMenu:[button menu] forScreen:[[button window] screen] options:newOptions];
     [result OE_updateFrameAttachedToPopupButton:button alignSelectedItemWithRect:titleRectInScreen];
     [result OE_showMenuAttachedToWindow:[button window] withEvent:event];
 }
 
-+ (void)popUpContextMenu:(NSMenu *)menu withEvent:(NSEvent *)event forView:(NSView *)view options:(NSDictionary *)options
++ (void)openMenu:(NSMenu *)menu withEvent:(NSEvent *)event forView:(NSView *)view options:(NSDictionary *)options
 {
     // Calculate the frame for the popup menu so that the menu appears to be attached to the specified view
-    OEMenu *result = [self OE_popUpContextMenuWithMenu:menu forScreen:[[view window] screen] options:options];
+    OEMenu *result = [self OE_menuWithMenu:menu forScreen:[[view window] screen] options:options];
 
     // If a reference rect has not been specified, use the specified view as a reference point
     NSRect   rect = NSZeroRect;
@@ -78,16 +81,11 @@ static NSMutableArray *__sharedMenuStack;
 
 - (id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)aStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)flag screen:(NSScreen *)screen
 {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        __sharedMenuStack = [NSMutableArray array];
-    });
-
     if((self = [super initWithContentRect:contentRect styleMask:aStyle backing:bufferingType defer:flag screen:screen]))
     {
         _view = [[OEMenuView alloc] initWithFrame:[[self contentView] bounds]];
         [_view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
-        [[self contentView] addSubview:_view];
+        [self setContentView:_view];
 
         [self setOpaque:NO];
         [self setBackgroundColor:[NSColor clearColor]];
@@ -178,6 +176,7 @@ static NSMutableArray *__sharedMenuStack;
     NSValue    *maxSize         = [options objectForKey:OEMenuOptionsMaximumSizeKey];
     NSMenuItem *highlightedItem = [options objectForKey:OEMenuOptionsHighlightedItemKey];
 
+    // Only set the option if it's been expliticly specified in the options dictionary
     if(style)           [_view setStyle:[style unsignedIntegerValue]];
     if(edge)            [_view setArrowEdge:[edge unsignedIntegerValue]];
     if(maxSize)         [self setMaxSize:[maxSize sizeValue]];
@@ -192,7 +191,7 @@ static NSMutableArray *__sharedMenuStack;
     id<NSMenuDelegate> delegate = [[self menu] delegate];
     if([delegate respondsToSelector:@selector(confinementRectForMenu:onScreen:)]) results = [delegate confinementRectForMenu:[self menu] onScreen:[self screen]];
 
-    // If delegate is not implemented or it returns NSZeroRect then return the screen's visible frame
+    // If confinementRectForMenu:onScreen: is not implemented or it returns NSZeroRect then we use the screen's visible frame, otherwise we make sure that the result is confined with the screen's visible frame
     NSRect visibleFrame = [[self screen] visibleFrame];
     if(NSEqualRects(results, NSZeroRect)) results = visibleFrame;
     else                                  results = NSIntersectionRect(visibleFrame, results);
@@ -200,12 +199,13 @@ static NSMutableArray *__sharedMenuStack;
     return results;
 }
 
-// Updates the frame's position and dimensions as it relates to the provided pop up button, while aligning the selected item to the rect specified
 - (void)OE_updateFrameAttachedToPopupButton:(OEPopUpButton *)button alignSelectedItemWithRect:(NSRect)rect
 {
+    // Make sure that the window's size has been adjusted early as the calculations below depend on it's positioning
     [self setContentSize:[self size]];
     [_view OE_layoutIfNeeded];
 
+    // Calculate the positioning frames
     const NSRect        selectedItemRect = [self convertRectToScreen:[[_view documentView] convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
     const NSRect        screenFrame      = [self OE_confinementRectForScreen];
     const NSEdgeInsets  edgeInsets       = [_view backgroundEdgeInsets];
@@ -232,6 +232,7 @@ static NSMutableArray *__sharedMenuStack;
 // Updates the frame's position and dimensions as it relates to the rect specified on the screen
 - (void)OE_updateFrameAttachedToScreenRect:(NSRect)rect
 {
+    // Calculate the positioning frames
     const NSRect screenFrame = [self OE_confinementRectForScreen];
 
     // Figure out the size and position of the frame, as well as the anchor point.
@@ -338,6 +339,7 @@ static NSMutableArray *__sharedMenuStack;
 
 - (void)OE_updateFrameForSubmenu
 {
+    // Calculate the positioning frames
     const NSRect        rectInScreen  = [self convertRectToScreen:[[_view documentView] convertRect:[[[self highlightedItem] extraData] frame] toView:nil]];
     const NSRect        screenFrame   = [self OE_confinementRectForScreen];
     const NSEdgeInsets  edgeInsets    = [_view backgroundEdgeInsets];
@@ -383,16 +385,23 @@ static NSMutableArray *__sharedMenuStack;
 
 - (void)OE_applicationActivityNotification:(NSNotification *)notification
 {
+    // The aplication has lost focus...lets cancel tracking
     [self cancelTrackingWithoutAnimation];
 }
 
 - (void)OE_menuWillBeginTrackingNotification:(NSNotification *)notification
 {
+    // The OS is about to open a native instance of NSMenu somewhere...lets cancel tracking
     if([notification object] != [self menu]) [self cancelTrackingWithoutAnimation];
 }
 
 - (void)OE_showMenuAttachedToWindow:(NSWindow *)parentWindow
 {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        __sharedMenuStack = [NSMutableArray array];
+    });
+
     [__sharedMenuStack addObject:self];
     if([__sharedMenuStack count] == 1)
     {
@@ -474,17 +483,14 @@ static NSMutableArray *__sharedMenuStack;
             {
                 // Forward the mouse up message to the menu with the current focus
                 [menuWithMouseFocus->_view mouseUp:[self OE_mockMouseEvent:event]];
-                event = nil;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+                event = nil;  // There is no need to forward this message to NSApp
             }
             else if((type == NSLeftMouseDragged) || (type == NSRightMouseDragged) || (type == NSOtherMouseDragged))
             {
                 // Notify mouse up event that we've seen a mouse drag event
                 dragged = YES;
 
-                // Lets to figure which window is under the cursor. You would expect that [event window] would contain this information, when a mouse down
-                // operation is encountered, the windowing system will send all the events to the window that initiated the mouse down event until a mouse
-                // up event is reached.  Mouse drag events are only sent in between a mouse down and mouse up operation, therefore, [event window] does
-                // not have the information we really need.
+                // During mouse drag operations, the window that the user initiated the mouse down operation will be sent the subsequent mouse drag messages.  We want to forward this messages to the last menu that the user focused in on, the following allows us to mimick mouse entered and exited events while tracking the last focused menu.
                 const NSPoint  locationInScreen = [OEMenu OE_locationInScreenForEvent:event];
                 OEMenu        *newMenuFocus     = [OEMenu OE_menuAtPoint:locationInScreen];
                 if((newMenuFocus != nil) && (menuWithMouseFocus != newMenuFocus))
@@ -498,25 +504,23 @@ static NSMutableArray *__sharedMenuStack;
                         [menuWithMouseFocus->_view mouseEntered:[menuWithMouseFocus OE_mockMouseEvent:event]];
                     }
                 }
-                else
+                else if(menuWithMouseFocus != nil)
                 {
-                    // If there has been no change, then let the current menu know that the mouse has been dragged
+                    // Forward the message to the last menu with the focus
                     [menuWithMouseFocus->_view mouseDragged:[menuWithMouseFocus OE_mockMouseEvent:event]];
                 }
-                event = nil;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+                event = nil;  // There is no need to forward this message to NSApp
             }
             else if((type == NSMouseMoved) || (type == NSMouseEntered))
             {
-                // Lets keep track of which menu has the current focus. After the windowing system receives a mouse up event,
-                // it will forward any mouse position changes as mouse moved, entered, and exited messages, now [event window]
-                // communicates the correct menu (or submenu) that is under that is under the cursor.
+                // Since the user can potentially start a mouse down followed by drag operation, we need to keep track of the focused window so that the future drag operation can function correctly
                 if([[event window] isKindOfClass:[OEMenu class]]) menuWithMouseFocus = (OEMenu *)[event window];
             }
             else if(((type == NSLeftMouseDown) || (type == NSRightMouseDown) || (type == NSOtherMouseDown)) && ![[event window] isKindOfClass:[OEMenu class]])
             {
-                // If a mouse down event was captured outside of a menu, then cancel tracking
+                // If a mouse down event occurred outside of a menu, then cancel tracking
                 [self cancelTracking];
-                event = nil;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+                event = nil;  // There is no need to forward this message to NSApp
             }
             else if((type == NSKeyDown) || (type == NSKeyUp))
             {
@@ -524,16 +528,16 @@ static NSMutableArray *__sharedMenuStack;
 
                 // Key down messages should be sent to the deepest submenu that is open
                 [[__sharedMenuStack lastObject] sendEvent:event];
-                event = nil;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+                event = nil;  // There is no need to forward this message to NSApp
             }
             else if(type == NSFlagsChanged)
             {
                 // Flags changes should be sent to all submenu's so that they can be updated appropriately
                 [__sharedMenuStack makeObjectsPerformSelector:@selector(sendEvent:) withObject:event];
-                event = nil;  // There is no need to forward this message to NSApp, go back to the start of the loop.
+                event = nil;  // There is no need to forward this message to NSApp
             }
 
-            // If we've gotten this far, then we need to forward the event to NSApp for additional / further processing
+            // If we've gotten this far, then we need to forward the event to NSApp for additional processing
             if(event) [NSApp sendEvent:event];
         }
     }
@@ -566,9 +570,10 @@ static NSMutableArray *__sharedMenuStack;
 
 - (NSSize)size
 {
-    NSSize results = [self intrinsicSize];
-    NSSize maxSize = [self maxSize];
+    const NSSize maxSize = [self maxSize];
+    NSSize       results = [self intrinsicSize];
 
+    // TODO: What do we do if minimumWidth may be larger than maximum width
     // Make sure width is not smaller than the menu's minimumWidth
     results.width  = MAX(results.width, [[self menu] minimumWidth]);
 
@@ -583,8 +588,10 @@ static NSMutableArray *__sharedMenuStack;
 {
     if(_highlightedItem != highlightedItem)
     {
-        [[_view documentView] setNeedsDisplayInRect:[[_highlightedItem extraData] frame]];
-        [[_view documentView] setNeedsDisplayInRect:[[highlightedItem extraData] frame]];
+        // Mark the old and new item's frames to be redrawn
+        NSView *documentView = [_view documentView];
+        if(_highlightedItem) [documentView setNeedsDisplayInRect:[[_highlightedItem extraData] frame]];
+        if(highlightedItem)  [documentView setNeedsDisplayInRect:[[highlightedItem extraData] frame]];
 
         _highlightedItem = highlightedItem;
     }
@@ -638,8 +645,7 @@ static NSMutableArray *__sharedMenuStack;
         return;
     }
 
-    _submenu = [isa OE_popUpContextMenuWithMenu:submenu forScreen:[self screen] options:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedInteger:[_view style]] forKey:OEMenuOptionsStyleKey]];
-    _submenu->_supermenu = self;
+    _submenu = [OEMenu OE_menuWithMenu:submenu forScreen:[self screen] options:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedInteger:[_view style]] forKey:OEMenuOptionsStyleKey]];
     [self OE_updateFrameForSubmenu];
     [_submenu OE_showMenuAttachedToWindow:[_view window]];
 }
@@ -651,7 +657,8 @@ static NSMutableArray *__sharedMenuStack;
 
 - (OEMenu *)OE_supermenu
 {
-    return _supermenu;
+    NSWindow *supermenu = [self parentWindow];
+    return ([supermenu isKindOfClass:[OEMenu class]] ? (OEMenu *)supermenu : nil);
 }
 
 - (OEMenuView *)OE_view
