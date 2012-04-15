@@ -67,6 +67,6 @@
 @property(nonatomic, assign)   NSPoint      attachedPoint;        // Point in this view's coordinate system where the arrow should point to
 @property(nonatomic, readonly) NSEdgeInsets backgroundEdgeInsets; // Insets used to determine content placement, this value is dependent on arrowEdge
 @property(nonatomic, readonly) NSSize       intrinsicSize;        // Natural size of the menu, does not take into account max and min size requirements
-@property(nonatomic, readonly) NSRect       visibleRect;          // Menu item area that is visible
+@property(nonatomic, readonly) NSRect       clippingRect;         // Menu item area that is visible
 
 @end
