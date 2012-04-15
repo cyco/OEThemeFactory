@@ -78,7 +78,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 @synthesize arrowEdge = _arrowEdge;
 @synthesize attachedPoint = _attachedPoint;
 @synthesize backgroundEdgeInsets = _backgroundEdgeInsets;
-@synthesize clippingRect = _clippingRect;
+@synthesize visibleRect = _visibleRect;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -358,11 +358,11 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
     if(item != nil)
     {
-        const NSRect visibleRect   = [self convertRect:_clippingRect toView:_documentView];
+        const NSRect visibleRect   = [self convertRect:_visibleRect toView:_documentView];
         const NSRect menuItemFrame = [[item extraData] frame];
 
-        if(NSMaxY(menuItemFrame) > NSMaxY(visibleRect))      [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY(menuItemFrame) - NSHeight(visibleRect) - (NSMinY(_clippingRect) - NSMinY([_scrollView frame])))];
-        else if(NSMinY(menuItemFrame) < NSMinY(visibleRect)) [self OE_scrollToPoint:NSMakePoint(0.0, NSMinY(menuItemFrame) - (NSMinY(_clippingRect) - NSMinY([_scrollView frame])))];
+        if(NSMaxY(menuItemFrame) > NSMaxY(visibleRect))      [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY(menuItemFrame) - NSHeight(visibleRect) - (NSMinY(_visibleRect) - NSMinY([_scrollView frame])))];
+        else if(NSMinY(menuItemFrame) < NSMinY(visibleRect)) [self OE_scrollToPoint:NSMakePoint(0.0, NSMinY(menuItemFrame) - (NSMinY(_visibleRect) - NSMinY([_scrollView frame])))];
     }
 }
 
@@ -532,7 +532,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
         // Check to see if we are already waiting to highlight the requested item
         if ([_delayedHighlightTimer userInfo] == highlightedItem)
         {
-            _lastMousePoint = point;
+            _lastHighlightPoint = point;
             return;
         }
 
@@ -547,7 +547,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     // Check to see if the item is already highlighted
     if([menu highlightedItem] == highlightedItem)
     {
-        _lastMousePoint = point;
+        _lastHighlightPoint = point;
         return;
     }
 
@@ -555,7 +555,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     BOOL isMouseMovingCloser = NO;
     if(submenu)
     {
-        const CGFloat distance = point.x - _lastMousePoint.x;
+        const CGFloat distance = point.x - _lastHighlightPoint.x;
         isMouseMovingCloser    = ([submenu arrowEdge] == OEMinXEdge) ? (distance < -1.0) : (distance > 1.0);
     }
 
@@ -568,12 +568,12 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     {
         [self OE_setHighlightedItemByMouse:highlightedItem];
     }
-    _lastMousePoint = point;
+    _lastHighlightPoint = point;
 }
 
 - (NSMenuItem *)itemAtPoint:(NSPoint)point
 {
-    if(NSPointInRect(point, _clippingRect))
+    if(NSPointInRect(point, _visibleRect))
     {
         NSView *view = [self hitTest:point];
         if((view != nil) && (view != self) && [view isKindOfClass:[OEMenuDocumentView class]]) return [(OEMenuDocumentView *)view OE_itemAtPoint:[self convertPoint:point toView:view]];
@@ -588,7 +588,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
     const NSRect bounds  = [self bounds];
     NSRect documentFrame = [_documentView frame];
-    _clippingRect        = [_scrollView frame];
+    _visibleRect        = [_scrollView frame];
 
     if(NSHeight(bounds) < NSHeight(documentFrame))
     {
@@ -600,8 +600,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
         [_scrollUpIndicatorView setHidden:hideUp];
         [_scrollDownIndicatorView setHidden:hideDown];
 
-        if(!hideDown) _clippingRect.origin.y = NSMaxY([_scrollDownIndicatorView frame]);
-        _clippingRect.size.height            = (hideUp ? NSHeight(bounds) : NSMinY([_scrollUpIndicatorView frame])) - NSMinY(_clippingRect);
+        if(!hideDown) _visibleRect.origin.y = NSMaxY([_scrollDownIndicatorView frame]);
+        _visibleRect.size.height            = (hideUp ? NSHeight(bounds) : NSMinY([_scrollUpIndicatorView frame])) - NSMinY(_visibleRect);
 
         if(updateVisibility) [self updateTrackingAreas];
     }

@@ -9,9 +9,15 @@
 #import "OEMenu.h"
 #import "OEMenuView.h"
 
+#pragma mark -
+#pragma mark Menu sizes and insets
+
 extern const NSEdgeInsets OEMenuContentEdgeInsets;
 extern const NSEdgeInsets OEMenuItemInsets;
 extern const CGFloat      OEMenuItemTickMarkWidth;
+
+#pragma mark -
+#pragma mark Implementation
 
 @interface OEMenu (OEMenuViewAdditions)
 

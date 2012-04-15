@@ -55,7 +55,7 @@ static inline NSRect OENSInsetRectWithEdgeInsets(NSRect rect, NSEdgeInsets inset
     BOOL _closing;        // Menu is closing
 
     OEMenuView *_view;    // Menu's content view
-    OEMenu     *_submenu; // Used to track submenu open
+    OEMenu     *_submenu; // Used to track opened submenu
 }
 
 + (void)openMenuForPopUpButton:(OEPopUpButton *)button withEvent:(NSEvent *)event options:(NSDictionary *)options;

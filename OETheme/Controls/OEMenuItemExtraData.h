@@ -14,9 +14,9 @@
 - (void)addAlternateItem:(NSMenuItem *)item;
 - (NSMenuItem *)itemWithModifierMask:(NSUInteger)mask;
 
-@property(nonatomic, assign) NSMenuItem          *ownerItem;
-@property(nonatomic, assign) NSMenuItem          *primaryItem;
-@property(nonatomic, retain) NSMutableDictionary *alternateItems;
-@property(nonatomic, assign) NSRect               frame;
+@property(nonatomic, weak)   NSMenuItem          *ownerItem;      // NSMenuItem that owns this extra data object
+@property(nonatomic, weak)   NSMenuItem          *primaryItem;    // Points to the primary item, if the ownerItem refers to an alternate menu item
+@property(nonatomic, retain) NSMutableDictionary *alternateItems; // Alternate items indexed by it's modifier flags
+@property(nonatomic, assign) NSRect               frame;          // Menu item's placement
 
 @end

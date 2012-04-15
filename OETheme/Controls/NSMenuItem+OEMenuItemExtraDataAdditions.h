@@ -11,6 +11,6 @@
 
 @interface NSMenuItem (OEMenuItemExtraDataAdditions)
 
-@property(nonatomic, retain) OEMenuItemExtraData *extraData;
+@property(nonatomic, retain) OEMenuItemExtraData *extraData; // Extra data references so that OEMenu can manipulate NSMenuItem's without having to completely subclass it
 
 @end

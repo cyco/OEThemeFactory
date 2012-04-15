@@ -13,13 +13,14 @@
 @interface OEMenuDocumentView : NSView
 {
 @private
-    BOOL   _containImages;
-    BOOL   _needsLayout;                        // Flag used to notify that the menu item's frames should be invalidated
-    NSSize _intrinsicSize;                      // Full size of the component, does not account for min / max sizes
+    BOOL   _containImages;           // Flag used to determine menu item height, if there are no images we use a smaller height
+    BOOL   _needsLayout;             // Flag used to notify that the menu item's frames should be invalidated
+    NSSize _intrinsicSize;           // Natural size of the menu items
 
-    NSUInteger _keyModifierMask;                // Aggregate mask of all the key modifiers used within the menu item (used to trim NSEvent's modifierFlags)
-    NSUInteger _lastKeyModifierMask;            // Last NSEvent's modifierFlags
+    NSUInteger _keyModifierMask;     // Aggregate mask of all the key modifiers used within the menu item (used to trim NSEvent's modifierFlags)
+    NSUInteger _lastKeyModifierMask; // Last NSEvent's modifierFlags
 
+    // Themed elements
     NSImage               *_separatorImage;
     OEThemeGradient       *_backgroundGradient;
     OEThemeImage          *_tickImage;
