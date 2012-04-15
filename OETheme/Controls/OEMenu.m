@@ -351,8 +351,8 @@ static NSMutableArray *__sharedMenuStack; // Array of all the open instances of 
     {
         switch(edge)
         {
-            case OEMinXEdge: return NSMinX(rectInScreen) - size.width + edgeInsets.left + OEMenuContentEdgeInsets.right + OEMenuItemInsets.right;
-            case OEMaxXEdge: return NSMaxX(rectInScreen) - edgeInsets.right - OEMenuContentEdgeInsets.left - OEMenuItemInsets.left;
+            case OEMinXEdge: return NSMinX(rectInScreen) - size.width + edgeInsets.left - 1.0;
+            case OEMaxXEdge: return NSMaxX(rectInScreen) - edgeInsets.right + 1.0;
             default:          break;
         }
         return 0.0;
