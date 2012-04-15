@@ -9,12 +9,10 @@
 #import "OEMenuView.h"
 #import "OEMenuView+OEMenuAdditions.h"
 #import "OEMenu+OEMenuViewAdditions.h"
-#import "OEMenuInlineView.h"
 #import "OEMenuDocumentView.h"
 #import "OEMenuDocumentView+OEMenuView.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
 #import "OETheme.h"
-#import "OEInlineMenuItem.h"
 #import <Carbon/Carbon.h>
 
 #pragma mark -
@@ -45,29 +43,66 @@ static const NSSize OEMaxYEdgeArrowSize = (NSSize){15.0, 10.0};
 static const CGFloat OEMenuItemFlashDelay       = 0.075; // Duration to flash an item on and off, after user wants to perform a menu item action
 static const CGFloat OEMenuItemHighlightDelay   = 1.0;   // Delay before changing the highlight of an item with a submenu
 static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing an item's submenu
+static const CGFloat OEMenuScrollAutoDelay      = 0.1;
 
 #pragma mark -
 
-@interface OEMenuView ()
+static const CGFloat OEMenuScrollArrowHeight = 19.0;
+static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
+#pragma mark -
+
+// Fake menu scroller (doesn't render anything)
+@interface _OEMenuScroller : NSScroller
+@end
+
+@interface _OEMenuScrollArrowView : NSView
+@property(nonatomic, retain) NSImage *arrow;
+@end
+
+@interface OEMenuView ()
 - (void)OE_updateTheme;
 - (void)OE_setNeedsLayout;
 - (OEMenu *)OE_menu;
-
 @end
 
 @implementation OEMenuView
+@synthesize scrollView = _scrollView;
+@synthesize documentView = _documentView;
 @synthesize style = _style;
 @synthesize arrowEdge = _arrowEdge;
 @synthesize attachedPoint = _attachedPoint;
 @synthesize backgroundEdgeInsets = _backgroundEdgeInsets;
+@synthesize clippingRect = _clippingRect;
 
 - (id)initWithFrame:(NSRect)frame
 {
     if((self = [super initWithFrame:frame]))
     {
+        _scrollView       = [[NSScrollView alloc] initWithFrame:[self bounds]];
+        _documentView     = [[OEMenuDocumentView alloc] initWithFrame:[self bounds]];
+        _scrollUpButton   = [[_OEMenuScrollArrowView alloc] initWithFrame:NSZeroRect];
+        _scrollDownButton = [[_OEMenuScrollArrowView alloc] initWithFrame:NSZeroRect];
+
+        [_scrollView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+        [_scrollView setDrawsBackground:NO];
+        [_scrollView setBorderType:NSNoBorder];
+        [_scrollView setHasVerticalScroller:YES];
+        [_scrollView setVerticalScroller:[[_OEMenuScroller alloc] init]];
+        [_scrollView setVerticalScrollElasticity:NSScrollElasticityNone];
+        [_scrollView setDocumentView:_documentView];
+
+        [_documentView setStyle:_style];
+
+        [self addSubview:_scrollView];
+        [self addSubview:_scrollUpButton];
+        [self addSubview:_scrollDownButton];
+
         [self OE_updateTheme];
         [self OE_setNeedsLayout];
+
+        // Add an observer to the  bounds of the scroller's content view as it will determine if / when the view has been scrolled
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentViewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:[_scrollView contentView]];
     }
 
     return self;
@@ -75,8 +110,14 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 
 - (void)dealloc
 {
-    [_autoDragTimer invalidate];
-    _autoDragTimer = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)viewDidMoveToSuperview
+{
+    // If the superview has been changed, then make sure we invalidate any of the timers that affect the visual feedback
+    [_autoScrollTimer invalidate];
+    _autoScrollTimer = nil;
 }
 
 - (void)drawRect:(NSRect)dirtyRect
@@ -139,92 +180,115 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     [self addTrackingArea:_trackingArea];
 }
 
+- (BOOL)acceptsFirstResponder
+{
+    return YES;
+}
+
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
     return nil;
 }
 
-- (BOOL)acceptsFirstResponder
+- (void)OE_autoScroll:(NSTimer *)timer
 {
-    // Return yes, we want to capture key board events to send to the various views as necessary
-    return YES;
+    id scrollIndicator = [timer userInfo];
+    if([scrollIndicator isKindOfClass:[_OEMenuScrollArrowView class]])
+    {
+        NSPoint newPoint  = [[_scrollView contentView] bounds].origin;
+        newPoint.y       -= OEMenuScrollAutoStep * (scrollIndicator == _scrollUpButton ? -1 : 1);
+        [self OE_scrollToPoint:newPoint];
+
+        if([scrollIndicator isHidden])
+        {
+            [_autoScrollTimer invalidate];
+            _autoScrollTimer = nil;
+            [self OE_highlightItemUnderMouse];
+        }
+    }
+    else
+    {
+        [_documentView autoscroll:_lastDragEvent];
+    }
+}
+
+- (void)OE_highlightItemOrAutoScrollWithPoint:(NSPoint)point
+{
+    // Check to see if we are hovering over the scroll up or down indicators
+    id userInfo = nil;
+    if(![_scrollUpButton isHidden] && NSPointInRect(point, [_scrollUpButton frame]))
+    {
+        userInfo = _scrollUpButton;
+    }
+    else if(![_scrollDownButton isHidden] && NSPointInRect(point, [_scrollDownButton frame]))
+    {
+        userInfo = _scrollDownButton;
+    }
+    else if((_lastDragEvent != nil) && ((point.y < NSMinY([_scrollView frame])) || (point.y > NSMaxY([_scrollView frame]))))
+    {
+        userInfo = _documentView;
+    }
+    else if(_autoScrollTimer != nil)
+    {
+        // We are not hovering over the scroll indicators, there is no need to keep the timer around (if it exists)
+        [_autoScrollTimer invalidate];
+        _autoScrollTimer = nil;
+    }
+
+    // -highlightItemAtPoint: will clear out the highlight if we are hovering over the scroll indicators
+    [self highlightItemAtPoint:point];
+
+    if(userInfo != nil && [_autoScrollTimer userInfo] != userInfo)
+    {
+        // Go ahead and set up the automatic scroll timer
+        [_autoScrollTimer invalidate];
+        _autoScrollTimer = [NSTimer timerWithTimeInterval:OEMenuScrollAutoDelay target:self selector:@selector(OE_autoScroll:) userInfo:userInfo repeats:YES];
+        [[NSRunLoop currentRunLoop] addTimer:_autoScrollTimer forMode:NSDefaultRunLoopMode];
+    }
 }
 
 - (void)mouseEntered:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
-    [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
+    [self OE_highlightItemOrAutoScrollWithPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
+    [_autoScrollTimer invalidate];
+    _autoScrollTimer = nil;
+
     if([[self OE_menu] OE_closing]) return;
-    [_autoDragTimer invalidate];
-    _autoDragTimer = nil;
 
     // If we are recovering from a mouse drag operation and the selected menu item has a submenu, then cancel our tracking
     OEMenu *menu = [self OE_menu];
-    if (_dragging && [[menu highlightedItem] hasSubmenu]) [menu cancelTracking];
-    else                                                  [self OE_performAction];
-}
-
-- (void)OE_autoMouseDragged:(NSTimer *)timer
-{
-    if(!_autoDragTimer && timer)
-    {
-        [timer invalidate];
-        return;
-    }
-
-    NSLog(@"Dragging...");
-
-    const NSPoint locationInView = [self convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]];
-    if([_draggingView shouldKeepAutoscroll:_lastDragEvent])
-    {
-        [self highlightItemAtPoint:locationInView];
-    }
-    else
-    {
-        _draggingView = nil;
-    }
-
-    [self highlightItemAtPoint:[self convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]]];
-    if(!_draggingView)
-    {
-        _draggingView = (OEMenuInlineView *)[[[self OE_viewThatContainsItem:[[self OE_menu] highlightedItem]] enclosingScrollView] superview];
-        if(NSHeight([[_draggingView documentView] frame]) <= NSHeight([_draggingView frame])) _draggingView = nil;
-    }
-}
-
-- (void)mouseDragged:(NSEvent *)theEvent
-{
-    if([[self OE_menu] OE_closing]) return;
-    _dragging = YES;
-    _lastDragEvent = theEvent;
-
-    const NSPoint locationInView = [self convertPointFromBase:[[self window] convertScreenToBase:[NSEvent mouseLocation]]];
-    if((locationInView.y < NSMinY([self bounds])) || (locationInView.y > NSMaxY([self bounds])))
-    {
-        if(!_autoDragTimer) _autoDragTimer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(OE_autoMouseDragged:) userInfo:nil repeats:YES];
-    }
-    else
-    {
-        [_autoDragTimer invalidate];
-        _autoDragTimer = nil;
-        [self OE_autoMouseDragged:nil];
-    }
+    if ((_lastDragEvent != nil) && [[menu highlightedItem] hasSubmenu]) [menu cancelTracking];
+    else                                                                [self OE_performAction];
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
-    [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
+    [self OE_highlightItemOrAutoScrollWithPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)mouseExited:(NSEvent *)theEvent
 {
     if([[self OE_menu] OE_closing]) return;
-    [self highlightItemAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
+    [self OE_highlightItemOrAutoScrollWithPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
+}
+
+- (void)OE_highlightItemUnderMouse
+{
+    [self highlightItemAtPoint:[self convertPoint:[[self window] convertScreenToBase:[NSEvent mouseLocation]] fromView:nil]];
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+    if([[self OE_menu] OE_closing]) return;
+
+    _lastDragEvent = theEvent;
+    [self OE_highlightItemOrAutoScrollWithPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 }
 
 - (void)flagsChanged:(NSEvent *)theEvent
@@ -236,11 +300,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     if(_lastKeyModifierMask != modiferFlags)
     {
         _lastKeyModifierMask = modiferFlags;
-        [[self subviews] enumerateObjectsUsingBlock:
-         ^ (OEMenuInlineView *obj, NSUInteger idx, BOOL *stop)
-         {
-             [[obj documentView] flagsChanged:theEvent];
-         }];
+        [_documentView flagsChanged:theEvent];
     }
 }
 
@@ -261,10 +321,34 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     return NO;
 }
 
+- (void)OE_scrollToPoint:(NSPoint)point
+{
+    const CGFloat maxY = NSHeight([[_scrollView documentView] frame]) - NSHeight([_scrollView frame]);
+    [_documentView scrollPoint:NSMakePoint(0.0, MIN(MAX(point.y, 0.0), maxY))];
+}
+
 - (void)OE_setHighlightedItemByKeyboard:(NSMenuItem *)item
 {
     [[self OE_menu] setHighlightedItem:item];
-    [(OEMenuInlineView *)[[[self OE_viewThatContainsItem:item] enclosingScrollView] superview] scrollItemToVisible:item];
+
+    if(item != nil)
+    {
+        const NSRect visibleRect   = [self convertRect:_clippingRect toView:_documentView];
+        const NSRect menuItemFrame = [[item extraData] frame];
+
+        if(NSMaxY(menuItemFrame) > NSMaxY(visibleRect))      [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY(menuItemFrame) - NSHeight(visibleRect) - OEMenuScrollArrowHeight)];
+        else if(NSMinY(menuItemFrame) < NSMinY(visibleRect)) [self OE_scrollToPoint:NSMakePoint(0.0, NSMinY(menuItemFrame) - OEMenuScrollArrowHeight)];
+    }
+}
+
+- (void)scrollToBeginningOfDocument:(id)sender
+{
+    [self OE_scrollToPoint:NSMakePoint(0.0, NSMaxY([_documentView frame]))];
+}
+
+- (void)scrollToEndOfDocument:(id)sender
+{
+    [self OE_scrollToPoint:NSZeroPoint];
 }
 
 - (void)moveUp:(id)sender
@@ -272,18 +356,19 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     OEMenu *menu = [self OE_menu];
     if([menu OE_closing]) return;
 
-    const NSInteger count = [_itemArray count];
+    NSArray         *itemArray = [[self menu] itemArray];
+    const NSInteger  count     = [itemArray count];
     if(count == 0) return;
 
     // On Mac OS X, the up key does not roll over the highlighted item to the bottom -- if we are at the top, then we are done
     NSMenuItem *item  = [menu highlightedItem];
-    NSInteger   index = [_itemArray indexOfObject:item];
+    NSInteger   index = [itemArray indexOfObject:item];
     if(index == 0) return;
 
     // If no item is highlighted then we begin from the bottom of the list, if an item is highlighted we go to the next preceeding valid item (not seperator, not disabled, and not hidden)
     for(NSInteger i = (item == nil ? count : index) - 1; i >= 0; i--)
     {
-        NSMenuItem *obj = [[[_itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lastKeyModifierMask];
+        NSMenuItem *obj = [[[itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lastKeyModifierMask];
         if(![obj isHidden] && ![obj isSeparatorItem] && [obj isEnabled] && ![obj isAlternate])
         {
             item = obj;
@@ -299,18 +384,19 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     OEMenu *menu = [self OE_menu];
     if([menu OE_closing]) return;
 
-    const NSInteger count = [_itemArray count];
+    NSArray         *itemArray = [[self menu] itemArray];
+    const NSInteger  count     = [itemArray count];
     if(count == 0) return;
 
     // On Mac OS X, the up key does not roll over the highlighted item to the top -- if we are at the bottom, then we are done
     NSMenuItem *item  = [menu highlightedItem];
-    NSInteger   index = [_itemArray indexOfObject:item];
+    NSInteger   index = [itemArray indexOfObject:item];
     if(index == count - 1) return;
 
     // If no item is highlighted then we begin from the top of the list, if an item is highlighted we go to the next proceeding valid item (not seperator, not disabled, and not hidden)
     for(NSInteger i = (item == nil ? -1 : index) + 1; i < count; i++)
     {
-        NSMenuItem *obj = [[[_itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lastKeyModifierMask];
+        NSMenuItem *obj = [[[itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lastKeyModifierMask];
         if(![obj isHidden] && ![obj isSeparatorItem] && [obj isEnabled] && ![obj isAlternate])
         {
             item = obj;
@@ -471,83 +557,59 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
 
 - (NSMenuItem *)itemAtPoint:(NSPoint)point
 {
-    NSView *view = [self hitTest:point];
-    if((view != nil) && (view != self) && [view isKindOfClass:[OEMenuDocumentView class]]) return [(OEMenuDocumentView *)view OE_itemAtPoint:[self convertPoint:point toView:view]];
+    if(NSPointInRect(point, _clippingRect))
+    {
+        NSView *view = [self hitTest:point];
+        if((view != nil) && (view != self) && [view isKindOfClass:[OEMenuDocumentView class]]) return [(OEMenuDocumentView *)view OE_itemAtPoint:[self convertPoint:point toView:view]];
+    }
+
     return nil;
 }
 
-- (void)setFrameSize:(NSSize)newSize
+- (void)OE_updateScrollerVisibility
 {
-    [super setFrameSize:newSize];
+    if(NSIsEmptyRect([self bounds])) return;
+
+    const NSRect bounds  = [self bounds];
+    NSRect documentFrame = [_documentView frame];
+    _clippingRect        = [_scrollView frame];
+
+    if(NSHeight(bounds) < NSHeight(documentFrame))
+    {
+        const NSRect contentBounds    = [[_scrollView contentView] bounds];
+        const BOOL   hideDown         = NSMinY(contentBounds) <= 0.0;
+        const BOOL   hideUp           = NSMaxY(contentBounds) >= NSHeight(documentFrame);
+        const BOOL   updateVisibility = ([_scrollUpButton isHidden] != hideUp) || ([_scrollDownButton isHidden] != hideDown);
+
+        [_scrollUpButton setHidden:hideUp];
+        [_scrollDownButton setHidden:hideDown];
+
+        if(!hideDown) _clippingRect.origin.y = NSMaxY([_scrollDownButton frame]);
+        _clippingRect.size.height            = (hideUp ? NSHeight(bounds) : NSMinY([_scrollUpButton frame])) - NSMinY(_clippingRect);
+
+        if(updateVisibility) [self updateTrackingAreas];
+    }
+}
+
+- (void)documentViewBoundsDidChange:(NSNotification *)notification
+{
+    if(NSIsEmptyRect([self bounds])) return;
+
+    [self OE_updateScrollerVisibility];
+
+    if([[[self window] currentEvent] type] == NSScrollWheel) [self OE_highlightItemUnderMouse];
+}
+
+- (void)resizeSubviewsWithOldSize:(NSSize)oldSize
+{
     [self OE_setNeedsLayout];
 }
 
 - (void)setMenu:(NSMenu *)menu
 {
-    __block NSMutableArray *inlineMenus     = nil;
-    __block NSMutableArray *itemArray       = [NSMutableArray array];
-    __block NSMutableSet   *scrollableMenus = [NSMutableSet set];
-    __block NSMutableArray *lastInlineMenu  = nil;
-    __block BOOL            containsImages  = NO;
-    __block NSUInteger      keyModifierMask = 0;
-
-    if(menu != nil)
-    {
-        inlineMenus = [NSMutableArray array];
-
-        [[menu itemArray] enumerateObjectsUsingBlock:
-         ^ (NSMenuItem *obj, NSUInteger idx, BOOL *stop)
-         {
-             if(![obj isHidden])
-             {
-                 keyModifierMask |= [obj keyEquivalentModifierMask];
-                 if([obj isKindOfClass:[OEInlineMenuItem class]])
-                 {
-                     lastInlineMenu = [NSMutableArray array];
-                     [inlineMenus addObject:lastInlineMenu];
-
-                     [[[obj submenu] itemArray] enumerateObjectsUsingBlock:
-                      ^ (id obj, NSUInteger idx, BOOL *stop)
-                      {
-                          [lastInlineMenu addObject:obj];
-                          [itemArray addObject:obj];
-                          containsImages = containsImages && ([obj image] != nil);
-                      }];
-                     [scrollableMenus addObject:lastInlineMenu];
-                     lastInlineMenu = nil;
-                 }
-                 else
-                 {
-                     if(lastInlineMenu == nil)
-                     {
-                         lastInlineMenu = [NSMutableArray array];
-                         [inlineMenus addObject:lastInlineMenu];
-                     }
-                     [lastInlineMenu addObject:obj];
-                     [itemArray addObject:obj];
-                     containsImages = containsImages && ([obj image] != nil);
-                 }
-             }
-         }];
-    }
-
-    _itemArray       = [itemArray copy];
-    _keyModifierMask = keyModifierMask;
-
-    [[self subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    [inlineMenus enumerateObjectsUsingBlock:
-     ^(NSArray *itemArray, NSUInteger idx, BOOL *stop)
-     {
-         OEMenuInlineView *inlineView = [[OEMenuInlineView alloc] initWithFrame:NSZeroRect];
-         [inlineView setScrollable:[scrollableMenus containsObject:itemArray]];
-         [inlineView setItemArray:itemArray];
-         [inlineView setContainImages:containsImages];
-         [inlineView setStyle:[self style]];
-         [self addSubview:inlineView];
-     }];
-
     [super setMenu:menu];
-    [self OE_setNeedsLayout];
+    [_documentView setItemArray:[menu itemArray]];
+    [self scrollToBeginningOfDocument:nil];
 }
 
 - (void)setStyle:(OEMenuStyle)style
@@ -556,8 +618,7 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     {
         _style = style;
 
-        NSNumber *styleValue = [NSNumber numberWithUnsignedInteger:_style];
-        [[self subviews] makeObjectsPerformSelector:@selector(setStyle:) withObject:styleValue];
+        [_documentView setStyle:_style];
         [self OE_updateTheme];
     }
 }
@@ -585,18 +646,10 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
     [self OE_layoutIfNeeded];
 
     // Go through each item and calculate the maximum width and the sum of the height
-    __block CGFloat width  = 0.0;
-    __block CGFloat height = 0.0;
-
-    [[self subviews] enumerateObjectsUsingBlock:
-     ^(OEMenuInlineView *obj, NSUInteger idx, BOOL *stop) {
-         NSSize size  = [obj intrinsicSize];
-         width        = MAX(width, size.width);
-         height      += size.height;
-     }];
+    NSSize intrinsicSize = [_documentView intrinsicSize];
 
     // Return a size with the appropriate padding
-    return NSMakeSize(width + _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right, height + _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom);
+    return NSMakeSize(intrinsicSize.width + _backgroundEdgeInsets.left + _backgroundEdgeInsets.right + OEMenuContentEdgeInsets.left + OEMenuContentEdgeInsets.right, intrinsicSize.height + _backgroundEdgeInsets.top + _backgroundEdgeInsets.bottom + OEMenuContentEdgeInsets.top + OEMenuContentEdgeInsets.bottom);
 }
 
 - (void)OE_setNeedsLayout
@@ -642,6 +695,9 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
         }
         _arrowImage = [[OETheme sharedTheme] imageForKey:[styleKeyPrefix stringByAppendingString:edgeComponent] forState:OEThemeStateDefault];
     }
+
+    [(_OEMenuScrollArrowView *)_scrollUpButton setArrow:[[OETheme sharedTheme] imageForKey:@"dark_menu_scroll_up_arrow" forState:OEThemeStateDefault]];
+    [(_OEMenuScrollArrowView *)_scrollDownButton setArrow:[[OETheme sharedTheme] imageForKey:@"dark_menu_scroll_down_arrow" forState:OEThemeStateDefault]];
 
     [self OE_setNeedsLayout];
 }
@@ -807,65 +863,72 @@ static const CGFloat OEMenuItemShowSubmenuDelay = 0.07;  // Delay before showing
         _rectForArrow = NSIntegralRect(_rectForArrow);
     }
 
-    const NSRect  contentBounds = OENSInsetRectWithEdgeInsets(backgroundBounds, OEMenuContentEdgeInsets);
-    NSArray      *subviews      = [self subviews];
-    if([subviews count] == 1)
+    [_scrollView setFrame:OENSInsetRectWithEdgeInsets(backgroundBounds, OEMenuContentEdgeInsets)];
+    [_documentView setFrameSize:NSMakeSize(NSWidth([_scrollView frame]), NSHeight([_documentView frame]))];
+
+    if(NSHeight(bounds) < NSHeight([_documentView frame]))
     {
-        OEMenuInlineView *view = [subviews lastObject];
-        [view setFrame:contentBounds];
-        [view scrollToBeginningOfDocument:nil];
+        NSRect contentFrame = [_scrollView frame];
+        NSRect upFrame;
+        NSRect downFrame;
+
+        NSDivideRect(contentFrame, &upFrame,   &contentFrame, OEMenuScrollArrowHeight, NSMaxYEdge);
+        NSDivideRect(contentFrame, &downFrame, &contentFrame, OEMenuScrollArrowHeight, NSMinYEdge);
+
+        [_scrollUpButton setFrame:upFrame];
+        [_scrollDownButton setFrame:downFrame];
     }
-    else if([subviews count] > 1)
-    {
-        // TODO: Fix this
-        __block CGFloat contentHeight   = NSHeight(contentBounds);
-        __block CGFloat intrinsicHeight = [self intrinsicSize].height - _backgroundEdgeInsets.top - _backgroundEdgeInsets.bottom - OEMenuContentEdgeInsets.top - OEMenuContentEdgeInsets.bottom;
 
-        NSArray *subviews = [self subviews];
-
-        [subviews enumerateObjectsUsingBlock:
-         ^ (OEMenuInlineView *obj, NSUInteger idx, BOOL *stop)
-         {
-            if(![obj shouldScroll])
-            {
-                contentHeight   -= [obj intrinsicSize].height;
-                intrinsicHeight -= [obj intrinsicSize].height;
-            }
-        }];
-
-        __block CGFloat y = 0;
-        [subviews enumerateObjectsUsingBlock:
-         ^ (OEMenuInlineView *obj, NSUInteger idx, BOOL *stop)
-         {
-             const CGFloat height = [obj intrinsicSize].height;
-
-             NSRect frame      = NSZeroRect;
-             frame.size.height = ([obj shouldScroll] ? contentHeight * (height / intrinsicHeight) : height);
-             frame.size.width  = NSWidth(contentBounds);
-             frame.origin.x    = NSMinX(contentBounds);
-             frame.origin.y    = NSMaxY(contentBounds) - NSHeight(frame) - y;
-             [obj setFrame:NSIntegralRect(frame)];
-             [obj scrollToBeginningOfDocument:nil];
-
-             y += NSHeight(frame);
-         }];
-    }
+    [self OE_updateScrollerVisibility];
 }
 
-- (NSView *)OE_viewThatContainsItem:(NSMenuItem *)item
-{
-    __block OEMenuInlineView *results = nil;
-    [[self subviews] enumerateObjectsUsingBlock:
-     ^ (OEMenuInlineView *obj, NSUInteger idx, BOOL *stop)
-     {
-         if ([[obj itemArray] containsObject:item])
-         {
-             *stop = YES;
-             results = obj;
-         }
-     }];
+@end
 
-    return [results documentView];
+@implementation _OEMenuScroller
+
++ (BOOL)isCompatibleWithOverlayScrollers
+{
+    return YES;
+}
+
+- (void)drawKnob
+{
+}
+
+- (void)drawKnobSlotInRect:(NSRect)slotRect highlight:(BOOL)flag
+{
+}
+
++ (CGFloat)scrollerWidthForControlSize:(NSControlSize)controlSize scrollerStyle:(NSScrollerStyle)scrollerStyle
+{
+    return 0.0;
+}
+
++ (CGFloat)scrollerWidth
+{
+    return 0.0;
+}
+
+@end
+
+@implementation _OEMenuScrollArrowView
+@synthesize arrow = _arrow;
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+    // TODO: Should be a themed view that draws based on state changes (if various states are provided)
+    const NSSize arrowSize = [_arrow size];
+    const NSPoint point = { ceil(NSMidX([self bounds]) - (arrowSize.width / 2.0)), ceil(NSMidY([self bounds]) - (arrowSize.height / 2.0))};
+    [_arrow drawAtPoint:point fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+}
+
+- (void)setArrow:(NSImage *)arrow
+{
+    if(_arrow != arrow)
+    {
+        _arrow = arrow;
+        [self setNeedsDisplay:YES];
+    }
 }
 
 @end

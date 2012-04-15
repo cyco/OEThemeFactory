@@ -8,7 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 #import "OEMenu.h"
-#import "OEMenuInlineView.h"
 
 @class OEMenuDocumentView;
 
@@ -29,23 +28,27 @@
     NSTimer *_delayedHighlightTimer;
     NSPoint  _lastMousePoint;
 
-    NSEvent          *_lastDragEvent;
-    OEMenuInlineView *_draggingView;
-    BOOL              _dragging;
-    NSTimer          *_autoDragTimer;
+    NSEvent *_lastDragEvent;
+    NSTimer *_autoScrollTimer;
 
-    NSArray    *_itemArray;
     NSUInteger  _keyModifierMask;
     NSUInteger  _lastKeyModifierMask;
     BOOL        _needsLayout;
+
+    NSView *_scrollUpButton;
+    NSView *_scrollDownButton;
 }
 
 - (void)highlightItemAtPoint:(NSPoint)point;
+
+@property(nonatomic, readonly) NSScrollView       *scrollView;
+@property(nonatomic, readonly) OEMenuDocumentView *documentView;
 
 @property(nonatomic, assign)   OEMenuStyle  style;
 @property(nonatomic, assign)   OERectEdge   arrowEdge;
 @property(nonatomic, assign)   NSPoint      attachedPoint;
 @property(nonatomic, readonly) NSEdgeInsets backgroundEdgeInsets;
 @property(nonatomic, readonly) NSSize       intrinsicSize;
+@property(nonatomic, readonly) NSRect       clippingRect;
 
 @end

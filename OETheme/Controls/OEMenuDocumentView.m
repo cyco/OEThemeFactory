@@ -11,7 +11,6 @@
 #import "OEMenu.h"
 #import "OEMenu+OEMenuViewAdditions.h"
 #import "NSMenuItem+OEMenuItemExtraDataAdditions.h"
-#import "OEMenuInlineView.h"
 
 #pragma mark -
 #pragma mark Menu Item Spacing
@@ -37,9 +36,8 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 #pragma mark -
 
 @implementation OEMenuDocumentView
-@synthesize style = _style;
 @synthesize itemArray = _itemArray;
-@synthesize containImages = _containImages;
+@synthesize style = _style;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -53,7 +51,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 
 - (void)dealloc
 {
-    // -setItemArray is responsible for attaching an instance of OEMenuItemExtraData when the menu is first set, following operation makes sure we clear out that extra data
+    // -setItemArray: is responsible for attaching an instance of OEMenuItemExtraData when the menu is first set, following operation makes sure we clear out that extra data
     [self setItemArray:nil];
 }
 
@@ -65,22 +63,22 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
     if(count == 0) return;
 
     // Constrain the clipped path to that of the dirtyRect and the OEMenuInlineView's clippingRect
-    NSView *scrollView = [[self enclosingScrollView] superview];
-    dirtyRect          = NSIntersectionRect(dirtyRect, [scrollView convertRect:[(OEMenuInlineView *)scrollView clippingRect] toView:self]);
+    NSView *menuView = [[self enclosingScrollView] superview];
+    dirtyRect        = NSIntersectionRect(dirtyRect, [menuView convertRect:[(OEMenuView *)menuView clippingRect] toView:self]);
 
     // If there is nothing to draw then return
     if(NSIsEmptyRect(dirtyRect)) return;
     NSRectClip(dirtyRect);
 
     // Setup positioning frames
-    NSRect tickMarkFrame = NSMakeRect(0.0, 0.0, NSWidth([self bounds]), ([self doesContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage));
+    NSRect tickMarkFrame = NSMakeRect(0.0, 0.0, NSWidth([self bounds]), (_containImages ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage));
     NSRect imageFrame;
     NSRect textFrame;
     NSRect submenuArrowFrame;
 
-    NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                               NSMinXEdge);
-    NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  ([self doesContainImages] ? OEMenuItemImageWidth : 0), NSMinXEdge);
-    NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                           NSMaxXEdge);
+    NSDivideRect(tickMarkFrame, &tickMarkFrame,     &imageFrame, OEMenuItemTickMarkWidth,                     NSMinXEdge);
+    NSDivideRect(imageFrame,    &imageFrame,        &textFrame,  (_containImages ? OEMenuItemImageWidth : 0), NSMinXEdge);
+    NSDivideRect(textFrame,     &submenuArrowFrame, &textFrame,  OEMenuItemSubmenuArrowWidth,                 NSMaxXEdge);
 
     // Cache for future use
     const NSSize separatorSize = [_separatorImage size];
@@ -234,12 +232,13 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
 - (void)OE_layout
 {
     _needsLayout = NO;
+
     if([_itemArray count] == 0) return;
 
     const NSRect   bounds      = [self bounds];
     const NSRect   contentRect = OENSInsetRectWithEdgeInsets(bounds, OEMenuItemInsets);
     NSDictionary  *attributes  = [_textAttributes textAttributesForState:OEThemeStateDefault];
-    const CGFloat  itemHeight  = [self doesContainImages] ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
+    const CGFloat  itemHeight  = _containImages ? OEMenuItemHeightWithImage : OEMenuItemHeightWithoutImage;
 
     __block CGFloat y     = 0.0;
     __block CGFloat width = 0.0;
@@ -266,7 +265,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
          }
      }];
 
-    const CGFloat minimumWidthPadding  = OEMenuItemTickMarkWidth + ([self doesContainImages] ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + OEMenuItemInsets.left + OEMenuItemInsets.right;
+    const CGFloat minimumWidthPadding  = OEMenuItemTickMarkWidth + (_containImages ? OEMenuItemImageWidth : 0) + OEMenuItemSubmenuArrowWidth + OEMenuItemInsets.left + OEMenuItemInsets.right;
     const CGFloat minimumHeightPadding = OEMenuItemInsets.top + OEMenuItemInsets.bottom;
 
     _intrinsicSize = NSMakeSize(ceil(width + minimumWidthPadding), ceil(y + minimumHeightPadding));
@@ -289,6 +288,7 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
         // Identify the alternate and primary items for each menu item
         __block NSMenuItem *lastValidItem   = nil;
         __block NSUInteger  keyModifierMask = 0;
+        __block BOOL        containsImages  = NO;
 
         [_itemArray enumerateObjectsUsingBlock:
          ^ (NSMenuItem *item, NSUInteger idx, BOOL *stop)
@@ -296,22 +296,17 @@ static const OEThemeState OEMenuItemStateMask = OEThemeStateDefault & ~OEThemeSt
              if(![item isHidden])
              {
                  keyModifierMask |= [item keyEquivalentModifierMask];
+                 containsImages   = containsImages && ([item image] != nil);
                  if([item isAlternate] && [[lastValidItem keyEquivalent] isEqualToString:[item keyEquivalent]]) [[lastValidItem extraData] addAlternateItem:item];
                  else                                                                                           lastValidItem = item;
              }
          }];
 
         _keyModifierMask = keyModifierMask;
-        [self OE_setNeedsLayout];
-    }
-}
+        _containImages   = containsImages;
 
-- (void)setContainImages:(BOOL)containImages
-{
-    if(_containImages != containImages)
-    {
-        _containImages = containImages;
         [self OE_setNeedsLayout];
+        [self setFrameSize:[self intrinsicSize]];
     }
 }
 
