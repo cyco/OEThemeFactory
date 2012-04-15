@@ -361,7 +361,7 @@ static inline id OENilForNSNull(id x)
     NSImage *centerFill = OENilForNSNull([_parts objectAtIndex:1]);
     NSImage *endCap     = OENilForNSNull([_parts objectAtIndex:2]);
 
-    NSDrawThreePartImage(dstSpacePortionRect, startCap, centerFill, endCap, _vertical, op, requestedAlpha, respectContextIsFlipped);
+    NSDrawThreePartImage(dstSpacePortionRect, startCap, centerFill, endCap, _vertical, op, requestedAlpha, respectContextIsFlipped && [[NSGraphicsContext currentContext] isFlipped]);
 }
 
 @end
@@ -418,7 +418,7 @@ static inline id OENilForNSNull(id x)
     NSImage *bottomEdgeFill    = OENilForNSNull([_parts objectAtIndex:7]);
     NSImage *bottomRightCorner = OENilForNSNull([_parts objectAtIndex:8]);
 
-    NSDrawNinePartImage(dstSpacePortionRect, topLeftCorner, topEdgeFill, topRightCorner, leftEdgeFill, centerFill, rightEdgeFill, bottomLeftCorner, bottomEdgeFill, bottomRightCorner, op, requestedAlpha, respectContextIsFlipped);
+    NSDrawNinePartImage(dstSpacePortionRect, topLeftCorner, topEdgeFill, topRightCorner, leftEdgeFill, centerFill, rightEdgeFill, bottomLeftCorner, bottomEdgeFill, bottomRightCorner, op, requestedAlpha, respectContextIsFlipped && [[NSGraphicsContext currentContext] isFlipped]);
 }
 
 @end
