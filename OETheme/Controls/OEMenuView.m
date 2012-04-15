@@ -214,8 +214,26 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     }
 }
 
+- (void)OE_cancelDelayedHighlightTimer
+{
+    // The following prevents an ancestor of this focused menu from being closed
+    OEMenu *supermenu = [self OE_menu];
+    while(supermenu)
+    {
+        OEMenuView *view = [supermenu OE_view];
+        if(view->_delayedHighlightTimer)
+        {
+            [view->_delayedHighlightTimer invalidate];
+            view->_delayedHighlightTimer = nil;
+        }
+        supermenu = [supermenu OE_supermenu];
+    }
+}
+
 - (void)OE_highlightItemOrAutoScrollWithPoint:(NSPoint)point
 {
+    [[[[self OE_menu] OE_supermenu] OE_view] OE_cancelDelayedHighlightTimer];
+
     // Check to see if we are hovering over the scroll up or down indicators
     id userInfo = nil;
     if(![_scrollUpButton isHidden] && NSPointInRect(point, [_scrollUpButton frame]))
@@ -495,17 +513,6 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 {
     NSMenuItem *highlightedItem = [timer userInfo];
     _delayedHighlightTimer      = nil;
-
-    // FIXME: If we paused over one of the descendents and moved off of it before this timer is fired, the descendent is hidden when it shouldn't be
-
-    // If the mouse is hovering over one of the descendent menus, then ignore the request to highlight a new item and expand it's menu.  Figuring out if the mouse is over a descendent menu is done backwards, we start with the menu that is under the mouse and keep comparing it's supermenu to our view's associated menu. If they ever match, then the focusedMenu has to be a descendent of this view's associated menu.
-    OEMenu *focusedMenu = [OEMenu OE_menuAtPoint:[NSEvent mouseLocation]];
-    while (focusedMenu)
-    {
-        if ([focusedMenu OE_supermenu] == [self window]) return;
-        focusedMenu = [focusedMenu OE_supermenu];
-    }
-
     [self OE_setHighlightedItemByMouse:highlightedItem];
 }
 
