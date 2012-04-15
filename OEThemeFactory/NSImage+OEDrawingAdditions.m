@@ -26,17 +26,12 @@
 
 #import "NSImage+OEDrawingAdditions.h"
 
-static inline id OENilForNSNull(id x)
-{
-    return (x == [NSNull null] ? nil : x);
-}
-
 @interface OENSThreePartImage : NSImage
 
 - (id)initWithImageParts:(NSArray *)imageParts vertical:(BOOL)vertical;
 
-@property(nonatomic, readonly, retain) NSArray *parts;
-@property(nonatomic, readonly, getter = isVertical) BOOL vertical;
+@property(nonatomic, readonly, retain) NSArray *parts;             // Array of the three different parts
+@property(nonatomic, readonly, getter = isVertical) BOOL vertical; // Image should be rendered vertically
 
 @end
 
@@ -44,15 +39,16 @@ static inline id OENilForNSNull(id x)
 
 - (id)initWithImageParts:(NSArray *)imageParts;
 
-@property(nonatomic, readonly, retain) NSArray *parts;
+@property(nonatomic, readonly, retain) NSArray *parts; // Array of the the nine different parts
 
 @end
 
 @implementation NSImage (OEDrawingAdditions)
 
-- (void)drawInRect:(NSRect)targetRect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(CGFloat)frac respectFlipped:(BOOL)flipped hints:(NSDictionary *)hints leftBorder:(float)leftBorder rightBorder:(float)rightBorder topBorder:(float)topBorder bottomBorder:(float)bottomBorder{
+- (void)drawInRect:(NSRect)targetRect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(CGFloat)frac respectFlipped:(BOOL)flipped hints:(NSDictionary *)hints leftBorder:(float)leftBorder rightBorder:(float)rightBorder topBorder:(float)topBorder bottomBorder:(float)bottomBorder
+{
 
-    if(NSEqualRects(sourceRect, NSZeroRect)) sourceRect=NSMakeRect(0, 0, [self size].width, [self size].height);
+    if(NSEqualRects(sourceRect, NSZeroRect)) sourceRect = (NSRect){ .size = [self size] };
 
     NSRect workingSourceRect;
     NSRect workingTargetRect;
@@ -60,15 +56,14 @@ static inline id OENilForNSNull(id x)
     BOOL sourceFlipped = [self isFlipped];
     BOOL targetFlipped = [[NSGraphicsContext currentContext] isFlipped];
 
-    NSDictionary *drawingHints = hints;
-    if(!drawingHints)
-        drawingHints = NoInterpol;
+    NSDictionary *drawingHints = (hints ?: NoInterpol);
 
     // Bottom Left
     if(sourceFlipped)
     {
         workingSourceRect = NSMakeRect(sourceRect.origin.x, sourceRect.origin.y+sourceRect.size.height-bottomBorder, leftBorder, bottomBorder);
-    } else
+    }
+    else
     {
         workingSourceRect = NSMakeRect(sourceRect.origin.x, sourceRect.origin.y, leftBorder, bottomBorder);
     }
@@ -294,9 +289,9 @@ static inline id OENilForNSNull(id x)
         else if([part isKindOfClass:[NSValue class]]) rect = [part rectValue];
         else                                          NSLog(@"Unable to parse NSRect from part: %@", part);
 
-        // Flip coordinate system (if it is not already flipped)
         if(!NSIsEmptyRect(rect))
         {
+            // Flip coordinate system (if it is not already flipped)
             if(![self isFlipped]) rect.origin.y = size.height - rect.origin.y - rect.size.height;
             [imageParts addObject:[self subImageFromRect:rect]];
         }
@@ -306,15 +301,21 @@ static inline id OENilForNSNull(id x)
         }
     }
 
-    NSImage *result = nil;
-    if(count == 1)      result = [imageParts lastObject];
-    else if(count == 3) result = [[OENSThreePartImage alloc] initWithImageParts:imageParts vertical:vertical];
-    else if(count == 9) result = [[OENSNinePartImage alloc] initWithImageParts:imageParts];
-
-    return result;
+    switch(count)
+    {
+        case 9:  return [[OENSNinePartImage alloc] initWithImageParts:imageParts];
+        case 3:  return [[OENSThreePartImage alloc] initWithImageParts:imageParts vertical:vertical];
+        case 1:
+        default: return [imageParts lastObject];
+    }
 }
 
 @end
+
+static inline id OENilForNSNull(id x)
+{
+    return (x == [NSNull null] ? nil : x);
+}
 
 @implementation OENSThreePartImage
 
@@ -325,7 +326,7 @@ static inline id OENilForNSNull(id x)
 {
     if((self = [super init]))
     {
-        _parts = [imageParts copy];
+        _parts    = [imageParts copy];
         _vertical = vertical;
 
         NSSize start  = [OENilForNSNull([_parts objectAtIndex:0]) size];

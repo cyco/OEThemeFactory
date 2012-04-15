@@ -41,4 +41,5 @@
 - (NSImage *)subImageFromRect:(NSRect)rect;
 - (void)setName:(NSString *)name forSubimageInRect:(NSRect)aRect;
 - (NSImage *)imageFromParts:(NSArray *)parts vertical:(BOOL)vertical;
+
 @end
