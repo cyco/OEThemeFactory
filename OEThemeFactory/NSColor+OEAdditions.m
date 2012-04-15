@@ -33,6 +33,10 @@
 #error This file cannot be compiled with ARC
 #endif
 
+static NSColor *_OENSColorFromRGBA(NSArray *parameters);
+static NSColor *_OENSColorFromHSLA(NSArray *parameters);
+static NSColor *_OENSColorFromString(NSString *colorString);
+
 @implementation NSColor (OEAdditions)
 
 + (NSColor *)colorWithCGColor:(CGColorRef)color
@@ -64,7 +68,7 @@
 
 @end
 
-NSColor *_NSColorFromRGBA(NSArray *parameters)
+NSColor *_OENSColorFromRGBA(NSArray *parameters)
 {
     if([parameters count] < 3) return nil;
 
@@ -76,7 +80,7 @@ NSColor *_NSColorFromRGBA(NSArray *parameters)
     return [NSColor colorWithCalibratedRed:red green:green blue:blue alpha:alpha];
 }
 
-NSColor *_NSColorFromHSLA(NSArray *parameters)
+NSColor *_OENSColorFromHSLA(NSArray *parameters)
 {
     if([parameters count] < 3) return nil;
 
@@ -105,8 +109,8 @@ NSColor *_OENSColorFromString(NSString *colorString)
         NSString *function  = [[colorString substringWithRange:[match rangeAtIndex:1]] lowercaseString];
         NSArray *parameters = [[[colorString substringWithRange:[match rangeAtIndex:2]] lowercaseString] componentsSeparatedByString:@","];
 
-        if([function isEqualToString:@"rgba"] || [function isEqualToString:@"rgb"])      result = _NSColorFromRGBA(parameters);
-        else if([function isEqualToString:@"hsla"] || [function isEqualToString:@"hsl"]) result = _NSColorFromHSLA(parameters);
+        if([function isEqualToString:@"rgba"] || [function isEqualToString:@"rgb"])      result = _OENSColorFromRGBA(parameters);
+        else if([function isEqualToString:@"hsla"] || [function isEqualToString:@"hsl"]) result = _OENSColorFromHSLA(parameters);
     }
     else if((match = [[rgbRegex matchesInString:colorString options:0 range:range] lastObject]))
     {

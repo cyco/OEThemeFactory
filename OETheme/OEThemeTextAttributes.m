@@ -57,8 +57,11 @@ static NSString * const OEThemeFontTraitUnitalic                = @"Unitalic";
 #pragma mark -
 #pragma mark Implementation
 
+static NSFontTraitMask _OENSFontTraitMaskFromString(NSString *string);
+static id _OEObjectFromDictionary(NSDictionary *dictionary, NSString *attributeName, Class expectedClass, id (^parse)(id obj));
+
 // Parses a comma separated NSString of theme font traits
-NSFontTraitMask NSFontTraitMaskFromString(NSString *string)
+NSFontTraitMask _OENSFontTraitMaskFromString(NSString *string)
 {
     __block NSFontTraitMask mask = 0;
 
@@ -130,7 +133,7 @@ id _OEObjectFromDictionary(NSDictionary *dictionary, NSString *attributeName, Cl
                                                      ^ id (id mask)
                                                      {
                                                          if(![mask isKindOfClass:[NSString class]]) return [NSNumber numberWithInt:0];
-                                                         return [NSNumber numberWithUnsignedInteger:NSFontTraitMaskFromString(mask)];
+                                                         return [NSNumber numberWithUnsignedInteger:_OENSFontTraitMaskFromString(mask)];
                                                      }) unsignedIntegerValue];
 
     NSFont *font = [[NSFontManager sharedFontManager] fontWithFamily:familyAttribute traits:mask weight:weight size:size];
