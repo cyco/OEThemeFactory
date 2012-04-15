@@ -9,8 +9,10 @@
 #import "OEButtonCell.h"
 
 @implementation OEButtonCell
-
 @synthesize stateMask = _stateMask;
+@synthesize backgroundThemeImage = _backgroundThemeImage;
+@synthesize themeImage = _themeImage;
+@synthesize themeTextAttributes = _themeTextAttributes;
 
 - (OEThemeState)OE_currentState
 {
@@ -141,11 +143,6 @@
     }
 }
 
-- (OEThemeImage *)backgroundThemeImage
-{
-    return _backgroundThemeImage;
-}
-
 - (void)setThemeImage:(OEThemeImage *)themeImage
 {
     if(_themeImage != themeImage)
@@ -156,11 +153,6 @@
     }
 }
 
-- (OEThemeImage *)themeImage
-{
-    return _themeImage;
-}
-
 - (void)setThemeTextAttributes:(OEThemeTextAttributes *)themeTextAttributes
 {
     if(_themeTextAttributes != themeTextAttributes)
@@ -169,11 +161,6 @@
         [[self controlView] setNeedsDisplay:YES];
         [self OE_recomputeStateMask];
     }
-}
-
-- (OEThemeTextAttributes *)themeTextAttributes
-{
-    return _themeTextAttributes;
 }
 
 @end

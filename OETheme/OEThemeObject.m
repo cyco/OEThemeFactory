@@ -8,10 +8,10 @@
 
 #import "OEThemeObject.h"
 
-/*
- Input state tokens used by OEThemeStateFromString to parse an NSString into an OEThemeState. The 'Default' token
- takes precedent over any other token and will automatically set the OEThemeState to OEThemeStateDefault.
- */
+#pragma mark -
+#pragma mark Input state names
+
+// Input state tokens used by OEThemeStateFromString to parse an NSString into an OEThemeState. The 'Default' token takes precedent over any other token and will automatically set the OEThemeState to OEThemeStateDefault.
 static NSString * const OEThemeInputStateDefaultName        = @"Default";
 static NSString * const OEThemeInputStateWindowInactiveName = @"Window Inactive";
 static NSString * const OEThemeInputStateWindowActiveName   = @"Window Active";
@@ -27,10 +27,10 @@ static NSString * const OEThemeInputStateFocusedName        = @"Focused";
 static NSString * const OEThemeInputStateMouseOverName      = @"Mouse Over";
 static NSString * const OEThemeInputStateMouseOffName       = @"Mouse Off";
 
-/*
- These are extended input state tokens to create OEThemeStates with a 'wild card' for the input states specified. If
- a particular input state is left unspecified, these wild cards are implicitly specified.
- */
+#pragma mark -
+#pragma mark Input state wild card names
+
+// These are extended input state tokens to create OEThemeStates with a 'wild card' for the input states specified. If a particular input state is left unspecified, these wild cards are implicitly specified.
 static NSString * const OEThemeStateAnyWindowActivityName   = @"Any Window State";
 static NSString * const OEThemeStateAnyToggleName           = @"Any Toggle";
 static NSString * const OEThemeStateAnySelectionName        = @"Any Selection";
@@ -38,8 +38,15 @@ static NSString * const OEThemeStateAnyInteractionName      = @"Any Interaction"
 static NSString * const OEThemeStateAnyFocusName            = @"Any Focus";
 static NSString * const OEThemeStateAnyMouseName            = @"Any Mouse State";
 
+#pragma mark -
+#pragma mark Common theme object attributes
+
 NSString * const OEThemeObjectStatesAttributeName = @"States";
 NSString * const OEThemeObjectValueAttributeName  = @"Value";
+
+
+#pragma mark -
+#pragma mark Implementation
 
 static inline id OEKeyForState(OEThemeState state)
 {
@@ -66,7 +73,7 @@ static inline id OEKeyForState(OEThemeState state)
 
         if([definition isKindOfClass:[NSDictionary class]])
         {
-            // Create a root definition that can be inherited by the states specified
+            // Create a root definition that can be inherited by the states
             NSMutableDictionary *rootDefinition = [definition mutableCopy];
             [rootDefinition removeObjectForKey:OEThemeObjectStatesAttributeName];
             [self OE_setValue:[isa parseWithDefinition:rootDefinition] forState:OEThemeStateDefault];
@@ -76,7 +83,7 @@ static inline id OEKeyForState(OEThemeState state)
             if([states isKindOfClass:[NSDictionary class]])
             {
                 [states enumerateKeysAndObjectsUsingBlock:
-                 ^ (id key, id obj, BOOL *stop)
+                 ^ (NSString *key, id obj, BOOL *stop)
                  {
                      NSMutableDictionary *newDefinition = [rootDefinition mutableCopy];
                      if([obj isKindOfClass:[NSDictionary class]]) [newDefinition setValuesForKeysWithDictionary:obj];
@@ -157,12 +164,12 @@ static inline id OEKeyForState(OEThemeState state)
 
 + (OEThemeState)themeStateWithWindowActive:(BOOL)windowActive buttonState:(NSCellStateValue)state selected:(BOOL)selected enabled:(BOOL)enabled focused:(BOOL)focused houseHover:(BOOL)hover
 {
-    return ((windowActive ? OEThemeInputStateWindowActive : OEThemeInputStateWindowInactive) |
-            (selected     ? OEThemeInputStatePressed      : OEThemeInputStateUnpressed)      |
-            (enabled      ? OEThemeInputStateEnabled      : OEThemeInputStateDisabled)       |
-            (focused      ? OEThemeInputStateFocused      : OEThemeInputStateUnfocused)      |
-            (hover        ? OEThemeInputStateMouseOver    : OEThemeInputStateMouseOff)       |
-            (state == NSOnState ? OEThemeInputStateToggleOn : (state == NSMixedState ? OEThemeInputStateToggleMixed : OEThemeInputStateToggleOff)));
+    return ((windowActive       ? OEThemeInputStateWindowActive : OEThemeInputStateWindowInactive) |
+            (selected           ? OEThemeInputStatePressed      : OEThemeInputStateUnpressed)      |
+            (enabled            ? OEThemeInputStateEnabled      : OEThemeInputStateDisabled)       |
+            (focused            ? OEThemeInputStateFocused      : OEThemeInputStateUnfocused)      |
+            (hover              ? OEThemeInputStateMouseOver    : OEThemeInputStateMouseOff)       |
+            (state == NSOnState ? OEThemeInputStateToggleOn     : (state == NSMixedState ? OEThemeInputStateToggleMixed : OEThemeInputStateToggleOff)));
 }
 
 - (NSString *)description
@@ -220,7 +227,7 @@ static inline id OEKeyForState(OEThemeState state)
                      // This state is the best we are going to get for the requested state
                      results = [_objectByState objectForKey:OEKeyForState(state)];
 
-                     // Explicitly set the state table to contain the requested state to the object we have just implicitly discovered
+                     // Explicitly set the state to the implicitly discovered object so the next time we are looking for this state we can short circuit this process
                      if(state != 0 && state != OEThemeStateDefault) [self OE_setValue:results forState:maskedState];
                      *stop = YES;
                  }
@@ -231,7 +238,6 @@ static inline id OEKeyForState(OEThemeState state)
         }
     }
 
-    // Return nil vice [NSNull null]
     return (results == [NSNull null] ? nil : results);
 }
 

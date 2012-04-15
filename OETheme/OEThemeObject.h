@@ -9,8 +9,11 @@
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
 
+#pragma mark -
+#pragma mark Input state masks
+
 /*
- The following available state inputs that a state mask is composed of:
+ The following are available state inputs that a state mask is composed of:
  - Window Activity
  - Toggle State
  - Pressed State
@@ -38,6 +41,9 @@ enum
     OEThemeInputStateMouseOver      = 1 << 12,
 };
 
+#pragma mark -
+#pragma mark Input state wild card masks
+
 /*
  In the Theme.plist you can define an 'Any' input state for input states that should be ignored when determining which
  object to apply.  'Any' input states can be set explicitly, if an input state is unspecified then the 'Any' mask is
@@ -55,15 +61,20 @@ enum
 };
 typedef NSUInteger OEThemeState;
 
-// Retrieves an NSString from an OEThemeState
-extern NSString     *NSStringFromThemeState(OEThemeState state);
-
-// Parses an NSString into an OEThemeState, the NSString is a comma separated list of tokens. The order of the token's
-// appearance has no effect on the final value.
-extern OEThemeState  OEThemeStateFromString(NSString *state);
+#pragma mark -
+#pragma mark Common theme object attributes
 
 extern NSString * const OEThemeObjectStatesAttributeName;
 extern NSString * const OEThemeObjectValueAttributeName;
+
+#pragma mark -
+#pragma mark Implementation
+
+// Retrieves an NSString from an OEThemeState
+extern NSString *NSStringFromThemeState(OEThemeState state);
+
+// Parses an NSString into an OEThemeState, the NSString is a comma separated list of tokens. The order of the token's appearance has no effect on the final value.
+extern OEThemeState  OEThemeStateFromString(NSString *state);
 
 @interface OEThemeObject : NSObject
 {
@@ -83,7 +94,6 @@ extern NSString * const OEThemeObjectValueAttributeName;
 // Retrieves UI object for state specified
 - (id)objectForState:(OEThemeState)state;
 
-// Aggregate mask that filters out any unspecified state input
-@property (nonatomic, readonly) NSUInteger stateMask;
+@property (nonatomic, readonly) NSUInteger stateMask;  // Aggregate mask that filters out any unspecified state input
 
 @end

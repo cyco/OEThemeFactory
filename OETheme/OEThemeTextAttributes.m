@@ -9,6 +9,9 @@
 #import "OEThemeTextAttributes.h"
 #import "NSColor+OEAdditions.h"
 
+#pragma mark -
+#pragma mark Theme font attributes
+
 static NSString * const OEThemeFontForegroundColorAttributeName = @"Color";
 static NSString * const OEThemeFontBackgroundColorAttributeName = @"Background Color";
 
@@ -17,17 +20,26 @@ static NSString * const OEThemeFontSizeAttributeName            = @"Size";
 static NSString * const OEThemeFontWeightAttributeName          = @"Weight";
 static NSString * const OEThemeFontTraitsAttributeName          = @"Traits";
 
+#pragma mark -
+#pragma mark Theme font shadow
+
 static NSString * const OEThemeFontShadowAttributeName          = @"Shadow";
 static NSString * const OEThemeShadowOffsetAttributeName        = @"Offset";
 static NSString * const OEThemeShadowBlurRadiusAttributeName    = @"Blur Radius";
 static NSString * const OEThemeShadowColorAttributeName         = @"Color";
 
-static NSString * const OEThemeFontTraitBoldName   = @"Bold";
-static NSString * const OEThemeFontTraitUnboldName = @"Unbold";
-static NSString * const OEThemeFontTraitItalicName = @"Italic";
-static NSString * const OEThemeFontTraitUnitalic   = @"Unitalic";
+#pragma mark -
+#pragma mark Theme font traits
 
-// Parses a common separated NSString that specifies font traits
+static NSString * const OEThemeFontTraitBoldName                = @"Bold";
+static NSString * const OEThemeFontTraitUnboldName              = @"Unbold";
+static NSString * const OEThemeFontTraitItalicName              = @"Italic";
+static NSString * const OEThemeFontTraitUnitalic                = @"Unitalic";
+
+#pragma mark -
+#pragma mark Implementation
+
+// Parses a comma separated NSString of theme font traits
 NSFontTraitMask NSFontTraitMaskFromString(NSString *string)
 {
     __block NSFontTraitMask mask = 0;
@@ -51,7 +63,7 @@ id _OEObjectFromDictionary(NSDictionary *dictionary, NSString *attributeName, Cl
 {
     id obj = [dictionary objectForKey:attributeName];
 
-    // If the object already conforms to the requested class, then return the object, other wise parse the object
+    // If the object already conforms to the requested class, then return the object, otherwise parse the object
     return ([obj isKindOfClass:expectedClass] ? obj : parse(obj));
 }
 
@@ -61,17 +73,20 @@ id _OEObjectFromDictionary(NSDictionary *dictionary, NSString *attributeName, Cl
 {
     // Parse the values from the new definition
     NSColor *foregroundColor = _OEObjectFromDictionary(definition, OEThemeFontForegroundColorAttributeName, [NSColor class],
-                                                       ^ id (id color) {
+                                                       ^ id (id color)
+                                                       {
                                                            return ([color isKindOfClass:[NSString class]] ? (NSColorFromString(color) ?: [NSColor blackColor]) : [NSColor blackColor]);
                                                        });
 
     NSColor *backgroundColor = _OEObjectFromDictionary(definition, OEThemeFontBackgroundColorAttributeName, [NSColor class],
-                                                       ^ id (id color) {
+                                                       ^ id (id color)
+                                                       {
                                                            return ([color isKindOfClass:[NSString class]] ? (NSColorFromString(color) ?: nil) : nil);
                                                        });
 
     NSShadow *shadow = _OEObjectFromDictionary(definition, OEThemeFontShadowAttributeName, [NSShadow class],
-                                               ^ id (id shadow) {
+                                               ^ id (id shadow)
+                                               {
                                                    if(![shadow isKindOfClass:[NSDictionary class]]) return nil;
 
                                                    NSSize  offset     = NSSizeFromString([shadow valueForKey:OEThemeShadowOffsetAttributeName]);
@@ -94,7 +109,8 @@ id _OEObjectFromDictionary(NSDictionary *dictionary, NSString *attributeName, Cl
     NSUInteger  weight          = [([definition objectForKey:OEThemeFontWeightAttributeName] ?: [NSNumber numberWithInt:5]) intValue];
 
     NSFontTraitMask  mask = [_OEObjectFromDictionary(definition, OEThemeFontTraitsAttributeName, [NSNumber class],
-                                                     ^ id (id mask) {
+                                                     ^ id (id mask)
+                                                     {
                                                          if(![mask isKindOfClass:[NSString class]]) return [NSNumber numberWithInt:0];
                                                          return [NSNumber numberWithUnsignedInteger:NSFontTraitMaskFromString(mask)];
                                                      }) unsignedIntegerValue];

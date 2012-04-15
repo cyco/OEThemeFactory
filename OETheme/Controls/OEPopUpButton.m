@@ -44,12 +44,12 @@
 
 - (void)updateTrackingAreas
 {
-    if(_mouseTrackingArea) [self removeTrackingArea:_mouseTrackingArea];
+    if(_trackingArea) [self removeTrackingArea:_trackingArea];
     if(_shouldTrackMouseActivity)
     {
         // Track mouse enter and exit (hover and off) events only if the one of the themed elements (the state mask) is influenced by the mouse
-        _mouseTrackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
-        [self addTrackingArea:_mouseTrackingArea];
+        _trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
+        [self addTrackingArea:_trackingArea];
     }
 }
 

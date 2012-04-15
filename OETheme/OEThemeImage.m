@@ -9,9 +9,15 @@
 #import "OEThemeImage.h"
 #import "NSImage+OEDrawingAdditions.h"
 
+#pragma mark -
+#pragma mark Theme image attributes
+
 static NSString * const OEThemeImageResourceAttributeName = @"Resource";
 static NSString * const OEThemeImagePartsAttributeName    = @"Parts";
 static NSString * const OEThemeImageVerticalAttributeName = @"Vertical";
+
+#pragma mark -
+#pragma mark Implementation
 
 @implementation OEThemeImage
 

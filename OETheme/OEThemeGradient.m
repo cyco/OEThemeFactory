@@ -9,13 +9,19 @@
 #import "OEThemeGradient.h"
 #import "NSColor+OEAdditions.h"
 
+#pragma mark -
+#pragma mark Theme gradient attributes
+
 static NSString * const OEThemeGradientLocationsAttributeName = @"Locations";
 static NSString * const OEThemeGradientColorsAttributeName    = @"Colors";
 static NSString * const OEThemeGradientAngleAttributeName     = @"Angle";
 
+#pragma mark -
+#pragma mark Implementation
+
 @interface OENSGradient : NSGradient
 
-@property(nonatomic, assign) CGFloat angle;
+@property(nonatomic, assign) CGFloat angle; // Saves the angle specified by the theme definition
 
 @end
 
@@ -36,10 +42,10 @@ static NSString * const OEThemeGradientAngleAttributeName     = @"Angle";
 
     if(![angle isKindOfClass:[NSString class]] && ![angle isKindOfClass:[NSNumber class]]) angle = nil;
 
-    // Make sure that there are color stops and colors to be represented as an NSGradient
+    // Make sure that there are color stops and colors
     if([rawLocations count] == 0 || [rawColorStrings count] == 0 || [rawLocations count] != [rawColorStrings count]) return nil;
 
-    // Translate color strings to NSColor
+    // Translate color strings into NSColor
     id              result = nil;
     NSMutableArray *colors = [NSMutableArray arrayWithCapacity:[rawColorStrings count]];
 
@@ -56,9 +62,9 @@ static NSString * const OEThemeGradientAngleAttributeName     = @"Angle";
         if((locations = calloc([colors count], sizeof(CGFloat))) != NULL)
         {
             [rawLocations enumerateObjectsUsingBlock:
-             ^ (id obj, NSUInteger idx, BOOL *stop)
+             ^ (NSNumber *location, NSUInteger idx, BOOL *stop)
              {
-                 locations[idx] = [obj floatValue];
+                 locations[idx] = [location floatValue];
              }];
 
             result = [[OENSGradient alloc] initWithColors:colors atLocations:locations colorSpace:[NSColorSpace genericRGBColorSpace]];

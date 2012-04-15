@@ -8,11 +8,16 @@
 
 #import "OETheme.h"
 
-//  Theme.plist Key Names
-static NSString * const OEThemeColorKey                     = @"Colors";
-static NSString * const OEThemeFontKey                      = @"Fonts";
-static NSString * const OEThemeImageKey                     = @"Images";
-static NSString * const OEThemeGradientKey                  = @"Gradients";
+#pragma mark -
+#pragma mark Theme.plist keys
+
+static NSString * const OEThemeColorKey    = @"Colors";
+static NSString * const OEThemeFontKey     = @"Fonts";
+static NSString * const OEThemeImageKey    = @"Images";
+static NSString * const OEThemeGradientKey = @"Gradients";
+
+#pragma mark -
+#pragma mark Implementation
 
 @interface OETheme ()
 
@@ -25,17 +30,15 @@ static NSString * const OEThemeGradientKey                  = @"Gradients";
 
 - (id)init
 {
-    // Dealloc self if there is no Theme file to parse, the caller should raise a critical error here and halt
-    // the application's progress
+    // Dealloc self if there is no Theme file to parse, the caller should raise a critical error here and halt the application's progress
     NSString *themeFile = [[NSBundle mainBundle] pathForResource:@"Theme" ofType:@"plist"];
     if(!themeFile) return nil;
 
     if((self = [super init]))
     {
-        // Dealloc self if the Theme.plist failed to load, as in previous critical error, the application should halt
-        // at this point.
-        NSDictionary *dictionary = [NSDictionary dictionaryWithContentsOfFile:themeFile];
-        if(!dictionary) return nil;
+        // Dealloc self if the Theme.plist failed to load, as in previous critical error, the application should halt at this point.
+        NSDictionary *themeDictionary = [NSDictionary dictionaryWithContentsOfFile:themeFile];
+        if(!themeDictionary) return nil;
 
         // Parse through all the types of UI elements: Colors, Fonts, Images, and Gradients
         NSDictionary *classesBySection = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -47,9 +50,9 @@ static NSString * const OEThemeGradientKey                  = @"Gradients";
 
         __block NSMutableDictionary *itemsByType = [NSMutableDictionary dictionary];
         [classesBySection enumerateKeysAndObjectsUsingBlock:
-         ^ (id key, id obj, BOOL *stop)
+         ^ (NSString *key, id themeClass, BOOL *stop)
          {
-             NSDictionary *items = [self OE_parseThemeSection:[dictionary valueForKey:key] forThemeClass:obj];
+             NSDictionary *items = [self OE_parseThemeSection:[themeDictionary valueForKey:key] forThemeClass:themeClass];
              [itemsByType setValue:(items ?: [NSDictionary dictionary]) forKey:key];
          }];
 
@@ -69,16 +72,15 @@ static NSString * const OEThemeGradientKey                  = @"Gradients";
     return sharedTheme;
 }
 
-- (NSDictionary *)OE_parseThemeSection:(NSDictionary *)section forThemeClass:(Class)class
+- (NSDictionary *)OE_parseThemeSection:(NSDictionary *)sectionDictionary forThemeClass:(Class)class
 {
-    // Each type of UI element represented in the Theme.plist should have an associated subclass of OEThemeObject.
-    // OEThemeObject is responsible for parsing the elements specified in that section of the Theme.plist
+    // Each type of UI element represented in the Theme.plist should have an associated subclass of OEThemeObject. OEThemeObject is responsible for parsing the elements specified in that section of the Theme.plist
     __block NSMutableDictionary *results = [NSMutableDictionary dictionary];
-    [section enumerateKeysAndObjectsUsingBlock:
-     ^ (id key, id obj, BOOL *stop)
+    [sectionDictionary enumerateKeysAndObjectsUsingBlock:
+     ^ (NSString *key, id definition, BOOL *stop)
      {
-         // Each subclass of OEThemeObject should implement a customized version of +parseWithDefinition:inheritedDefinition: to be able to parse objects
-         id themeItem = [[class alloc] initWithDefinition:obj];
+         // Each subclass of OEThemeObject should implement a customized version of +parseWithDefinition: to be able to parse the definitions
+         id themeItem = [[class alloc] initWithDefinition:definition];
          if(themeItem) [results setValue:themeItem forKey:key];
      }];
 

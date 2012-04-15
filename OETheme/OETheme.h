@@ -30,7 +30,7 @@
 @interface OETheme : NSObject
 {
 @private
-    NSMutableDictionary *_objectsByType;  // Storage location where the themed objects for the various types are stored
+    NSMutableDictionary *_objectsByType;  // Dictionary of themed object types
 }
 
 + (id)sharedTheme;
