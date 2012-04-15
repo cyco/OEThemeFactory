@@ -542,6 +542,11 @@ static NSMutableArray *__sharedMenuStack; // Array of all the open instances of 
                 [self cancelTracking];
                 event = nil;  // There is no need to forward this message to NSApp
             }
+            else if(type == NSScrollWheel && ![[event window] isKindOfClass:[OEMenu class]])
+            {
+                // Blackhole any scroll wheel messages not destined to a menu.
+                event = nil;
+            }
             else if((type == NSKeyDown) || (type == NSKeyUp))
             {
                 // TODO: -performKeyEquivalent:
