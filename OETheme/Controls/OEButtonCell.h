@@ -33,11 +33,4 @@
 @private
     NSMutableParagraphStyle *_style;  // Cached paragraph style used to render text
 }
-
-@property (nonatomic, readonly) OEThemeState stateMask;
-
-@property (nonatomic, retain) OEThemeImage          *backgroundThemeImage;
-@property (nonatomic, retain) OEThemeImage          *themeImage;
-@property (nonatomic, retain) OEThemeTextAttributes *themeTextAttributes;
-
 @end

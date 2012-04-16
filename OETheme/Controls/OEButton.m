@@ -91,7 +91,6 @@
     [self updateHoverFlagWithMousePoint:locationInView];
 }
 
-
 - (void)mouseEntered:(NSEvent *)theEvent
 {
     [self OE_updateHoverFlag:theEvent];
