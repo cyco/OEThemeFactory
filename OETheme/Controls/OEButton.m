@@ -114,8 +114,8 @@
     OEButtonCell *cell = [self cell];
     if([cell isKindOfClass:[OEButtonCell class]])
     {
-        [self OE_setShouldTrackWindowActivity:[cell stateMask] & OEThemeStateAnyWindowActivity];
-        [self OE_setShouldTrackMouseActivity:[cell stateMask] & OEThemeStateAnyMouse];
+        [self OE_setShouldTrackWindowActivity:([cell stateMask] & OEThemeStateAnyWindowActivity) != 0];
+        [self OE_setShouldTrackMouseActivity:([cell stateMask] & OEThemeStateAnyMouse) != 0];
     }
 }
 
