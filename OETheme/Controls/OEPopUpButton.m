@@ -66,7 +66,7 @@
     if(_shouldTrackMouseActivity)
     {
         // Track mouse enter and exit (hover and off) events only if the one of the themed elements (the state mask) is influenced by the mouse
-        _trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited owner:self userInfo:nil];
+        _trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved owner:self userInfo:nil];
         [self addTrackingArea:_trackingArea];
     }
 }
@@ -78,6 +78,12 @@
 }
 
 - (void)mouseExited:(NSEvent *)theEvent
+{
+    // Mouse has exited / mouse off, we want to redisplay the button with the new state...this is only fired when the mouse tracking is installed
+    [self setNeedsDisplay];
+}
+
+- (void)mouseMoved:(NSEvent *)theEvent
 {
     // Mouse has exited / mouse off, we want to redisplay the button with the new state...this is only fired when the mouse tracking is installed
     [self setNeedsDisplay];
