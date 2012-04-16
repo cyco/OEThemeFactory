@@ -61,7 +61,7 @@
 - (BOOL)startTrackingAt:(NSPoint)startPoint inView:(NSView *)controlView
 {
     id<OEControl> control = (id<OEControl>)controlView;
-    if(![control conformsToProtocol:@protocol(OEControl)]) return NO;
+    if(![control conformsToProtocol:@protocol(OEControl)] || ![control respondsToSelector:@selector(updateHoverFlagWithMousePoint:)]) return NO;
 
     [control updateHoverFlagWithMousePoint:startPoint];
     return YES;
@@ -70,7 +70,7 @@
 - (BOOL)continueTracking:(NSPoint)lastPoint at:(NSPoint)currentPoint inView:(NSView *)controlView
 {
     id<OEControl> control = (id<OEControl>)controlView;
-    if(![control conformsToProtocol:@protocol(OEControl)]) return NO;
+    if(![control conformsToProtocol:@protocol(OEControl)] || ![control respondsToSelector:@selector(updateHoverFlagWithMousePoint:)]) return NO;
 
     [control updateHoverFlagWithMousePoint:currentPoint];
     return YES;
@@ -79,7 +79,7 @@
 - (void)stopTracking:(NSPoint)lastPoint at:(NSPoint)stopPoint inView:(NSView *)controlView mouseIsUp:(BOOL)flag
 {
     id<OEControl> control = (id<OEControl>)controlView;
-    if(![control conformsToProtocol:@protocol(OEControl)]) return;
+    if(![control conformsToProtocol:@protocol(OEControl)] || ![control respondsToSelector:@selector(updateHoverFlagWithMousePoint:)]) return;
 
     [control updateHoverFlagWithMousePoint:stopPoint];
 }

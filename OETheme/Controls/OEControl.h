@@ -28,6 +28,7 @@
 
 @protocol OEControl <NSObject>
 
+@optional
 - (void)updateHoverFlagWithMousePoint:(NSPoint)point;
 
 @end
