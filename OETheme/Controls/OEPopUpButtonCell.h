@@ -26,12 +26,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import "OETheme.h"
+#import "OECell.h"
 
-@interface OEPopUpButtonCell : NSPopUpButtonCell
+@interface OEPopUpButtonCell : NSPopUpButtonCell <OECell>
 {
 @private
     NSMutableParagraphStyle *_style;  // Cached paragraph style used to render text
-    BOOL                     _themed; // Identifies that the object is themed
 }
 
 @property (nonatomic, readonly) OEThemeState stateMask;

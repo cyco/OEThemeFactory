@@ -27,6 +27,8 @@
 #import "OEPopUpButtonCell.h"
 
 @implementation OEPopUpButtonCell
+@synthesize hovering = _hover;
+@synthesize themed = _themed;
 @synthesize stateMask = _stateMask;
 @synthesize backgroundThemeImage = _backgroundThemeImage;
 @synthesize themeImage = _themeImage;
@@ -37,24 +39,17 @@
     // This is a convenience method that retrieves the current state of the button
     BOOL focused      = NO;
     BOOL windowActive = NO;
-    BOOL hover        = NO;
 
-    if((_stateMask & OEThemeStateAnyFocus) || (_stateMask & OEThemeStateAnyMouse) || (_stateMask & OEThemeStateAnyWindowActivity))
+    if(((_stateMask & OEThemeStateAnyFocus) != 0) || ((_stateMask & OEThemeStateAnyWindowActivity) != 0))
     {
         // Set the focused, windowActive, and hover properties only if the state mask is tracking the button's focus, mouse hover, and window activity properties
         NSWindow *window = [[self controlView] window];
 
         focused      = [window firstResponder] == [self controlView];
-        windowActive = (_stateMask & OEThemeStateAnyWindowActivity) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
-
-        if(_stateMask & OEThemeStateAnyMouse)
-        {
-            const NSPoint p = [[self controlView] convertPointFromBase:[window convertScreenToBase:[NSEvent mouseLocation]]];
-            hover           = NSPointInRect(p, [[self controlView] bounds]);
-        }
+        windowActive = ((_stateMask & OEThemeStateAnyWindowActivity) != 0) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
     }
 
-    return [OEThemeObject themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:hover] & _stateMask;
+    return [OEThemeObject themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:[self isHovering]] & _stateMask;
 }
 
 - (NSDictionary *)OE_attributesForState:(OEThemeState)state
