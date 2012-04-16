@@ -89,6 +89,9 @@
             result.origin.x -= [shadow shadowOffset].width;
             result.origin.y -= [shadow shadowOffset].height;
         }
+
+        result           = NSInsetRect(result, 3.0, 0.0);
+        result.origin.y += 1;
     }
     return result;
 }
@@ -122,8 +125,8 @@
 {
     if(_themed)
     {
-        NSRect textRect  = [self titleRectForBounds:cellFrame];
-        NSRect imageRect = [self imageRectForBounds:cellFrame];
+        NSRect textRect  = NSIntegralRect([self titleRectForBounds:cellFrame]);
+        NSRect imageRect = NSIntegralRect([self imageRectForBounds:cellFrame]);
 
         if(!NSIsEmptyRect(textRect))  [self drawTitle:[self attributedTitle] withFrame:textRect inView:controlView];
         if(!NSIsEmptyRect(imageRect)) [self drawImage:[self image] withFrame:imageRect inView:controlView];
