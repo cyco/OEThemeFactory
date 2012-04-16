@@ -70,16 +70,41 @@
     }
 }
 
+- (void)updateHoverFlagWithMousePoint:(NSPoint)point
+{
+    id<OECell> cell = [self cell];
+    if(![cell conformsToProtocol:@protocol(OECell)]) return;
+
+    const NSRect  bounds   = [self bounds];
+    const BOOL    hovering = NSPointInRect(point, bounds);
+
+    if([cell isHovering] != hovering)
+    {
+        [cell setHovering:hovering];
+        [self setNeedsDisplayInRect:bounds];
+    }
+}
+
+- (void)OE_updateHoverFlag:(NSEvent *)theEvent
+{
+    const NSPoint locationInView = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    [self updateHoverFlagWithMousePoint:locationInView];
+}
+
+
 - (void)mouseEntered:(NSEvent *)theEvent
 {
-    // Mouse has entered / mouse hover, we want to redisplay the button with the new state...this is only fired when the mouse tracking is installed
-    [self setNeedsDisplay];
+    [self OE_updateHoverFlag:theEvent];
 }
 
 - (void)mouseExited:(NSEvent *)theEvent
 {
-    // Mouse has exited / mouse off, we want to redisplay the button with the new state...this is only fired when the mouse tracking is installed
-    [self setNeedsDisplay];
+    [self OE_updateHoverFlag:theEvent];
+}
+
+- (void)mouseMoved:(NSEvent *)theEvent
+{
+    [self OE_updateHoverFlag:theEvent];
 }
 
 - (void)OE_windowKeyChanged:(NSNotification *)notification

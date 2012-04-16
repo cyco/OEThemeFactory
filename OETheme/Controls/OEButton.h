@@ -26,8 +26,9 @@
 
 #import <Cocoa/Cocoa.h>
 #import "OEButtonCell.h"
+#import "OEControl.h"
 
-@interface OEButton : NSButton
+@interface OEButton : NSButton <OEControl>
 {
 @private
     NSTrackingArea *_trackingArea;   // Mouse tracking area used only if the control reacts to the mouse's location
