@@ -35,11 +35,6 @@
 @synthesize themeImage = _themeImage;
 @synthesize themeTextAttributes = _themeTextAttributes;
 
-+ (BOOL)prefersTrackingUntilMouseUp
-{
-    return YES;
-}
-
 - (OEThemeState)OE_currentState
 {
     // This is a convenience method that retrieves the current state of the button
@@ -55,7 +50,7 @@
         windowActive = ((_stateMask & OEThemeStateAnyWindowActivity) != 0) && ([window isMainWindow] || ([window parentWindow] && [[window parentWindow] isMainWindow]));
     }
 
-    return [OEThemeObject themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:[self isHovering]] & _stateMask;
+    return [OEThemeObject themeStateWithWindowActive:windowActive buttonState:[self state] selected:[self isHighlighted] enabled:[self isEnabled] focused:focused houseHover:[self isHovering] modifierMask:[NSEvent modifierFlags]] & _stateMask;
 }
 
 - (BOOL)startTrackingAt:(NSPoint)startPoint inView:(NSView *)controlView
@@ -103,22 +98,85 @@
 
     return attributes;
 }
+- (NSSize)cellSize
+{
+    NSSize size = [super cellSize];
+    if(_themed && _themeImage)
+        size.width += [self image].size.width;
+    return size;
+}
+- (NSRect)imageRectForBounds:(NSRect)theRect
+{
+    NSRect result = [super imageRectForBounds:theRect];
+    if(_themed && _themeImage)
+    {
+        NSButtonType buttonType = [[self valueForKey:@"buttonType"] unsignedIntegerValue];
+        switch(buttonType)
+        {
+            case NSSwitchButton:
+            {
+                NSSize imageSize = [self image].size;
+                result.origin.y = round(NSMinY(result) + (NSHeight(result) - imageSize.height) / 2.0);
+                result.size = imageSize;
+                break;
+            }
+            default:
+                if(NSIsEmptyRect(result))
+                {
+                    NSSize imageSize = [self image].size;
+                    result.size = imageSize;
+                    
+                    switch ([self imagePosition]) {
+                        // TODO: Take other imagePositions and imageScaling into account
+                        case NSImageRight:
+                            result.origin.x = round(NSMaxX(theRect) - imageSize.width);
+                            result.origin.y = round(NSMinY(theRect) + (NSHeight(theRect)-imageSize.height) / 2.0);
+                            break;
+                        default:
+                            result.origin.x = round(NSMinX(theRect) + (NSWidth(theRect)-imageSize.width) / 2.0);
+                            result.origin.y = round(NSMinY(theRect) + (NSHeight(theRect)-imageSize.height) / 2.0);
+                            break;
+                    }
+                }
+                else
+                    result.origin.x -= 2;
+                break;
+        }
+    }
+    return result;
+}
 
 - (NSRect)titleRectForBounds:(NSRect)theRect
 {
     NSRect result = [super titleRectForBounds:theRect];
     if(_themed)
     {
-        NSDictionary *attributes = [self OE_attributesForState:[self OE_currentState]];
-        NSShadow *shadow = [attributes objectForKey:NSShadowAttributeName];
-        if(shadow)
+        NSButtonType buttonType = [[self valueForKey:@"buttonType"] unsignedIntegerValue];
+        switch(buttonType)
         {
-            result.origin.x -= [shadow shadowOffset].width;
-            result.origin.y -= [shadow shadowOffset].height;
+            case NSRadioButton:
+            case NSSwitchButton:
+                result = NSInsetRect(result, 3.0, 0.0);
+                result.origin.y += 1.0;
+                break;
+            default:
+                if(_themeImage)
+                {
+                    NSSize imageSize = [self image].size;
+                    switch ([self imagePosition]) {
+                    // TODO: Take other imagePositions and imageScaling into account
+                        case NSImageRight:
+                            result.size.width -= imageSize.width;
+                            result.origin.y += 1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                
+                result.origin.y -= 2;
+                break;
         }
-
-        result           = NSInsetRect(result, 3.0, 0.0);
-        result.origin.y += 1;
     }
     return result;
 }
@@ -154,7 +212,7 @@
     {
         NSRect textRect  = NSIntegralRect([self titleRectForBounds:cellFrame]);
         NSRect imageRect = NSIntegralRect([self imageRectForBounds:cellFrame]);
-
+        
         if(!NSIsEmptyRect(textRect))  [self drawTitle:[self attributedTitle] withFrame:textRect inView:controlView];
         if(!NSIsEmptyRect(imageRect)) [self drawImage:[self image] withFrame:imageRect inView:controlView];
     }
@@ -181,10 +239,38 @@
     _stateMask = [_backgroundThemeImage stateMask] | [_themeImage stateMask] | [_themeTextAttributes stateMask];
 }
 
+- (void)setThemeKey:(NSString *)key
+{
+    NSString *backgroundKey = key;
+    if(![key hasSuffix:@"_background"])
+    {
+        [self setThemeImageKey:key];
+        backgroundKey = [key stringByAppendingString:@"_background"];
+    }
+    [self setBackgroundThemeImageKey:backgroundKey];
+    [self setThemeTextAttributesKey:key];
+}
+
+- (void)setBackgroundThemeImageKey:(NSString *)key
+{
+    [self setBackgroundThemeImage:[[OETheme sharedTheme] themeImageForKey:key]];
+}
+
+- (void)setThemeImageKey:(NSString *)key
+{
+    [self setThemeImage:[[OETheme sharedTheme] themeImageForKey:key]];
+}
+
+- (void)setThemeTextAttributesKey:(NSString *)key
+{
+    [self setThemeTextAttributes:[[OETheme sharedTheme] themeTextAttributesForKey:key]];
+}
+
 - (void)setBackgroundThemeImage:(OEThemeImage *)backgroundThemeImage
 {
     if(_backgroundThemeImage != backgroundThemeImage)
     {
+        // TODO: Only invalidate area of the control view
         _backgroundThemeImage = backgroundThemeImage;
         [[self controlView] setNeedsDisplay:YES];
         [self OE_recomputeStateMask];
@@ -195,6 +281,7 @@
 {
     if(_themeImage != themeImage)
     {
+        // TODO: Only invalidate area of the control view
         _themeImage = themeImage;
         [[self controlView] setNeedsDisplay:YES];
         [self OE_recomputeStateMask];
@@ -205,6 +292,7 @@
 {
     if(_themeTextAttributes != themeTextAttributes)
     {
+        // TODO: Only invalidate area of the control view
         _themeTextAttributes = themeTextAttributes;
         [[self controlView] setNeedsDisplay:YES];
         [self OE_recomputeStateMask];

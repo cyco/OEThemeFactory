@@ -25,15 +25,22 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "OETheme.h"
 
 @protocol OECell <NSObject>
 
-@property(nonatomic, assign, getter = isHovering) BOOL         hovering;
-@property(nonatomic, readonly, getter = isThemed) BOOL         themed;
-@property (nonatomic, readonly)                   OEThemeState stateMask;
+@required
+- (void)setThemeKey:(NSString *)key;
+- (void)setBackgroundThemeImageKey:(NSString *)key;
+- (void)setThemeImageKey:(NSString *)key;
+- (void)setThemeTextAttributesKey:(NSString *)key;
 
 @property (nonatomic, retain) OEThemeImage          *backgroundThemeImage;
 @property (nonatomic, retain) OEThemeImage          *themeImage;
 @property (nonatomic, retain) OEThemeTextAttributes *themeTextAttributes;
+
+@property(nonatomic, assign, getter = isHovering) BOOL         hovering;
+@property(nonatomic, readonly, getter = isThemed) BOOL         themed;
+@property (nonatomic, readonly)                   OEThemeState stateMask;
 
 @end

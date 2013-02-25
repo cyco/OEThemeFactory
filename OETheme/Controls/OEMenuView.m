@@ -323,7 +323,10 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 
 - (void)OE_highlightItemUnderMouse
 {
-    [self highlightItemAtPoint:[self convertPoint:[[self window] convertScreenToBase:[NSEvent mouseLocation]] fromView:nil]];
+    NSPoint screenLocation = [NSEvent mouseLocation];
+    NSPoint windowLocation = [[self window] convertRectFromScreen:(NSRect){screenLocation, {0,0}}].origin;
+    NSPoint viewLocation   = [self convertPoint:windowLocation fromView:nil];
+    [self highlightItemAtPoint:viewLocation];
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
@@ -339,10 +342,18 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     if([[self OE_menu] OE_closing]) return;
 
     // Figure out if any of the modifier flags that we are interested have changed
-    NSUInteger modiferFlags = [theEvent modifierFlags] & _keyModifierMask;
-    if(_lastKeyModifierMask != modiferFlags)
+    NSUInteger modifierFlags = [theEvent modifierFlags] & [_documentView keyModifierMask];
+    if(_lastKeyModifierMask != modifierFlags)
     {
-        _lastKeyModifierMask = modiferFlags;
+        _lastKeyModifierMask = modifierFlags;
+
+        OEMenu *menu = [self OE_menu];
+        NSMenuItem *previousHighlightedItem = [menu highlightedItem];
+        NSMenuItem *newHighlightedItem = ([previousHighlightedItem isAlternate] ?
+                                          [[previousHighlightedItem extraData] primaryItem] :
+                                          [[previousHighlightedItem extraData] itemWithModifierMask:modifierFlags]);
+        [menu setHighlightedItem:newHighlightedItem];
+
         [_documentView flagsChanged:theEvent];
     }
 }
@@ -398,7 +409,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     NSInteger   index = [itemArray indexOfObject:item];
     if(index == 0) return;
 
-    // If no item is highlighted then we begin from the bottom of the list, if an item is highlighted we go to the next preceeding valid item (not seperator, not disabled, and not hidden)
+    // If no item is highlighted then we begin from the bottom of the list, if an item is highlighted we go to the next preceeding valid item (not separator, not disabled, and not hidden)
     for(NSInteger i = (item == nil ? count : index) - 1; i >= 0; i--)
     {
         NSMenuItem *obj = [[[itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lastKeyModifierMask];
@@ -426,7 +437,7 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     NSInteger   index = [itemArray indexOfObject:item];
     if(index == count - 1) return;
 
-    // If no item is highlighted then we begin from the top of the list, if an item is highlighted we go to the next proceeding valid item (not seperator, not disabled, and not hidden)
+    // If no item is highlighted then we begin from the top of the list, if an item is highlighted we go to the next proceeding valid item (not separator, not disabled, and not hidden)
     for(NSInteger i = (item == nil ? -1 : index) + 1; i < count; i++)
     {
         NSMenuItem *obj = [[[itemArray objectAtIndex:i] extraData] itemWithModifierMask:_lastKeyModifierMask];
@@ -517,7 +528,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 - (void)OE_immediatelyExpandHighlightedItemSubmenu
 {
     OEMenu *menu = [self OE_menu];
-    [menu OE_setSubmenu:[[menu highlightedItem] submenu]];
+    if([[menu highlightedItem] isEnabled])
+        [menu OE_setSubmenu:[[menu highlightedItem] submenu]];
 }
 
 - (void)OE_expandHighlightedItemSubmenu
@@ -531,7 +543,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
     OEMenu *menu = [self OE_menu];
     [menu OE_setSubmenu:nil];
     [menu setHighlightedItem:highlightedItem];
-    if([highlightedItem hasSubmenu]) [self OE_expandHighlightedItemSubmenu];
+    if([highlightedItem hasSubmenu] && [highlightedItem isEnabled])
+        [self OE_expandHighlightedItemSubmenu];
 }
 
 - (void)OE_delayedSetHighlightedItem:(NSTimer *)timer
@@ -643,6 +656,8 @@ static const CGFloat OEMenuScrollAutoStep    = 8.0;
 {
     [super setMenu:menu];
     [_documentView setItemArray:[menu itemArray]];
+    // update the lastKeyModifierMask as the documentView may have updated
+    _lastKeyModifierMask = [[NSApp currentEvent] modifierFlags] & [_documentView keyModifierMask];
 }
 
 - (void)setStyle:(OEMenuStyle)style

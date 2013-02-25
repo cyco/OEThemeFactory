@@ -34,6 +34,16 @@
 @end
 
 @implementation OEButton
+@synthesize trackWindowActivity = _trackWindowActivity;
+@synthesize trackMouseActivity = _trackMouseActivity;
+@synthesize trackModifierActivity = _trackModifierActivity;
+@synthesize modifierEventMonitor = _modifierEventMonitor;
+@synthesize toolTipStyle = _toolTipStyle;
+
++ (Class)cellClass
+{
+    return [OEButtonCell class];
+}
 
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow
 {
@@ -45,7 +55,7 @@
         [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:[self window]];
     }
 
-    if(newWindow && _shouldTrackWindowActivity)
+    if(newWindow && _trackWindowActivity)
     {
         // Register with the default notification center for changes in the window's keyedness only if one of the themed elements (the state mask) is influenced by the window's activity
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(OE_windowKeyChanged:) name:NSWindowDidBecomeMainNotification object:newWindow];
@@ -62,7 +72,7 @@
 - (void)updateTrackingAreas
 {
     if(_trackingArea) [self removeTrackingArea:_trackingArea];
-    if(_shouldTrackMouseActivity)
+    if(_trackMouseActivity)
     {
         // Track mouse enter and exit (hover and off) events only if the one of the themed elements (the state mask) is influenced by the mouse
         _trackingArea = [[NSTrackingArea alloc] initWithRect:[self bounds] options:NSTrackingActiveInActiveApp | NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved owner:self userInfo:nil];
@@ -106,6 +116,15 @@
     [self OE_updateHoverFlag:theEvent];
 }
 
+- (void)flagsChanged:(NSEvent *)theEvent
+{
+    if ([self isTrackingModifierActivity])
+    {
+        const NSRect bounds = [self bounds];
+        [self setNeedsDisplayInRect:bounds];
+    }
+}
+
 - (void)OE_windowKeyChanged:(NSNotification *)notification
 {
     // The keyedness of the window has changed, we want to redisplay the button with the new state, this is only fired when NSWindowDidBecomeMainNotification and NSWindowDidResignMainNotification is registered.
@@ -114,9 +133,9 @@
 
 - (void)OE_setShouldTrackWindowActivity:(BOOL)shouldTrackWindowActivity
 {
-    if(_shouldTrackWindowActivity != shouldTrackWindowActivity)
+    if(_trackWindowActivity != shouldTrackWindowActivity)
     {
-        _shouldTrackWindowActivity = shouldTrackWindowActivity;
+        _trackWindowActivity = shouldTrackWindowActivity;
         [self viewWillMoveToWindow:[self window]];
         [self setNeedsDisplay:YES];
     }
@@ -124,23 +143,58 @@
 
 - (void)OE_setShouldTrackMouseActivity:(BOOL)shouldTrackMouseActivity
 {
-    if(_shouldTrackMouseActivity != shouldTrackMouseActivity)
+    if(_trackMouseActivity != shouldTrackMouseActivity)
     {
-        _shouldTrackMouseActivity = shouldTrackMouseActivity;
+        _trackMouseActivity = shouldTrackMouseActivity;
         [self updateTrackingAreas];
         [self setNeedsDisplay];
+        
+    }
+}
+
+- (void)OE_setShouldTrackModifierActivity:(BOOL)shouldTrackModifierActivity
+{
+    if(_trackModifierActivity != shouldTrackModifierActivity)
+    {
+        _trackModifierActivity = shouldTrackModifierActivity;
+        if(shouldTrackModifierActivity == FALSE)
+        {
+            [NSEvent removeMonitor:_modifierEventMonitor];
+        }
+        else
+        {
+            __block id blockself = self;
+            _modifierEventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskFromType(NSFlagsChanged) handler:^NSEvent*(NSEvent* e) {
+                [blockself setNeedsDisplayInRect:[self bounds]];
+                return e;
+            }];
+        }
+        [self setNeedsDisplayInRect:[self bounds]];
     }
 }
 
 - (void)OE_updateNotifications
 {
-    // This method determins if we need to register ourselves with the notification center and/or we need to add mouse tracking
+    // This method determines if we need to register ourselves with the notification center and/or we need to add mouse tracking
     OEButtonCell *cell = [self cell];
     if([cell isKindOfClass:[OEButtonCell class]])
     {
         [self OE_setShouldTrackWindowActivity:([cell stateMask] & OEThemeStateAnyWindowActivity) != 0];
         [self OE_setShouldTrackMouseActivity:([cell stateMask] & OEThemeStateAnyMouse) != 0];
+        [self OE_setShouldTrackModifierActivity:([cell stateMask] & OEThemeStateAnyModifier) != 0];
     }
+}
+
+- (void)setThemeKey:(NSString *)key
+{
+    NSString *backgroundKey = key;
+    if(![key hasSuffix:@"_background"])
+    {
+        [self setThemeImageKey:key];
+        backgroundKey = [key stringByAppendingString:@"_background"];
+    }
+    [self setBackgroundThemeImageKey:backgroundKey];
+    [self setThemeTextAttributesKey:key];
 }
 
 - (void)setBackgroundThemeImageKey:(NSString *)key
@@ -213,6 +267,14 @@
 {
     [super setCell:aCell];
     [self updateTrackingAreas];
+}
+
+- (NSPoint)badgePosition
+{
+    const NSRect frame = [self frame];
+    const CGFloat y = floor(NSMinY(frame) + 1);
+    const CGFloat x = floor(NSMinX(frame) + [[[self cell] attributedTitle] size].width + 27);
+    return NSMakePoint(x, y);
 }
 
 @end

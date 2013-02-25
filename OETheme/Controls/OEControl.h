@@ -25,10 +25,28 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "OETheme.h"
+#import "OECell.h"
 
 @protocol OEControl <NSObject>
 
 @optional
 - (void)updateHoverFlagWithMousePoint:(NSPoint)point;
+
+@required
+- (void)setThemeKey:(NSString *)key;
+- (void)setBackgroundThemeImageKey:(NSString *)key;
+- (void)setThemeImageKey:(NSString *)key;
+- (void)setThemeTextAttributesKey:(NSString *)key;
+
+@property(nonatomic, retain) OEThemeImage          *backgroundThemeImage;
+@property(nonatomic, retain) OEThemeImage          *themeImage;
+@property(nonatomic, retain) OEThemeTextAttributes *themeTextAttributes;
+
+@property(nonatomic, readonly, getter = isTrackingWindowActivity)    BOOL trackWindowActivity;
+@property(nonatomic, readonly, getter = isTrackingMouseActivity)     BOOL trackMouseActivity;
+@optional
+@property(nonatomic, readonly, getter = isTrackingModifierActivity)  BOOL trackModifierActivity;
+@property(nonatomic, readonly) id modifierEventMonitor;
 
 @end

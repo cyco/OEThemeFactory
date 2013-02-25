@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		839335D916DB775000905407 /* OEToolTipManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 839335D816DB775000905407 /* OEToolTipManager.m */; };
 		EF0D7E4115131B9500070DBE /* hud_button.png in Resources */ = {isa = PBXBuildFile; fileRef = EF0D7E4015131B9500070DBE /* hud_button.png */; };
 		EF1027DF15037AD3003BC6C0 /* NSColor+OEAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = EF37DA3C14FC3BB00098A077 /* NSColor+OEAdditions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		EF1027E21503B708003BC6C0 /* gloss_button.png in Resources */ = {isa = PBXBuildFile; fileRef = EF1027E11503B708003BC6C0 /* gloss_button.png */; };
@@ -55,6 +56,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		839335D616DB775000905407 /* OEToolTip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEToolTip.h; sourceTree = "<group>"; };
+		839335D716DB775000905407 /* OEToolTipManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OEToolTipManager.h; sourceTree = "<group>"; };
+		839335D816DB775000905407 /* OEToolTipManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OEToolTipManager.m; sourceTree = "<group>"; };
 		EF0D7E4015131B9500070DBE /* hud_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hud_button.png; sourceTree = "<group>"; };
 		EF1027E11503B708003BC6C0 /* gloss_button.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gloss_button.png; sourceTree = "<group>"; };
 		EF1027E6150403A8003BC6C0 /* open_weblink_arrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = open_weblink_arrow.png; sourceTree = "<group>"; };
@@ -144,6 +148,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		839335DA16DB775400905407 /* Tooltip */ = {
+			isa = PBXGroup;
+			children = (
+				839335D616DB775000905407 /* OEToolTip.h */,
+				839335D716DB775000905407 /* OEToolTipManager.h */,
+				839335D816DB775000905407 /* OEToolTipManager.m */,
+			);
+			name = Tooltip;
+			sourceTree = "<group>";
+		};
 		EF33D812150B6F3900B93D87 /* Buttons */ = {
 			isa = PBXGroup;
 			children = (
@@ -175,6 +189,7 @@
 				EF33D81D150BA65F00B93D87 /* Menu */,
 				EF33D812150B6F3900B93D87 /* Buttons */,
 				EF33D813150B6F4900B93D87 /* Button Cells */,
+				839335DA16DB775400905407 /* Tooltip */,
 			);
 			path = Controls;
 			sourceTree = "<group>";
@@ -457,6 +472,7 @@
 				EF4A20AE153412730055B37B /* OEMenuView.m in Sources */,
 				EF4A20B4153439900055B37B /* OEMenuDocumentView.m in Sources */,
 				EF3B0EFD153496E40096D358 /* OEMenuItemExtraData.m in Sources */,
+				839335D916DB775000905407 /* OEToolTipManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
