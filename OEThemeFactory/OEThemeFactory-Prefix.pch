@@ -11,6 +11,13 @@
 #define NO __objc_no
 #endif
 
+#define GENERATE_PRAGMA(x) _Pragma(#x)
+#define TODO(x) GENERATE_PRAGMA(message("[TODO] " #x))
+#define FIXME(x) GENERATE_PRAGMA(message("[FIXME] " #x))
+#define NOTE(x) GENERATE_PRAGMA(message("[NOTE] " #x))
+
+#define BOOL_STR(value) ((value) ? "YES" : "NO")
+
 #pragma mark Debug Logging
 
 #ifdef DEBUG_PRINT

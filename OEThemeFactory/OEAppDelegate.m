@@ -23,17 +23,7 @@
     [[_window contentView] setWantsLayer:YES];
     [[[_window contentView] layer] setBackgroundColor:[[NSColor colorWithDeviceWhite:0.25 alpha:1.0] CGColor]];
 
-    [_darkCheckBox setThemeImageKey:@"dark_checkbox"];
-    [_darkCheckBox setThemeTextAttributesKey:@"dark_checkbox"];
-
-    [_glossCheckBox setThemeImageKey:@"gloss_checkbox"];
-    [_glossCheckBox setThemeTextAttributesKey:@"gloss_checkbox"];
-
-    [_popupButton setBackgroundThemeImageKey:@"dark_popupbutton"];
-    [_popupButton setThemeTextAttributesKey:@"dark_popupbutton"];
     [_popupButton setMenuStyle:OEMenuStyleLight];
-
-    [_redHudButton setBackgroundThemeImageKey:@"red_hud_button"];
 }
 
 - (IBAction)showMenu:(id)sender
